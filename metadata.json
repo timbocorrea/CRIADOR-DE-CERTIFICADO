@@ -1,0 +1,7 @@
+{
+  "name": "CertificaMaster - Gerador de Certificados",
+  "description": "Uma plataforma profissional para criação, personalização e exportação de certificados de cursos com suporte a variáveis dinâmicas e grade curricular.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
