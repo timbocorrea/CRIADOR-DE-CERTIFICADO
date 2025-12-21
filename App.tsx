@@ -15,6 +15,8 @@ const App: React.FC = () => {
     companyName: '',
     companyCnpj: '',
     address: '',
+    providerName: '',
+    providerCnpj: '',
     instructors: [],
     techResponsibleName: '',
     techResponsibleCompetencies: '',
@@ -32,6 +34,8 @@ const App: React.FC = () => {
     hoursColumnWidth: 80,
     versoRowPadding: 12,
     versoCurriculumFontSize: 12,
+    versoHeaderFontSize: 16,
+    footerFontSize: 9,
     versoInstitutionVerticalOffset: 0,
     mainTextVerticalOffset: 0,
     titleVerticalOffset: 0,
@@ -126,7 +130,7 @@ const App: React.FC = () => {
         id: Math.random().toString(36).substring(2, 9),
         name: newStudentName,
         cpf: newStudentCpf,
-        displayName: newStudentName // Default é o nome completo
+        displayName: newStudentName
       };
       setData(prev => ({ ...prev, students: [...prev.students, newStudent] }));
       setNewStudentName('');
@@ -230,48 +234,73 @@ const App: React.FC = () => {
       alert("Adicione pelo menos um aluno.");
       return;
     }
+    
     setIsGenerating(true);
+    console.log("Iniciando exportação...");
+
     try {
-      // Usando milímetros (mm) para garantir o tamanho A4 exato
+      // Pequeno delay para garantir que o DOM de exportação esteja pronto
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const pdf = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
-        format: 'a4', // a4 landscape é 297mm x 210mm
+        format: 'a4',
       });
+
+      const capturePage = async (elementId: string) => {
+        const element = document.getElementById(elementId);
+        if (!element) {
+          console.error(`Elemento ${elementId} não encontrado no DOM.`);
+          return null;
+        }
+
+        console.log(`Capturando ${elementId}...`);
+        
+        return await html2canvas(element, { 
+          scale: 2.5, 
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: 1123,
+          height: 794,
+          onclone: (clonedDoc) => {
+            const el = clonedDoc.getElementById(elementId);
+            if (el) {
+              el.style.transform = 'none';
+              el.style.visibility = 'visible';
+              el.style.display = 'block';
+              el.style.position = 'relative';
+              el.style.top = '0';
+              el.style.left = '0';
+            }
+          }
+        });
+      };
 
       for (let i = 0; i < data.students.length; i++) {
         const student = data.students[i];
-        const p1 = document.getElementById(`export-p1-${student.id}`);
-        if (p1) {
-          const canvas1 = await html2canvas(p1, { 
-            scale: 2, // Maior escala para impressão nítida
-            useCORS: true,
-            logging: false,
-            width: 1123,
-            height: 794
-          });
+        const canvas1 = await capturePage(`export-p1-${student.id}`);
+        if (canvas1) {
           if (i > 0) pdf.addPage();
           pdf.addImage(canvas1.toDataURL('image/png'), 'PNG', 0, 0, 297, 210);
+          console.log(`Página 1 de ${student.name} adicionada.`);
         }
       }
 
-      const p2 = document.getElementById('export-p2-generic');
-      if (p2) {
+      const canvas2 = await capturePage('export-p2-generic');
+      if (canvas2) {
         pdf.addPage();
-        const canvas2 = await html2canvas(p2, { 
-          scale: 2, 
-          useCORS: true,
-          logging: false,
-          width: 1123,
-          height: 794
-        });
         pdf.addImage(canvas2.toDataURL('image/png'), 'PNG', 0, 0, 297, 210);
+        console.log("Verso genérico adicionado.");
       }
       
-      pdf.save(`Certificados_${data.courseName.replace(/\s+/g, '_')}.pdf`);
+      pdf.save(`Certificados_${data.courseName.replace(/\s+/g, '_') || 'Lote'}.pdf`);
+      console.log("PDF salvo com sucesso!");
     } catch (error) {
       console.error("PDF generation failed:", error);
-      alert("Houve um erro ao gerar o lote de PDFs.");
+      alert("Houve um erro técnico ao gerar o PDF. Verifique o console.");
     } finally {
       setIsGenerating(false);
     }
@@ -282,40 +311,32 @@ const App: React.FC = () => {
 
   const availableTags = [
     '{{NOME}}', '{{CPF}}', '{{CURSO}}', '{{DATA}}', '{{CARGA_HORARIA}}', 
-    '{{RAZAO_SOCIAL}}', '{{CNPJ}}', '{{ENDERECO}}', '{{INSTRUTORES}}'
+    '{{RAZAO_SOCIAL}}', '{{CNPJ}}', '{{ENDERECO}}', '{{INSTRUTORES}}',
+    '{{PROVEDORA_NOME}}', '{{PROVEDORA_CNPJ}}'
   ];
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Modal de Pré-visualização */}
       {isPreviewOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
           <div className="absolute top-4 right-4 flex gap-4">
-             <button 
-              onClick={exportAllToPDF}
-              className="bg-green-600 text-white px-6 py-2 rounded-full font-bold shadow-lg hover:bg-green-700 transition-all flex items-center gap-2"
-             >
+             <button onClick={exportAllToPDF} className="bg-green-600 text-white px-6 py-2 rounded-full font-bold shadow-lg hover:bg-green-700 transition-all flex items-center gap-2">
                <i className="fa-solid fa-file-pdf"></i> Exportar Agora
              </button>
-             <button 
-              onClick={() => setIsPreviewOpen(false)}
-              className="bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all"
-             >
+             <button onClick={() => setIsPreviewOpen(false)} className="bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all">
                <i className="fa-solid fa-xmark text-xl"></i>
              </button>
           </div>
-          
           <div className="w-full max-w-6xl max-h-[90vh] overflow-y-auto scrollbar-hide py-10">
             <div className="flex flex-col items-center gap-12">
               <div className="space-y-4">
-                <h3 className="text-white text-center font-bold uppercase tracking-widest opacity-50 text-sm">Página 1: Frente (A4 297x210mm)</h3>
+                <h3 className="text-white text-center font-bold uppercase tracking-widest opacity-50 text-sm">Página 1: Frente (A4 Realista)</h3>
                 <div className="shadow-2xl ring-1 ring-white/10 rounded-lg overflow-hidden transform scale-[0.8] md:scale-100 origin-center">
                   <CertificatePreview data={data} student={currentStudent} page={1} />
                 </div>
               </div>
-
               <div className="space-y-4">
-                <h3 className="text-white text-center font-bold uppercase tracking-widest opacity-50 text-sm">Página 2: Verso (A4 297x210mm)</h3>
+                <h3 className="text-white text-center font-bold uppercase tracking-widest opacity-50 text-sm">Página 2: Verso (A4 Realista)</h3>
                 <div className="shadow-2xl ring-1 ring-white/10 rounded-lg overflow-hidden transform scale-[0.8] md:scale-100 origin-center">
                   <CertificatePreview data={data} student={null} page={2} />
                 </div>
@@ -331,7 +352,7 @@ const App: React.FC = () => {
             <i className="fa-solid fa-graduation-cap"></i>
             CertificaMaster
           </h1>
-          <p className="text-xs opacity-75">Layout A4 (297x210mm) Ativo</p>
+          <p className="text-xs opacity-75">Sincronização WYSIWYG Ativa</p>
         </div>
         <div className="flex bg-gray-100 border-b">
           <button onClick={() => setActiveTab('dados')} className={`flex-1 py-3 text-xs font-bold uppercase transition-colors ${activeTab === 'dados' ? 'bg-white border-t-2 border-blue-900 text-blue-900' : 'text-gray-500'}`}>Alunos & Curso</button>
@@ -348,21 +369,12 @@ const App: React.FC = () => {
                   <input type="text" placeholder="CPF" value={newStudentCpf} onChange={(e) => setNewStudentCpf(e.target.value)} className="px-3 py-2 text-sm border rounded bg-white" />
                 </div>
                 <button onClick={addStudent} className="w-full bg-blue-600 text-white py-2 rounded text-sm font-bold hover:bg-blue-700 mb-4">Adicionar Aluno</button>
-                
                 {currentStudent && (
                   <div className="bg-blue-50 p-3 rounded border border-blue-100 mb-4 animate-fadeIn">
                     <label className="block text-[10px] font-bold text-blue-800 mb-1 uppercase">Texto de Destaque (Aluno Selecionado)</label>
-                    <input 
-                      type="text" 
-                      placeholder="Nome p/ o Manuscrito" 
-                      value={currentStudent.displayName || ''} 
-                      onChange={(e) => updateStudentDisplayName(currentStudent.id, e.target.value)}
-                      className="w-full px-2 py-1.5 text-xs border rounded bg-white focus:ring-2 focus:ring-blue-500 outline-none"
-                    />
-                    <p className="text-[9px] text-blue-400 mt-1 italic">* Edite como o nome deve aparecer na fonte manuscrita.</p>
+                    <input type="text" placeholder="Nome p/ o Manuscrito" value={currentStudent.displayName || ''} onChange={(e) => updateStudentDisplayName(currentStudent.id, e.target.value)} className="w-full px-2 py-1.5 text-xs border rounded bg-white focus:ring-2 focus:ring-blue-500 outline-none" />
                   </div>
                 )}
-
                 <div className="bg-gray-50 p-3 rounded border border-dashed mb-4">
                   <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Importação em Lote (Nome, CPF)</label>
                   <textarea placeholder="João Silva, 123.456.789-00&#10;Maria Souza, 987.654.321-11" className="w-full h-24 text-xs p-2 border rounded font-mono bg-white" value={bulkInput} onChange={(e) => setBulkInput(e.target.value)} />
@@ -405,21 +417,19 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <h2 className="text-sm font-bold text-gray-500 uppercase mt-8 mb-4 flex items-center gap-2"><i className="fa-solid fa-building"></i> Informações da Empresa</h2>
-                <FormInput label="Razão Social" name="companyName" value={data.companyName} onChange={handleChange} />
+                <FormInput label="Razão Social (Instituição)" name="companyName" value={data.companyName} onChange={handleChange} />
                 <FormInput label="CNPJ" name="companyCnpj" value={data.companyCnpj} onChange={handleChange} />
                 <FormInput label="Endereço Completo" name="address" value={data.address} onChange={handleChange} multiline />
+                <div className="mt-6 border-t pt-6">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">Empresa Fornecedora / Realização (Opcional)</h3>
+                  <FormInput label="Razão Social da Fornecedora" name="providerName" value={data.providerName} onChange={handleChange} />
+                  <FormInput label="CNPJ da Fornecedora" name="providerCnpj" value={data.providerCnpj} onChange={handleChange} />
+                </div>
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mt-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-xs font-bold text-gray-600 uppercase">Responsável Técnico</h3>
                     <div className="flex items-center gap-2">
-                      <input 
-                        type="checkbox" 
-                        id="showTechResponsible" 
-                        name="showTechResponsible" 
-                        checked={data.showTechResponsible} 
-                        onChange={handleCheckboxChange} 
-                        className="w-4 h-4 text-blue-600 rounded"
-                      />
+                      <input type="checkbox" id="showTechResponsible" name="showTechResponsible" checked={data.showTechResponsible} onChange={handleCheckboxChange} className="w-4 h-4 text-blue-600 rounded" />
                       <label htmlFor="showTechResponsible" className="text-[10px] font-bold text-gray-500 uppercase cursor-pointer">Exibir no Certificado</label>
                     </div>
                   </div>
@@ -458,6 +468,10 @@ const App: React.FC = () => {
                       <input type="range" name="versoInstitutionVerticalOffset" min="-200" max="200" value={data.versoInstitutionVerticalOffset} onChange={handleSliderChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                     </div>
                   </div>
+                  <div className="pt-2 border-t">
+                    <div className="flex justify-between items-center mb-1"><label className="text-xs font-bold text-gray-500 uppercase">Fonte Cabeçalho Verso</label><span className="text-xs font-mono font-bold text-blue-600">{data.versoHeaderFontSize}px</span></div>
+                    <input type="range" name="versoHeaderFontSize" min="10" max="40" value={data.versoHeaderFontSize} onChange={handleSliderChange} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+                  </div>
                 </div>
               </section>
               <CurriculumTable items={data.curriculum} totalHours={data.totalHours} showHoursColumn={data.showHoursColumn} onAdd={handleAddCurriculum} onRemove={handleRemoveCurriculum} onUpdate={handleUpdateCurriculum} onUpdateTotal={(val) => setData(prev => ({ ...prev, totalHours: val }))} />
@@ -476,8 +490,6 @@ const App: React.FC = () => {
                       ))}
                     </div>
                   </div>
-
-                  {/* Controles de Título e Cabeçalho */}
                   <div className="bg-white p-3 rounded border border-gray-200 space-y-3 shadow-inner">
                     <p className="text-[10px] font-bold text-blue-900 uppercase flex items-center gap-1"><i className="fa-solid fa-heading"></i> Ajustes de Título</p>
                     <div>
@@ -499,7 +511,6 @@ const App: React.FC = () => {
                       <input type="range" name="titleSpacing" min="0" max="100" value={data.titleSpacing} onChange={handleSliderChange} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                     </div>
                   </div>
-
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <div className="flex justify-between items-center mb-1"><label className="text-[10px] font-bold text-gray-500 uppercase">Altura do Corpo</label></div>
@@ -510,26 +521,16 @@ const App: React.FC = () => {
                       <input type="range" name="frontSidePadding" min="0" max="400" value={data.frontSidePadding} onChange={handleSliderChange} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                     </div>
                   </div>
-                  
-                  {/* Controles de Nome em Destaque */}
                   <div className="bg-white p-3 rounded border border-gray-200 space-y-3 shadow-inner">
                     <p className="text-[10px] font-bold text-blue-900 uppercase flex items-center gap-1"><i className="fa-solid fa-signature"></i> Nome em Destaque (Manuscrito)</p>
-                    
                     {currentStudent ? (
                       <div>
                         <label className="text-[9px] font-bold text-gray-400 uppercase block mb-1">Conteúdo do Destaque</label>
-                        <input 
-                          type="text" 
-                          value={currentStudent.displayName || ''} 
-                          onChange={(e) => updateStudentDisplayName(currentStudent.id, e.target.value)}
-                          className="w-full px-2 py-1.5 text-xs border rounded bg-blue-50 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all"
-                          placeholder="Editar nome para o manuscrito..."
-                        />
+                        <input type="text" value={currentStudent.displayName || ''} onChange={(e) => updateStudentDisplayName(currentStudent.id, e.target.value)} className="w-full px-2 py-1.5 text-xs border rounded bg-blue-50 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all" placeholder="Editar nome para o manuscrito..." />
                       </div>
                     ) : (
                       <p className="text-[9px] text-gray-400 italic">Selecione um aluno na aba 'Dados' para editar seu texto.</p>
                     )}
-
                     <div>
                       <div className="flex justify-between items-center mb-1"><label className="text-[10px] font-bold text-gray-500 uppercase">Tamanho da Fonte</label><span className="text-[10px] font-mono font-bold text-blue-600">{data.highlightNameFontSize}px</span></div>
                       <input type="range" name="highlightNameFontSize" min="20" max="150" value={data.highlightNameFontSize} onChange={handleSliderChange} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
@@ -539,8 +540,6 @@ const App: React.FC = () => {
                       <input type="range" name="highlightNameVerticalOffset" min="-200" max="200" value={data.highlightNameVerticalOffset} onChange={handleSliderChange} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                     </div>
                   </div>
-
-                  {/* Novos controles de Assinatura */}
                   <div className="bg-blue-50 p-3 rounded border border-blue-200 space-y-3">
                     <p className="text-[10px] font-bold text-blue-900 uppercase flex items-center gap-1"><i className="fa-solid fa-file-signature"></i> Bloco de Assinaturas</p>
                     <div className="grid grid-cols-2 gap-4">
@@ -558,28 +557,42 @@ const App: React.FC = () => {
                       <input type="range" name="signatureFontSize" min="8" max="40" value={data.signatureFontSize} onChange={handleSliderChange} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                     </div>
                   </div>
+                  <div className="bg-gray-100 p-3 rounded border border-gray-300 space-y-3">
+                    <p className="text-[10px] font-bold text-gray-600 uppercase flex items-center gap-1"><i className="fa-solid fa-shoe-prints"></i> Rodapés Geral</p>
+                    <div className="flex justify-between items-center mb-1"><label className="text-[10px] font-bold text-gray-500 uppercase">Tamanho da Fonte Rodapé</label><span className="text-[10px] font-mono font-bold text-blue-600">{data.footerFontSize}px</span></div>
+                    <input type="range" name="footerFontSize" min="6" max="24" value={data.footerFontSize} onChange={handleSliderChange} className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+                  </div>
+                </div>
+              </section>
+
+              <section className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-4">
+                <h3 className="text-xs font-bold text-gray-600 uppercase flex items-center gap-2"><i className="fa-solid fa-image"></i> Gestão de Ativos Visuais</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Arte de Fundo (Frente)</label>
+                    <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'bgImage')} className="block w-full text-[11px] text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                    {data.bgImage && <button onClick={() => setData(prev => ({...prev, bgImage: null}))} className="text-[10px] text-red-500 hover:underline mt-1">Remover Imagem</button>}
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Assinatura do Instrutor</label>
+                    <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'signatureImage')} className="block w-full text-[11px] text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                    {data.signatureImage && <button onClick={() => setData(prev => ({...prev, signatureImage: null}))} className="text-[10px] text-red-500 hover:underline mt-1">Remover Assinatura</button>}
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Selo Digital / QR Code</label>
+                    <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'digitalSeal')} className="block w-full text-[11px] text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                    {data.digitalSeal && <button onClick={() => setData(prev => ({...prev, digitalSeal: null}))} className="text-[10px] text-red-500 hover:underline mt-1">Remover Selo</button>}
+                  </div>
                 </div>
               </section>
 
               <section className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
-                <h3 className="text-xs font-bold text-blue-900 uppercase mb-3 flex items-center gap-2">
-                  <i className="fa-solid fa-bold"></i> Destacar em Negrito
-                </h3>
-                <p className="text-[10px] text-gray-500 mb-3 leading-tight">Marque as variáveis que devem aparecer em negrito no texto final:</p>
+                <h3 className="text-xs font-bold text-blue-900 uppercase mb-3 flex items-center gap-2"><i className="fa-solid fa-bold"></i> Destacar em Negrito</h3>
                 <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                   {availableTags.map(tag => (
                     <label key={tag} className="flex items-center gap-2 cursor-pointer group">
-                      <div className="relative flex items-center">
-                        <input 
-                          type="checkbox" 
-                          checked={data.boldVariables.includes(tag)}
-                          onChange={() => handleBoldToggle(tag)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                      </div>
-                      <span className="text-[10px] font-mono text-gray-700 group-hover:text-blue-900 transition-colors">
-                        {tag}
-                      </span>
+                      <input type="checkbox" checked={data.boldVariables.includes(tag)} onChange={() => handleBoldToggle(tag)} className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />
+                      <span className="text-[10px] font-mono text-gray-700 group-hover:text-blue-900 transition-colors">{tag}</span>
                     </label>
                   ))}
                 </div>
@@ -593,30 +606,21 @@ const App: React.FC = () => {
                   ))}
                 </div>
                 <textarea ref={textareaRef} name="baseText" value={data.baseText} onChange={handleChange} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm h-48 text-sm font-mono bg-white outline-none" />
-                <button onClick={enhanceTextWithGemini} disabled={isEnhancingText} className="mt-2 flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-800 disabled:opacity-50"><i className={`fa-solid fa-wand-magic-sparkles ${isEnhancingText ? 'animate-spin' : ''}`}></i>{isEnhancingText ? 'Melhorando...' : 'Melhorar texto com IA'}</button>
-              </div>
-              <div className="space-y-4">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Arte de Fundo (Frente)</label><input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'bgImage')} className="text-xs block w-full text-gray-500" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Assinatura</label><input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'signatureImage')} className="text-xs block w-full text-gray-500" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Selo</label><input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'digitalSeal')} className="text-xs block w-full text-gray-500" /></div>
+                <button onClick={enhanceTextWithGemini} disabled={isEnhancingText} className="mt-2 flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-800 disabled:opacity-50"><i className="fa-solid fa-wand-magic-sparkles"></i> Melhorar texto com IA</button>
               </div>
             </div>
           )}
         </div>
         <div className="p-6 border-t bg-gray-50 flex flex-col gap-3">
-          <button 
-            onClick={() => setIsPreviewOpen(true)}
-            disabled={data.students.length === 0}
-            className="w-full bg-white border-2 border-blue-900 text-blue-900 font-bold py-2 rounded-lg hover:bg-blue-50 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-          >
+          <button onClick={() => setIsPreviewOpen(true)} disabled={data.students.length === 0} className="w-full bg-white border-2 border-blue-900 text-blue-900 font-bold py-2 rounded-lg hover:bg-blue-50 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
             <i className="fa-solid fa-eye"></i> Pré-visualizar (A4)
           </button>
-          
           <button onClick={exportAllToPDF} disabled={isGenerating || data.students.length === 0} className="w-full bg-green-600 text-white font-bold py-3 rounded-lg shadow-md hover:bg-green-700 disabled:bg-gray-400 transition-all flex items-center justify-center gap-2">
             {isGenerating ? (<><i className="fa-solid fa-circle-notch animate-spin"></i> Processando...</>) : (<><i className="fa-solid fa-file-pdf"></i> Exportar Lote em PDF</>)}
           </button>
         </div>
       </div>
+
       <div className="flex-1 bg-gray-200 p-8 overflow-auto flex flex-col items-center relative">
         <div className="mb-6 flex flex-col items-center gap-4 no-print sticky top-0 z-30 w-full">
           <div className="flex flex-wrap items-center justify-center gap-4 bg-white p-3 rounded-xl shadow-xl border border-gray-100">
@@ -641,14 +645,15 @@ const App: React.FC = () => {
         <div className="origin-top shadow-2xl transition-transform duration-300 ease-out mb-20" style={{ transform: `scale(${zoom})`, marginTop: '20px' }}>
            <CertificatePreview data={data} student={previewPage === 1 ? currentStudent : null} page={previewPage} />
         </div>
-        {/* Container Oculto para Exportação - Forçando Dimensões A4 */}
-        <div className="fixed top-[-9999px] left-[-9999px]">
+        
+        {/* CORREÇÃO: Posicionamento físico off-screen para garantir captura do layout e fontes */}
+        <div className="fixed top-[-10000px] left-[-10000px] pointer-events-none overflow-visible">
           {data.students.map(student => (
-            <div key={student.id} id={`export-p1-${student.id}`} style={{ width: '1123px', height: '794px' }}>
+            <div key={student.id} id={`export-p1-${student.id}`} style={{ width: '1123px', height: '794px', position: 'relative', marginBottom: '100px' }}>
               <CertificatePreview data={data} student={student} page={1} />
             </div>
           ))}
-          <div id="export-p2-generic" style={{ width: '1123px', height: '794px' }}>
+          <div id="export-p2-generic" style={{ width: '1123px', height: '794px', position: 'relative' }}>
             <CertificatePreview data={data} student={null} page={2} />
           </div>
         </div>

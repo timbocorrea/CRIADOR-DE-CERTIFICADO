@@ -37,12 +37,13 @@ export const replaceVariables = (text: string, data: CertificateData, student: S
     '{{CARGA HORARIA}}': data.totalHours || '0',
     '{{CARGA_HORÁRIA}}': data.totalHours || '0',
     '{{CARGA HORÁRIA}}': data.totalHours || '0',
+    '{{PROVEDORA_NOME}}': data.providerName || '[PROVEDORA]',
+    '{{PROVEDORA_CNPJ}}': data.providerCnpj || '[CNPJ PROVEDORA]',
   };
 
   let result = text;
   
   // Escapar o texto original para evitar injeção de HTML acidental antes de processar as variáveis
-  // Mas como queremos permitir que o usuário use quebras de linha etc, faremos a substituição com tags HTML específicas
   
   Object.entries(vars).forEach(([key, value]) => {
     // Verificar se esta chave (ou suas variações) deve estar em negrito

@@ -23,6 +23,8 @@ export interface CertificateData {
   companyName: string;
   companyCnpj: string;
   address: string;
+  providerName: string;
+  providerCnpj: string;
   instructors: Instructor[];
   techResponsibleName: string;
   techResponsibleCompetencies: string;
@@ -40,6 +42,8 @@ export interface CertificateData {
   hoursColumnWidth: number;
   versoRowPadding: number;
   versoCurriculumFontSize: number;
+  versoHeaderFontSize: number;
+  footerFontSize: number;
   versoInstitutionVerticalOffset: number;
   mainTextVerticalOffset: number;
   titleVerticalOffset: number;
