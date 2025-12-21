@@ -45,6 +45,7 @@ export interface CertificateData {
   versoHeaderFontSize: number;
   footerFontSize: number;
   versoInstitutionVerticalOffset: number;
+  versoCurriculumVerticalOffset: number;
   mainTextVerticalOffset: number;
   titleVerticalOffset: number;
   titleFontSize: number;
@@ -59,6 +60,11 @@ export interface CertificateData {
   signatureFontSize: number;
   frontTextAlign: 'left' | 'center' | 'right' | 'justify';
   boldVariables: string[];
+  frontHeaderPadding: number;
+  frontFooterPadding: number;
+  versoHeaderPadding: number;
+  versoFooterPadding: number;
+  frontBorderWidth: number; // Nova propriedade para espessura da borda
 }
 
 export const DEFAULT_BASE_TEXT = "Certificamos que {{NOME}}, portador do CPF {{CPF}}, concluiu com êxito o curso de {{CURSO}}, realizado em {{DATA}}, com carga horária total de {{CARGA_HORARIA}} horas, sob a responsabilidade técnica de {{RAZAO_SOCIAL}}, inscrita no CNPJ {{CNPJ}}, com sede em {{ENDERECO}}.";

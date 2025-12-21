@@ -11,10 +11,7 @@ interface CertificatePreviewProps {
 }
 
 const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, page, idSuffix = "" }) => {
-  const bgStyle: React.CSSProperties = data.bgImage
-    ? { backgroundImage: `url(${data.bgImage})`, backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }
-    : { backgroundColor: '#ffffff', border: '16px solid #1e3a8a' };
-
+  // Versão 1: Frente
   if (page === 1) {
     const formattedText = replaceVariables(data.baseText, data, student);
     const displayHighlightName = student?.displayName || student?.name || '[NOME DE DESTAQUE]';
@@ -22,19 +19,47 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
     return (
       <div
         id={`certificate-page-1${idSuffix}`}
-        className="relative w-[1123px] h-[794px] bg-white mx-auto certificate-font box-border overflow-hidden"
-        style={bgStyle}
+        className="relative w-[1123px] h-[794px] bg-white mx-auto certificate-font box-border overflow-hidden select-none"
+        style={{ width: '1123px', height: '794px' }}
       >
+        {/* Renderização do Fundo */}
+        {data.bgImage ? (
+          <img 
+            src={data.bgImage} 
+            width="1123"
+            height="794"
+            className="absolute inset-0 w-[1123px] h-[794px] object-fill pointer-events-none" 
+            style={{ zIndex: 0 }}
+            alt="Fundo"
+          />
+        ) : (
+          <div 
+            className="absolute inset-0 border-blue-900 pointer-events-none" 
+            style={{ 
+              zIndex: 0, 
+              width: '1123px', 
+              height: '794px', 
+              boxSizing: 'border-box',
+              borderWidth: `${data.frontBorderWidth}px`,
+              borderStyle: 'solid'
+            }}
+          ></div>
+        )}
+
+        {/* Conteúdo sobreposto */}
         <div 
-          className="absolute inset-0 flex flex-col"
+          className="relative z-10 w-full h-full flex flex-col"
           style={{ 
             paddingLeft: `${data.frontSidePadding}px`, 
             paddingRight: `${data.frontSidePadding}px`,
-            paddingTop: '60px',
-            paddingBottom: '40px'
+            paddingTop: `${data.frontHeaderPadding}px`,
+            paddingBottom: `${data.frontFooterPadding}px`,
+            width: '1123px',
+            height: '794px',
+            boxSizing: 'border-box'
           }}
         >
-          {/* ZONA 1: TÍTULO (Âncora Superior) */}
+          {/* ZONA 1: TÍTULO */}
           <div 
             className="w-full text-center flex flex-col items-center"
             style={{ transform: `translateY(${data.titleVerticalOffset}px)` }}
@@ -53,7 +78,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
             </p>
           </div>
           
-          {/* ZONA 2: NOME MANUSCRITO (Centro-Superior) */}
+          {/* ZONA 2: NOME MANUSCRITO */}
           <div 
             className="w-full flex items-center justify-center"
             style={{ height: '140px', marginTop: '20px', transform: `translateY(${data.highlightNameVerticalOffset}px)` }}
@@ -67,11 +92,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
           </div>
 
           <div 
-            className="w-full h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent"
+            className="w-full border-b border-gray-300"
             style={{ marginBottom: '30px', transform: `translateY(${data.highlightNameVerticalOffset}px)` }}
           ></div>
           
-          {/* ZONA 3: CORPO DO TEXTO (Centro) */}
           <div 
             className="text-2xl leading-relaxed text-gray-800 whitespace-pre-wrap w-full px-6 flex-grow flex items-center"
             style={{ 
@@ -83,7 +107,6 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
             <div className="w-full" dangerouslySetInnerHTML={{ __html: formattedText }} />
           </div>
 
-          {/* ZONA 4: ASSINATURAS (Âncora Inferior) */}
           <div 
             className={`w-full flex items-end ${data.showTechResponsible ? 'justify-between' : 'justify-around'}`}
             style={{ 
@@ -93,25 +116,23 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
               minHeight: '160px'
             }}
           >
-            {/* Instrutor */}
             <div className="flex flex-col items-center text-center min-w-[220px]">
-              <div className="h-20 flex items-end justify-center mb-2">
-                {data.signatureImage && <img src={data.signatureImage} className="h-full object-contain" />}
+              <div className="h-20 flex items-end justify-center mb-2" style={{ height: '80px' }}>
+                {data.signatureImage && <img src={data.signatureImage} height="80" className="h-20 object-contain" alt="Assinatura" />}
               </div>
               <div className="w-full border-t border-gray-400 mb-1"></div>
               <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
                 {data.instructors[0]?.name || 'Instrutor Responsável'}
               </p>
               {data.instructors[0]?.competencies && (
-                <p style={{ fontSize: `${Math.max(8, data.signatureFontSize * 0.7)}px` }} className="text-gray-500 max-w-[200px] leading-tight mt-1">
+                <p style={{ fontSize: `${data.signatureFontSize * 0.7}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[200px] leading-tight">
                   {data.instructors[0].competencies}
                 </p>
               )}
             </div>
 
-            {/* Aluno */}
             <div className="flex flex-col items-center text-center min-w-[220px]">
-              <div className="h-20 flex items-end justify-center mb-2"></div>
+              <div className="h-20 flex items-end justify-center mb-2" style={{ height: '80px' }}></div>
               <div className="w-full border-t border-gray-400 mb-1"></div>
               <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
                 {student?.name || '[NOME DO ALUNO]'}
@@ -121,29 +142,22 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
               </p>
             </div>
 
-            {/* Responsável Técnico */}
             {data.showTechResponsible && (
               <div className="flex flex-col items-center text-center min-w-[220px]">
-                <div className="h-20 flex items-end justify-center mb-2">
-                   {data.digitalSeal && <img src={data.digitalSeal} className="h-full object-contain" />}
+                <div className="h-20 flex items-end justify-center mb-2" style={{ height: '80px' }}>
+                   {data.digitalSeal && <img src={data.digitalSeal} height="80" className="h-20 object-contain" alt="Selo" />}
                 </div>
                 <div className="w-full border-t border-gray-400 mb-1"></div>
                 <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
                   {data.techResponsibleName || 'Responsável Técnico'}
                 </p>
-                {data.techResponsibleCompetencies && (
-                  <p style={{ fontSize: `${Math.max(8, data.signatureFontSize * 0.7)}px` }} className="text-gray-500 max-w-[200px] leading-tight mt-1">
-                    {data.techResponsibleCompetencies}
-                  </p>
-                )}
               </div>
             )}
           </div>
           
-          {/* RODAPÉ FIXO */}
           <div 
-            className="absolute bottom-6 w-full px-10 text-gray-400 uppercase tracking-tighter text-center" 
-            style={{ left: 0, fontSize: `${data.footerFontSize}px` }}
+            className="absolute w-full px-10 text-gray-400 uppercase tracking-tighter text-center" 
+            style={{ left: 0, fontSize: `${data.footerFontSize}px`, bottom: `${data.frontFooterPadding}px` }}
           >
              {data.companyName} - {data.companyCnpj} {data.address && `| ${data.address.replace(/\n/g, ' ')}`}
           </div>
@@ -152,20 +166,36 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
     );
   }
 
-  // VERSO (Simplificado e Rígido)
+  // Versão 2: Verso
   const rowPaddingStyle: React.CSSProperties = { 
     paddingTop: `${data.versoRowPadding}px`, 
     paddingBottom: `${data.versoRowPadding}px`,
-    fontSize: `${data.versoCurriculumFontSize}px`
+    fontSize: `${data.versoCurriculumFontSize}px`,
+    verticalAlign: 'middle', 
+    textAlign: 'left', 
+    lineHeight: '1.2'
   };
 
   return (
     <div
       id={`certificate-page-2${idSuffix}`}
-      className="relative w-[1123px] h-[794px] bg-white mx-auto p-12 certificate-font box-border flex flex-col"
-      style={{ border: '4px solid #f3f4f6' }}
+      className="relative w-[1123px] h-[794px] bg-white mx-auto certificate-font box-border flex flex-col overflow-hidden"
+      style={{ 
+        border: '4px solid #f3f4f6', 
+        width: '1123px', 
+        height: '794px',
+        paddingTop: `${data.versoHeaderPadding}px`,
+        paddingBottom: `${data.versoFooterPadding}px`,
+        paddingLeft: '64px',
+        paddingRight: '64px'
+      }}
     >
-      <h2 className="text-3xl font-bold text-blue-900 mb-6 border-b-4 border-blue-900 pb-2 uppercase tracking-wide">Conteúdo Programático</h2>
+      <h2 
+        className="text-3xl font-bold text-blue-900 border-b-4 border-blue-900 uppercase tracking-wide leading-tight"
+        style={{ marginBottom: '24px', paddingBottom: '12px' }}
+      >
+        Conteúdo Programático
+      </h2>
       
       <div 
         className="grid gap-8 flex-grow overflow-hidden"
@@ -187,11 +217,14 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
           </div>
         </div>
         
-        <div className="flex flex-col h-full border rounded-lg overflow-hidden">
+        <div 
+          className="flex flex-col h-full border rounded-lg overflow-hidden bg-white"
+          style={{ transform: `translateY(${data.versoCurriculumVerticalOffset}px)` }}
+        >
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-blue-900">
-                <th className="px-4 py-3 text-white uppercase font-bold text-sm">Disciplina / Módulo</th>
+                <th className="px-4 py-3 text-white uppercase font-bold text-sm text-left">Disciplina / Módulo</th>
                 {data.showHoursColumn && (
                   <th className="px-4 py-3 text-white text-center uppercase font-bold text-sm w-24">Horas</th>
                 )}
