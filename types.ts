@@ -32,6 +32,7 @@ export interface CertificateData {
   courseName: string;
   courseDate: string;
   totalHours: string;
+  workloadMode?: 'auto' | 'manual';
   baseText: string;
   curriculum: CurriculumItem[];
   bgImage: string | null;
@@ -43,6 +44,8 @@ export interface CertificateData {
   versoRowPadding: number;
   versoCurriculumFontSize: number;
   versoHeaderFontSize: number;
+  versoTitleFontSize?: number;
+  versoFooterFontSize?: number;
   footerFontSize: number;
   versoInstitutionVerticalOffset: number;
   versoCurriculumVerticalOffset: number;
@@ -52,6 +55,7 @@ export interface CertificateData {
   subtitleFontSize: number;
   titleSpacing: number;
   bodyVerticalOffset: number;
+  bodyFontSize?: number;
   highlightNameVerticalOffset: number;
   highlightNameFontSize: number;
   frontSidePadding: number;
@@ -65,6 +69,34 @@ export interface CertificateData {
   versoHeaderPadding: number;
   versoFooterPadding: number;
   frontBorderWidth: number; // Nova propriedade para espessura da borda
+  versoBorderWidth?: number;
+  versoSidePadding?: number;
+  frontBorderMargin?: number;
 }
 
 export const DEFAULT_BASE_TEXT = "Certificamos que {{NOME}}, portador do CPF {{CPF}}, concluiu com êxito o curso de {{CURSO}}, realizado em {{DATA}}, com carga horária total de {{CARGA_HORARIA}} horas, sob a responsabilidade técnica de {{RAZAO_SOCIAL}}, inscrita no CNPJ {{CNPJ}}, com sede em {{ENDERECO}}.";
+
+export type AIProviderId = 'gemini' | 'groq' | 'openrouter';
+
+export interface AISettings {
+  geminiApiKey: string;
+  groqApiKey: string;
+  openrouterApiKey: string;
+  preferredProvider: 'auto' | 'gemini' | 'groq' | 'openrouter';
+}
+
+export interface ExtractedStudentCandidate {
+  name: string;
+  cpf: string;
+  confidence?: 'high' | 'medium' | 'low';
+}
+
+export interface AIExtractionResult {
+  success: boolean;
+  students: ExtractedStudentCandidate[];
+  providerUsed?: AIProviderId | 'local';
+  modelUsed?: string;
+  error?: string;
+  message?: string;
+}
+

@@ -1,19 +1,31 @@
 
 import React from 'react';
-import { CertificateData, Student } from '../types';
-import { replaceVariables } from '../utils/helpers';
+import { CertificateData, Student, CurriculumItem } from '../types';
+import { renderSafeCertificateText } from '../utils/helpers';
 
 interface CertificatePreviewProps {
   data: CertificateData;
   student: Student | null;
   page: 1 | 2;
   idSuffix?: string;
+  versoPageNumber?: number;
+  versoTotalPages?: number;
+  curriculumSlice?: CurriculumItem[];
+  isFillerPage?: boolean;
 }
 
-const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, page, idSuffix = "" }) => {
+const CertificatePreview: React.FC<CertificatePreviewProps> = ({
+  data,
+  student,
+  page,
+  idSuffix = "",
+  versoPageNumber,
+  versoTotalPages,
+  curriculumSlice,
+  isFillerPage = false,
+}) => {
   // Versão 1: Frente
   if (page === 1) {
-    const formattedText = replaceVariables(data.baseText, data, student);
     const displayHighlightName = student?.displayName || student?.name || '[NOME DE DESTAQUE]';
 
     return (
@@ -34,11 +46,13 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
           />
         ) : (
           <div 
-            className="absolute inset-0 border-blue-900 pointer-events-none" 
+            className="absolute border-blue-900 pointer-events-none" 
             style={{ 
               zIndex: 0, 
-              width: '1123px', 
-              height: '794px', 
+              top: `${data.frontBorderMargin || 0}px`,
+              left: `${data.frontBorderMargin || 0}px`,
+              width: `${1123 - (data.frontBorderMargin || 0) * 2}px`, 
+              height: `${794 - (data.frontBorderMargin || 0) * 2}px`, 
               boxSizing: 'border-box',
               borderWidth: `${data.frontBorderWidth}px`,
               borderStyle: 'solid'
@@ -97,14 +111,15 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
           ></div>
           
           <div 
-            className="text-2xl leading-relaxed text-gray-800 whitespace-pre-wrap w-full px-6 flex-grow flex items-center"
+            className="leading-relaxed text-gray-800 whitespace-pre-wrap w-full px-6 flex-grow flex items-center"
             style={{ 
+              fontSize: `${data.bodyFontSize || 24}px`,
               transform: `translateY(${data.bodyVerticalOffset}px)`,
               textAlign: data.frontTextAlign,
               maxHeight: '280px'
             }}
           >
-            <div className="w-full" dangerouslySetInnerHTML={{ __html: formattedText }} />
+            <div className="w-full">{renderSafeCertificateText(data.baseText, data, student)}</div>
           </div>
 
           <div 
@@ -116,20 +131,48 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
               minHeight: '160px'
             }}
           >
-            <div className="flex flex-col items-center text-center min-w-[220px]">
-              <div className="h-20 flex items-end justify-center mb-2" style={{ height: '80px' }}>
-                {data.signatureImage && <img src={data.signatureImage} height="80" className="h-20 object-contain" alt="Assinatura" />}
-              </div>
-              <div className="w-full border-t border-gray-400 mb-1"></div>
-              <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
-                {data.instructors[0]?.name || 'Instrutor Responsável'}
-              </p>
-              {data.instructors[0]?.competencies && (
-                <p style={{ fontSize: `${data.signatureFontSize * 0.7}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[200px] leading-tight">
-                  {data.instructors[0].competencies}
+            {/* Bloco de Instrutores (Suporta 1 a 4 instrutores - CM-ALTO-004) */}
+            {data.instructors.length <= 1 ? (
+              <div className="flex flex-col items-center text-center min-w-[220px]">
+                <div className="h-20 flex items-end justify-center mb-2" style={{ height: '80px' }}>
+                  {data.signatureImage && <img src={data.signatureImage} height="80" className="h-20 object-contain" alt="Assinatura" />}
+                </div>
+                <div className="w-full border-t border-gray-400 mb-1"></div>
+                <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
+                  {data.instructors[0]?.name || 'Instrutor Responsável'}
                 </p>
-              )}
-            </div>
+                {data.instructors[0]?.competencies && (
+                  <p style={{ fontSize: `${data.signatureFontSize * 0.7}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[200px] leading-tight">
+                    {data.instructors[0].competencies}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-end gap-4 max-w-[500px]">
+                {data.instructors.slice(0, 4).map((inst, idx) => {
+                  const scaleFactor = data.instructors.length > 2 ? 0.85 : 0.95;
+                  const effectiveFontSize = Math.max(9, Math.floor(data.signatureFontSize * scaleFactor));
+                  return (
+                    <div key={inst.id || idx} className="flex flex-col items-center text-center min-w-[130px] max-w-[180px]">
+                      <div className="h-20 flex items-end justify-center mb-2" style={{ height: '80px' }}>
+                        {idx === 0 && data.signatureImage && (
+                          <img src={data.signatureImage} height="80" className="h-20 object-contain" alt="Assinatura" />
+                        )}
+                      </div>
+                      <div className="w-full border-t border-gray-400 mb-1"></div>
+                      <p style={{ fontSize: `${effectiveFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
+                        {inst.name}
+                      </p>
+                      {inst.competencies && (
+                        <p style={{ fontSize: `${effectiveFontSize * 0.75}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[160px] leading-tight">
+                          {inst.competencies}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             <div className="flex flex-col items-center text-center min-w-[220px]">
               <div className="h-20 flex items-end justify-center mb-2" style={{ height: '80px' }}></div>
@@ -166,35 +209,109 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
     );
   }
 
-  // Versão 2: Verso
+  // Página de Fechamento / Anotações (Filler para alinhamento estrito em Impressão Duplex)
+  if (isFillerPage) {
+    return (
+      <div
+        id={`certificate-page-2${idSuffix}`}
+        className="relative w-[1123px] h-[794px] bg-white mx-auto certificate-font box-border flex flex-col justify-between overflow-hidden"
+        style={{ 
+          border: `${data.versoBorderWidth !== undefined ? data.versoBorderWidth : 4}px solid #f3f4f6`, 
+          width: '1123px', 
+          height: '794px',
+          paddingTop: `${data.versoHeaderPadding}px`,
+          paddingBottom: `${data.versoFooterPadding}px`,
+          paddingLeft: `${data.versoSidePadding !== undefined ? data.versoSidePadding : 64}px`,
+          paddingRight: `${data.versoSidePadding !== undefined ? data.versoSidePadding : 64}px`
+        }}
+      >
+        <h2 
+          className="font-bold text-gray-500 border-b-2 border-gray-300 uppercase tracking-wide leading-tight pb-2"
+          style={{ 
+            fontSize: `${data.versoTitleFontSize ? Math.max(18, data.versoTitleFontSize - 6) : 24}px`,
+            marginBottom: '24px' 
+          }}
+        >
+          Anotações e Observações Institucionais
+        </h2>
+
+        <div className="flex-grow border-2 border-dashed border-gray-200 rounded-xl p-8 bg-gray-50/40 flex flex-col justify-between text-gray-500">
+          <div className="space-y-4">
+            <p className="text-sm uppercase tracking-wider font-semibold text-gray-400">
+              Espaço Reservado para Registros Complementares
+            </p>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              Este espaço destina-se a averbações acadêmicas, registros de estágio supervisionado, selos cartoriais de autenticação física ou homologações complementares da entidade formadora.
+            </p>
+          </div>
+          <div className="border-t border-gray-200 pt-4 flex justify-between text-[11px] text-gray-400">
+            <span>CertificaMaster — Sistema de Emissão Documental</span>
+            <span>Folha de fechamento de impressão Duplex</span>
+          </div>
+        </div>
+
+        <div className="mt-8 pt-4 border-t flex justify-between items-end opacity-60">
+          <div className="text-gray-400 max-w-md uppercase tracking-tighter" style={{ fontSize: `${data.versoFooterFontSize || data.footerFontSize}px` }}>
+            Registro oficial da instituição para fins de comprovação acadêmica.
+          </div>
+          <div className="text-right">
+            <p className="font-bold text-blue-900 uppercase" style={{ fontSize: `${(data.versoFooterFontSize || data.footerFontSize) + 2}px` }}>{data.companyName}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Versão 2: Verso (Conteúdo Programático com Paginador de Grade Extensa)
+  const items = curriculumSlice || data.curriculum;
+  const isLastVersoPage = !versoTotalPages || versoTotalPages === 1 || versoPageNumber === versoTotalPages;
+
+  // Ajuste fino dinâmico de densidade para acomodar até 12 disciplinas com legibilidade total
+  const compactRowPadding = items.length > 8 
+    ? Math.max(4, Math.floor(data.versoRowPadding * (8 / items.length)))
+    : data.versoRowPadding;
+  const compactFontSize = items.length > 10
+    ? Math.max(10, Math.floor(data.versoCurriculumFontSize * 0.9))
+    : data.versoCurriculumFontSize;
+
   const rowPaddingStyle: React.CSSProperties = { 
-    paddingTop: `${data.versoRowPadding}px`, 
-    paddingBottom: `${data.versoRowPadding}px`,
-    fontSize: `${data.versoCurriculumFontSize}px`,
+    paddingTop: `${compactRowPadding}px`, 
+    paddingBottom: `${compactRowPadding}px`,
+    fontSize: `${compactFontSize}px`,
     verticalAlign: 'middle', 
     textAlign: 'left', 
     lineHeight: '1.2'
   };
+
+  const headerTitle = versoTotalPages && versoTotalPages > 1
+    ? (versoPageNumber && versoPageNumber > 1
+        ? `Conteúdo Programático (Continuação — Folha ${versoPageNumber} de ${versoTotalPages})`
+        : `Conteúdo Programático (Folha 1 de ${versoTotalPages})`)
+    : 'Conteúdo Programático';
 
   return (
     <div
       id={`certificate-page-2${idSuffix}`}
       className="relative w-[1123px] h-[794px] bg-white mx-auto certificate-font box-border flex flex-col overflow-hidden"
       style={{ 
-        border: '4px solid #f3f4f6', 
+        border: `${data.versoBorderWidth !== undefined ? data.versoBorderWidth : 4}px solid #f3f4f6`, 
         width: '1123px', 
         height: '794px',
         paddingTop: `${data.versoHeaderPadding}px`,
         paddingBottom: `${data.versoFooterPadding}px`,
-        paddingLeft: '64px',
-        paddingRight: '64px'
+        paddingLeft: `${data.versoSidePadding !== undefined ? data.versoSidePadding : 64}px`,
+        paddingRight: `${data.versoSidePadding !== undefined ? data.versoSidePadding : 64}px`
       }}
     >
       <h2 
-        className="text-3xl font-bold text-blue-900 border-b-4 border-blue-900 uppercase tracking-wide leading-tight"
-        style={{ marginBottom: '24px', paddingBottom: '12px' }}
+        className="font-bold text-blue-900 border-b-4 border-blue-900 uppercase tracking-wide leading-tight"
+        style={{ 
+          fontSize: `${data.versoTitleFontSize || 30}px`,
+          marginBottom: '24px', 
+          paddingBottom: '12px' 
+        }}
       >
-        Conteúdo Programático
+        {headerTitle}
       </h2>
       
       <div 
@@ -226,35 +343,52 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({ data, student, 
               <tr className="bg-blue-900">
                 <th className="px-4 py-3 text-white uppercase font-bold text-sm text-left">Disciplina / Módulo</th>
                 {data.showHoursColumn && (
-                  <th className="px-4 py-3 text-white text-center uppercase font-bold text-sm w-24">Horas</th>
+                  <th 
+                    className="px-4 py-3 text-white text-center uppercase font-bold text-sm"
+                    style={{ width: `${data.hoursColumnWidth || 80}px` }}
+                  >
+                    Horas
+                  </th>
                 )}
               </tr>
             </thead>
             <tbody className="divide-y">
-              {data.curriculum.map((item, idx) => (
+              {items.map((item, idx) => (
                 <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}>
                   <td className="px-4 text-gray-700 font-medium" style={rowPaddingStyle}>{item.subject}</td>
                   {data.showHoursColumn && (
-                    <td className="px-4 text-center text-gray-600 font-mono font-bold" style={rowPaddingStyle}>{item.hours}h</td>
+                    <td 
+                      className="px-4 text-center text-gray-600 font-mono font-bold" 
+                      style={{ ...rowPaddingStyle, width: `${data.hoursColumnWidth || 80}px` }}
+                    >
+                      {item.hours}h
+                    </td>
                   )}
                 </tr>
               ))}
             </tbody>
           </table>
           
-          <div className="mt-auto bg-blue-50/50 p-4 border-t-2 border-blue-900 flex justify-between items-center font-bold">
-             <span className="text-blue-900 uppercase text-xs">Carga Horária Total Final</span>
-             <span className="text-blue-900 text-lg">{data.totalHours}h</span>
-          </div>
+          {isLastVersoPage ? (
+            <div className="mt-auto bg-blue-50/50 p-4 border-t-2 border-blue-900 flex justify-between items-center font-bold">
+               <span className="text-blue-900 uppercase text-xs">Carga Horária Total Final</span>
+               <span className="text-blue-900 text-lg">{data.totalHours}h</span>
+            </div>
+          ) : (
+            <div className="mt-auto bg-gray-50 p-3 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500 font-medium">
+               <span>Continua na folha seguinte...</span>
+               <span>Folha {versoPageNumber || 1} de {versoTotalPages}</span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="mt-8 pt-4 border-t flex justify-between items-end opacity-60">
-        <div className="text-gray-400 max-w-md uppercase tracking-tighter" style={{ fontSize: `${data.footerFontSize}px` }}>
+        <div className="text-gray-400 max-w-md uppercase tracking-tighter" style={{ fontSize: `${data.versoFooterFontSize || data.footerFontSize}px` }}>
           Registro oficial da instituição para fins de comprovação acadêmica.
         </div>
         <div className="text-right">
-          <p className="font-bold text-blue-900 uppercase" style={{ fontSize: `${data.footerFontSize + 2}px` }}>{data.companyName}</p>
+          <p className="font-bold text-blue-900 uppercase" style={{ fontSize: `${(data.versoFooterFontSize || data.footerFontSize) + 2}px` }}>{data.companyName}</p>
         </div>
       </div>
     </div>

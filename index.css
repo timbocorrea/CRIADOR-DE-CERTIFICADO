@@ -1,0 +1,40 @@
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import '@fontsource/inter/300.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/playfair-display/400.css';
+@import '@fontsource/playfair-display/700.css';
+@import '@fontsource/alex-brush/400.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+.certificate-font {
+  font-family: 'Playfair Display', serif;
+}
+
+.script-font {
+  font-family: 'Alex Brush', cursive;
+}
+
+@media print {
+  .no-print {
+    display: none;
+  }
+}
