@@ -13,7 +13,27 @@ import { formatCPF, cleanCPF, validateCPF } from '../utils/security';
 
 const STORAGE_KEY = 'certificamaster_ai_settings';
 
-export const DEFAULT_AI_SETTINGS: AISettings = {
+const getEnvKey = (key: string): string => {
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      return (import.meta.env[key] as string) || '';
+    }
+  } catch {}
+  return '';
+};
+
+export const getInitialDefaultAISettings = (): AISettings => {
+  return {
+    geminiApiKey: getEnvKey('VITE_GEMINI_API_KEY') || getEnvKey('GEMINI_API_KEY') || '',
+    groqApiKey: getEnvKey('VITE_GROQ_API_KEY') || '',
+    openrouterApiKey: getEnvKey('VITE_OPENROUTER_API_KEY') || '',
+    preferredProvider: 'auto',
+  };
+};
+
+export const DEFAULT_AI_SETTINGS: AISettings = getInitialDefaultAISettings();
+/* Default settings placeholder */
+const _unused_defaults = {
   geminiApiKey: '',
   groqApiKey: '',
   openrouterApiKey: '',
@@ -46,9 +66,9 @@ export function loadAISettings(): AISettings {
     if (!raw) return { ...DEFAULT_AI_SETTINGS };
     const parsed = JSON.parse(raw);
     const loaded: AISettings = {
-      geminiApiKey: parsed.geminiApiKey || '',
-      groqApiKey: parsed.groqApiKey || '',
-      openrouterApiKey: parsed.openrouterApiKey || '',
+      geminiApiKey: parsed.geminiApiKey || DEFAULT_AI_SETTINGS.geminiApiKey,
+      groqApiKey: parsed.groqApiKey || DEFAULT_AI_SETTINGS.groqApiKey,
+      openrouterApiKey: parsed.openrouterApiKey || DEFAULT_AI_SETTINGS.openrouterApiKey,
       preferredProvider: parsed.preferredProvider || 'auto',
     };
     memoryCache = loaded;
