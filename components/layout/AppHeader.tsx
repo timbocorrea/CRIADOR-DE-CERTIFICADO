@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   AppButton,
   AppBadge,
@@ -18,6 +18,8 @@ interface AppHeaderProps {
   isGenerating?: boolean;
   theme?: 'light' | 'dark';
   onToggleTheme?: () => void;
+  mobileView?: 'split' | 'editor' | 'preview';
+  onSelectMobileView?: (view: 'split' | 'editor' | 'preview') => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -34,7 +36,39 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   isGenerating = false,
   theme = 'light',
   onToggleTheme,
+  mobileView = 'split',
+  onSelectMobileView,
 }) => {
+  const [isViewMenuOpen, setIsViewMenuOpen] = useState(false);
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const viewMenuRef = useRef<HTMLDivElement>(null);
+  const actionMenuRef = useRef<HTMLDivElement>(null);
+
+  // Fecha menus ao clicar fora ou pressionar ESC
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (viewMenuRef.current && !viewMenuRef.current.contains(event.target as Node)) {
+        setIsViewMenuOpen(false);
+      }
+      if (actionMenuRef.current && !actionMenuRef.current.contains(event.target as Node)) {
+        setIsActionMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsViewMenuOpen(false);
+        setIsActionMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
   return (
     <header className="h-16 bg-slate-900 text-white px-3 sm:px-5 flex items-center justify-between border-b border-slate-800 shrink-0 select-none no-print z-30">
       {/* Brand Identity & Project info */}
@@ -80,8 +114,263 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         </div>
       </div>
 
-      {/* Quick Action Buttons */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      {/* 2. Grupo de Controles Mobile (< lg): Dois Menus na Mesma Linha do Cabeçalho */}
+      <div className="flex lg:hidden items-center gap-1.5 shrink-0">
+        {/* Menu de Visualização (Dividido / Edição / Preview) */}
+        {onSelectMobileView && (
+          <div ref={viewMenuRef} className="relative">
+            <button
+              type="button"
+              id="mobile-view-menu-trigger"
+              aria-haspopup="true"
+              aria-expanded={isViewMenuOpen}
+              aria-label="Selecionar modo de visualização"
+              onClick={() => {
+                setIsViewMenuOpen(!isViewMenuOpen);
+                setIsActionMenuOpen(false);
+              }}
+              className="h-9 px-2.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-100 flex items-center gap-1.5 text-xs font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-xs"
+            >
+              <i
+                className={`text-xs ${
+                  mobileView === 'split'
+                    ? 'fa-solid fa-table-columns text-blue-400'
+                    : mobileView === 'editor'
+                    ? 'fa-solid fa-sliders text-amber-400'
+                    : 'fa-solid fa-eye text-emerald-400'
+                }`}
+                aria-hidden="true"
+              ></i>
+              <span className="capitalize">
+                {mobileView === 'split' ? 'Dividido' : mobileView === 'editor' ? 'Edição' : 'Preview'}
+              </span>
+              <i className="fa-solid fa-chevron-down text-[10px] text-slate-400" aria-hidden="true"></i>
+            </button>
+
+            {/* Dropdown Menu de Visualização */}
+            {isViewMenuOpen && (
+              <div
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="mobile-view-menu-trigger"
+                className="absolute right-0 mt-1.5 w-56 rounded-xl bg-slate-900 border border-slate-700/80 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100"
+              >
+                <div className="px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-800 mb-1">
+                  Modo de Exibição
+                </div>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    onSelectMobileView('split');
+                    setIsViewMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-2 rounded-lg text-xs font-medium flex items-center gap-2.5 transition-colors ${
+                    mobileView === 'split'
+                      ? 'bg-blue-600 text-white font-semibold'
+                      : 'text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <i className="fa-solid fa-table-columns text-xs text-blue-400" aria-hidden="true"></i>
+                  <div className="flex-1 min-w-0">
+                    <div className="leading-snug">Dividido (Ao Vivo)</div>
+                    <div className={`text-[10px] ${mobileView === 'split' ? 'text-blue-100' : 'text-slate-400'}`}>
+                      Preview topo + Edição embaixo
+                    </div>
+                  </div>
+                  {mobileView === 'split' && <i className="fa-solid fa-check text-xs ml-auto" aria-hidden="true"></i>}
+                </button>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    onSelectMobileView('editor');
+                    setIsViewMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-2 rounded-lg text-xs font-medium flex items-center gap-2.5 transition-colors ${
+                    mobileView === 'editor'
+                      ? 'bg-blue-600 text-white font-semibold'
+                      : 'text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <i className="fa-solid fa-sliders text-xs text-amber-400" aria-hidden="true"></i>
+                  <div className="flex-1 min-w-0">
+                    <div className="leading-snug">Foco em Edição</div>
+                    <div className={`text-[10px] ${mobileView === 'editor' ? 'text-blue-100' : 'text-slate-400'}`}>
+                      Formulário em tela cheia
+                    </div>
+                  </div>
+                  {mobileView === 'editor' && <i className="fa-solid fa-check text-xs ml-auto" aria-hidden="true"></i>}
+                </button>
+
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    onSelectMobileView('preview');
+                    setIsViewMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-2.5 py-2 rounded-lg text-xs font-medium flex items-center gap-2.5 transition-colors ${
+                    mobileView === 'preview'
+                      ? 'bg-blue-600 text-white font-semibold'
+                      : 'text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <i className="fa-solid fa-eye text-xs text-emerald-400" aria-hidden="true"></i>
+                  <div className="flex-1 min-w-0">
+                    <div className="leading-snug">Foco no Certificado</div>
+                    <div className={`text-[10px] ${mobileView === 'preview' ? 'text-blue-100' : 'text-slate-400'}`}>
+                      Visualização ampliada do A4
+                    </div>
+                  </div>
+                  {mobileView === 'preview' && <i className="fa-solid fa-check text-xs ml-auto" aria-hidden="true"></i>}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Menu Geral de Ações do Sistema */}
+        <div ref={actionMenuRef} className="relative">
+          <button
+            type="button"
+            id="mobile-action-menu-trigger"
+            aria-haspopup="true"
+            aria-expanded={isActionMenuOpen}
+            aria-label="Abrir menu de ações e configurações"
+            onClick={() => {
+              setIsActionMenuOpen(!isActionMenuOpen);
+              setIsViewMenuOpen(false);
+            }}
+            className="h-9 px-2.5 rounded-lg border border-slate-700 bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 text-xs font-semibold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 shadow-md"
+          >
+            <i className="fa-solid fa-bars text-xs" aria-hidden="true"></i>
+            <span>Menu</span>
+            <i className="fa-solid fa-chevron-down text-[10px] text-blue-200" aria-hidden="true"></i>
+          </button>
+
+          {/* Dropdown Menu de Ações */}
+          {isActionMenuOpen && (
+            <div
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="mobile-action-menu-trigger"
+              className="absolute right-0 mt-1.5 w-60 rounded-xl bg-slate-900 border border-slate-700/80 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-100 divide-y divide-slate-800"
+            >
+              {/* Seção 1: Exportação Principal */}
+              <div className="p-1 space-y-1">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setIsActionMenuOpen(false);
+                    onOpenExportModal();
+                  }}
+                  disabled={isGenerating}
+                  className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 flex items-center gap-2.5 transition-colors shadow-sm"
+                >
+                  <i className="fa-solid fa-print text-xs" aria-hidden="true"></i>
+                  <span>Exportar PDF Completo</span>
+                </button>
+
+                {studentsCount > 0 && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      onExportIndividual();
+                    }}
+                    disabled={isGenerating}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
+                  >
+                    <i className="fa-solid fa-user-check text-xs text-blue-400" aria-hidden="true"></i>
+                    <span className="truncate">Emitir Individual ({currentStudentName || 'Aluno Atual'})</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Seção 2: Ferramentas do Projeto */}
+              <div className="p-1 space-y-1">
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setIsActionMenuOpen(false);
+                    onOpenProjectModal();
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
+                >
+                  <i className="fa-solid fa-floppy-disk text-xs text-slate-400" aria-hidden="true"></i>
+                  <span>Gerenciar Projeto (.certproj)</span>
+                </button>
+
+                {onOpenAISettings && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      onOpenAISettings();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
+                  >
+                    <i className="fa-solid fa-microchip text-xs text-blue-400" aria-hidden="true"></i>
+                    <span>Central de Inteligência Artificial</span>
+                  </button>
+                )}
+
+                {onOpenValidation && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      onOpenValidation();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
+                  >
+                    <i className="fa-solid fa-stamp text-xs text-emerald-400" aria-hidden="true"></i>
+                    <span>Validar Autenticidade (QR Code)</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Seção 3: Preferências de Tema */}
+              {onToggleTheme && (
+                <div className="p-1">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      onToggleTheme();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center justify-between transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {theme === 'dark' ? (
+                        <i className="fa-solid fa-sun text-xs text-amber-400" aria-hidden="true"></i>
+                      ) : (
+                        <i className="fa-solid fa-moon text-xs text-slate-300" aria-hidden="true"></i>
+                      )}
+                      <span>Tema: {theme === 'dark' ? 'Modo Escuro' : 'Modo Claro'}</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
+                      Alternar
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. Grupo de Ações Desktop (>= lg) */}
+      <div className="hidden lg:flex items-center gap-1.5 sm:gap-2 shrink-0">
         {/* Alternador de Modo Claro / Escuro */}
         {onToggleTheme && (
           <button

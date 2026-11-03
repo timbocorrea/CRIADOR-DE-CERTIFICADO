@@ -180,7 +180,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-900 font-sans text-slate-800 antialiased overflow-hidden">
-      {/* 1. Barra Superior Corporativa */}
+      {/* 1. Barra Superior Corporativa com Menus Responsivos */}
       <AppHeader
         courseName={data.courseName}
         studentsCount={data.students.length}
@@ -198,76 +198,16 @@ const AppContent: React.FC = () => {
         isGenerating={isGenerating}
         theme={theme}
         onToggleTheme={toggleTheme}
+        mobileView={mobileView}
+        onSelectMobileView={(view) => {
+          setMobileView(view);
+          if (view === 'split' || view === 'preview') {
+            handleResetZoom();
+          }
+        }}
       />
 
-      {/* 2. Barra de Modos de Exibição para Telas Móveis e Tablets (< lg) */}
-      <div
-        className="lg:hidden bg-slate-800 dark:bg-slate-900 border-b border-slate-700/80 px-2 sm:px-3 py-1.5 flex items-center justify-center shrink-0 z-20 select-none"
-        role="tablist"
-        aria-label="Modo de visualização móvel"
-      >
-        <div className="flex bg-slate-900/90 dark:bg-slate-950 p-1 rounded-xl border border-slate-700/60 w-full max-w-sm shadow-inner gap-1">
-          <button
-            type="button"
-            role="tab"
-            id="mobile-tab-split"
-            aria-selected={mobileView === 'split'}
-            aria-controls="mobile-panel-split"
-            onClick={() => {
-              setMobileView('split');
-              handleResetZoom();
-            }}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-              mobileView === 'split'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            title="Visualização dividida: veja as alterações no certificado em tempo real enquanto edita"
-          >
-            <i className="fa-solid fa-table-columns text-xs" aria-hidden="true"></i>
-            <span>Dividido (Ao Vivo)</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="mobile-tab-editor"
-            aria-selected={mobileView === 'editor'}
-            aria-controls="mobile-panel-editor"
-            onClick={() => setMobileView('editor')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-              mobileView === 'editor'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            title="Foco total no formulário de edição"
-          >
-            <i className="fa-solid fa-sliders text-xs" aria-hidden="true"></i>
-            <span>Edição</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="mobile-tab-preview"
-            aria-selected={mobileView === 'preview'}
-            aria-controls="mobile-panel-preview"
-            onClick={() => {
-              setMobileView('preview');
-              handleResetZoom();
-            }}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
-              mobileView === 'preview'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            title="Foco total na pré-visualização do certificado"
-          >
-            <i className="fa-solid fa-eye text-xs" aria-hidden="true"></i>
-            <span>Preview</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 3. Área Principal Dividida: Barra Lateral Funcional + Área de Pré-visualização */}
+      {/* 2. Área Principal: Barra Lateral Funcional + Área de Pré-visualização */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         {/* Painel Lateral com as 4 Áreas Funcionais (Preservação de DOM sem perda de digitação) */}
         <div
