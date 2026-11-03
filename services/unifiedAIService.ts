@@ -247,14 +247,15 @@ export function parseStudentsFromJson(text: string): ExtractedStudentCandidate[]
 
 /**
  * Lista de modelos Gemini suportados em ordem de preferência.
- * Garante que contas antigas e novas funcionem sem erro 404 de modelo.
+ * Modelos modernos da família Gemini 3 (v1beta) com alta disponibilidade para visão e OCR.
  */
 export const GEMINI_CANDIDATE_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-latest',
-  'gemini-2.5-pro',
+  'gemini-3.5-flash-lite',
+  'gemini-3-flash-preview',
+  'gemini-3.5-flash',
+  'gemini-3.8-flash',
+  'gemini-3.1-flash-lite',
+  'gemini-flash-latest',
 ];
 
 /**
@@ -304,9 +305,9 @@ export async function callGeminiVision(
         body: JSON.stringify(payload),
       });
 
-      if (response.status === 404) {
-        console.warn(`[Gemini] Modelo ${model} retornou 404. Tentando próximo modelo...`);
-        lastError = new Error(`Modelo ${model} indisponível (404).`);
+      if (response.status === 404 || response.status === 503 || response.status === 502 || response.status === 500) {
+        console.warn(`[Gemini] Modelo ${model} retornou ${response.status}. Tentando próximo modelo...`);
+        lastError = new Error(`Modelo ${model} retornou ${response.status}.`);
         continue;
       }
 
@@ -404,6 +405,16 @@ export async function callGroqVision(
 }
 
 /**
+ * Modelos visuais OpenRouter com fallback automático
+ */
+export const OPENROUTER_CANDIDATE_MODELS = [
+  'nvidia/nemotron-3.5-super-vl:free',
+  'google/gemma-4-26b-a4b-it:free',
+  'google/gemma-4-31b-it:free',
+  'dots-studio/dots-3-note-preview:free',
+];
+
+/**
  * 3. Provedor OpenRouter
  */
 export async function callOpenRouterVision(
@@ -416,55 +427,68 @@ export async function callOpenRouterVision(
   }
 
   const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+  let lastError: Error | null = null;
 
-  const payload = {
-    model: 'qwen/qwen-2.5-vl-72b-instruct:free',
-    messages: [
-      {
-        role: 'user',
-        content: [
-          { type: 'text', text: VISION_SYSTEM_PROMPT },
+  for (const model of OPENROUTER_CANDIDATE_MODELS) {
+    try {
+      const payload = {
+        model,
+        messages: [
           {
-            type: 'image_url',
-            image_url: {
-              url: `data:${mimeType};base64,${base64Data}`,
-            },
+            role: 'user',
+            content: [
+              { type: 'text', text: VISION_SYSTEM_PROMPT },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Data}`,
+                },
+              },
+            ],
           },
         ],
-      },
-    ],
-    temperature: 0.1,
-  };
+        temperature: 0.1,
+      };
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey.trim()}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://certificamaster.local',
-      'X-Title': 'CertificaMaster',
-    },
-    body: JSON.stringify(payload),
-  });
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey.trim()}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://certificamaster.local',
+          'X-Title': 'CertificaMaster',
+        },
+        body: JSON.stringify(payload),
+      });
 
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => '');
-    if (response.status === 429) {
-      throw new Error('Limite de requisições do OpenRouter atingido (429 Rate Limit).');
+      if (response.status === 404 || response.status === 429 || response.status === 503) {
+        const errText = await response.text().catch(() => '');
+        console.warn(`[OpenRouter] Modelo ${model} retornou ${response.status}: ${errText.substring(0, 80)}. Tentando próximo...`);
+        lastError = new Error(`OpenRouter (${model}): ${response.status}`);
+        continue;
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Falha no OpenRouter (${response.status}): ${errorText.substring(0, 100)}`);
+      }
+
+      const data = await response.json();
+      const textContent = data.choices?.[0]?.message?.content || '';
+      const students = parseStudentsFromJson(textContent);
+
+      return {
+        success: true,
+        students,
+        providerUsed: 'openrouter',
+        modelUsed: model,
+      };
+    } catch (err: unknown) {
+      lastError = err instanceof Error ? err : new Error(String(err));
     }
-    throw new Error(`Falha no OpenRouter (${response.status}): ${errorText.substring(0, 100)}`);
   }
 
-  const data = await response.json();
-  const textContent = data.choices?.[0]?.message?.content || '';
-  const students = parseStudentsFromJson(textContent);
-
-  return {
-    success: true,
-    students,
-    providerUsed: 'openrouter',
-    modelUsed: 'qwen-2.5-vl-72b-instruct:free',
-  };
+  throw lastError || new Error('Nenhum modelo OpenRouter compatível pôde processar a imagem.');
 }
 
 interface ProviderKeyAttempt {
@@ -731,7 +755,9 @@ export async function callGeminiTextEnhance(apiKey: string, text: string): Promi
         body: JSON.stringify(payload),
       });
 
-      if (response.status === 404) {
+      if (response.status === 404 || response.status === 503 || response.status === 502 || response.status === 500) {
+        console.warn(`[Gemini Text] Modelo ${model} retornou ${response.status}. Tentando próximo modelo...`);
+        lastError = new Error(`Modelo ${model} retornou ${response.status}.`);
         continue;
       }
       if (response.status === 429) {
