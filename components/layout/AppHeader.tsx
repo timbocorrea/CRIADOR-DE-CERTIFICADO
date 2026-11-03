@@ -137,7 +137,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           className="bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 hover:text-white min-h-[36px]"
           title="Salvar projeto completo (.certproj) ou carregar arquivo"
         >
-          <span>Projeto</span>
+          <span className="hidden sm:inline">Projeto</span>
         </AppButton>
 
         {/* Emitir Individual (Aluno Ativo) */}
@@ -167,7 +167,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           className="bg-blue-600 hover:bg-blue-500 shadow-md min-h-[36px]"
           title="Exportar certificados em PDF duplex ou individual"
         >
-          <span>Exportar PDF</span>
+          <span className="hidden xs:inline">Exportar PDF</span>
+          <span className="xs:hidden">PDF</span>
         </AppButton>
       </div>
     </header>

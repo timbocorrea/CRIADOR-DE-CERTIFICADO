@@ -63,12 +63,16 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = React.memo(({
             <i className="fa-solid fa-chevron-left" aria-hidden="true"></i>
           </button>
 
-          <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 px-1 sm:px-2 min-w-[110px] sm:min-w-[140px] text-center truncate">
+          <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 px-1 sm:px-2 min-w-[70px] sm:min-w-[140px] text-center truncate">
             {totalStudents > 0 ? (
               <>
-                <span className="text-slate-500 dark:text-slate-400">Aluno</span>{' '}
+                <span className="hidden sm:inline text-slate-500 dark:text-slate-400">Aluno </span>
                 <span className="text-blue-600 dark:text-blue-400 font-bold">{currentStudentIdx + 1}</span>{' '}
-                <span className="text-slate-500 dark:text-slate-400">de</span> {totalStudents}
+                <span className="text-slate-500 dark:text-slate-400">
+                  <span className="hidden sm:inline">de </span>
+                  <span className="sm:hidden">/ </span>
+                  {totalStudents}
+                </span>
               </>
             ) : (
               <span className="text-slate-400 dark:text-slate-500 italic">Sem alunos</span>
@@ -100,33 +104,35 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = React.memo(({
           type="button"
           onClick={() => onSelectPage(1)}
           aria-pressed={previewPage === 1}
-          className={`px-3 sm:px-4 py-1.5 min-h-[32px] rounded-lg text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+          className={`px-2.5 sm:px-4 py-1.5 min-h-[32px] rounded-lg text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
             previewPage === 1
               ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 border border-slate-200/50 dark:border-slate-600'
               : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <i className="fa-solid fa-file text-xs mr-1.5" aria-hidden="true"></i>
-          Frente (Pág 1)
+          <i className="fa-solid fa-file text-xs sm:mr-1.5" aria-hidden="true"></i>
+          <span className="hidden sm:inline">Frente (Pág 1)</span>
+          <span className="sm:hidden">Frente</span>
         </button>
         <button
           type="button"
           onClick={() => onSelectPage(2)}
           aria-pressed={previewPage === 2}
-          className={`px-3 sm:px-4 py-1.5 min-h-[32px] rounded-lg text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+          className={`px-2.5 sm:px-4 py-1.5 min-h-[32px] rounded-lg text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
             previewPage === 2
               ? 'bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400 border border-slate-200/50 dark:border-slate-600'
               : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <i className="fa-solid fa-file-lines text-xs mr-1.5" aria-hidden="true"></i>
-          Verso (Pág 2)
+          <i className="fa-solid fa-file-lines text-xs sm:mr-1.5" aria-hidden="true"></i>
+          <span className="hidden sm:inline">Verso (Pág 2)</span>
+          <span className="sm:hidden">Verso</span>
         </button>
       </div>
 
       {/* 3. Controles de Enquadramento e Zoom Proporcional (Auto Responsivo como Padrão) */}
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1 border border-slate-200/60 dark:border-slate-700/60" role="group" aria-label="Controle de Escala e Enquadramento">
+        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1 border border-slate-200/60 dark:border-slate-700/60" role="group" aria-label="Controle de Escala e Enquadramento">
           {/* Botão de Enquadramento Automático Responsivo (Opção Padrão) */}
           <button
             type="button"
@@ -207,10 +213,10 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = React.memo(({
             variant="secondary"
             icon="fa-solid fa-expand"
             onClick={onOpenFullscreen}
-            title="Abrir pré-visualização completa lado a lado"
-            className="hidden sm:inline-flex min-h-[36px]"
+            title="Abrir pré-visualização completa em tela cheia"
+            className="min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 text-xs"
           >
-            Expandir
+            <span className="hidden sm:inline">Expandir</span>
           </AppButton>
         )}
       </div>

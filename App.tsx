@@ -105,7 +105,7 @@ const AppContent: React.FC = () => {
 
   // 5. Estados de Interface e Navegação das 4 Áreas Funcionais (Gate 05 / Gate 06)
   const [activeArea, setActiveArea] = useState<FunctionalArea>('course_issuer');
-  const [mobileView, setMobileView] = useState<'editor' | 'preview'>('editor');
+  const [mobileView, setMobileView] = useState<'split' | 'editor' | 'preview'>('split');
   const [previewPage, setPreviewPage] = useState<1 | 2>(1);
   const [zoomMode, setZoomMode] = useState<'auto' | 'manual'>('auto');
   const [zoom, setZoom] = useState<number>(0.65);
@@ -200,13 +200,33 @@ const AppContent: React.FC = () => {
         onToggleTheme={toggleTheme}
       />
 
-      {/* 2. Barra de Alternância Edição / Pré-visualização exclusiva para Mobile/Tablet (< lg) */}
+      {/* 2. Barra de Modos de Exibição para Telas Móveis e Tablets (< lg) */}
       <div
-        className="lg:hidden bg-slate-800 border-b border-slate-700/80 px-3 py-2 flex items-center justify-center shrink-0 z-20"
+        className="lg:hidden bg-slate-800 dark:bg-slate-900 border-b border-slate-700/80 px-2 sm:px-3 py-1.5 flex items-center justify-center shrink-0 z-20 select-none"
         role="tablist"
         aria-label="Modo de visualização móvel"
       >
-        <div className="flex bg-slate-900/90 p-1 rounded-xl border border-slate-700/60 w-full max-w-xs shadow-inner">
+        <div className="flex bg-slate-900/90 dark:bg-slate-950 p-1 rounded-xl border border-slate-700/60 w-full max-w-sm shadow-inner gap-1">
+          <button
+            type="button"
+            role="tab"
+            id="mobile-tab-split"
+            aria-selected={mobileView === 'split'}
+            aria-controls="mobile-panel-split"
+            onClick={() => {
+              setMobileView('split');
+              handleResetZoom();
+            }}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+              mobileView === 'split'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Visualização dividida: veja as alterações no certificado em tempo real enquanto edita"
+          >
+            <i className="fa-solid fa-table-columns text-xs" aria-hidden="true"></i>
+            <span>Dividido (Ao Vivo)</span>
+          </button>
           <button
             type="button"
             role="tab"
@@ -214,11 +234,12 @@ const AppContent: React.FC = () => {
             aria-selected={mobileView === 'editor'}
             aria-controls="mobile-panel-editor"
             onClick={() => setMobileView('editor')}
-            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
               mobileView === 'editor'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
+            title="Foco total no formulário de edição"
           >
             <i className="fa-solid fa-sliders text-xs" aria-hidden="true"></i>
             <span>Edição</span>
@@ -233,14 +254,15 @@ const AppContent: React.FC = () => {
               setMobileView('preview');
               handleResetZoom();
             }}
-            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[36px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
               mobileView === 'preview'
                 ? 'bg-blue-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
+            title="Foco total na pré-visualização do certificado"
           >
             <i className="fa-solid fa-eye text-xs" aria-hidden="true"></i>
-            <span>Pré-visualização</span>
+            <span>Preview</span>
           </button>
         </div>
       </div>
@@ -251,10 +273,14 @@ const AppContent: React.FC = () => {
         <div
           id="mobile-panel-editor"
           role="region"
-          aria-labelledby="mobile-tab-editor"
-          className={`shrink-0 w-full lg:w-auto ${
-            mobileView === 'editor' ? 'flex flex-col' : 'hidden lg:flex lg:flex-col'
-          }`}
+          aria-labelledby={mobileView === 'split' ? 'mobile-tab-split' : 'mobile-tab-editor'}
+          className={`shrink-0 ${
+            mobileView === 'split'
+              ? 'order-2 w-full flex-1 min-h-0 flex flex-col overflow-hidden'
+              : mobileView === 'editor'
+              ? 'order-1 w-full flex-1 h-full flex flex-col overflow-hidden'
+              : 'hidden lg:flex lg:flex-col'
+          } lg:order-1 lg:w-[480px] xl:w-[500px] lg:h-[calc(100vh-4rem)] lg:flex lg:flex-col`}
         >
           <AppSidebar
             activeArea={activeArea}
@@ -351,10 +377,14 @@ const AppContent: React.FC = () => {
         <main
           id="mobile-panel-preview"
           role="region"
-          aria-labelledby="mobile-tab-preview"
-          className={`flex-1 flex flex-col h-[calc(100vh-8.5rem)] lg:h-[calc(100vh-4rem)] overflow-hidden bg-slate-100 ${
-            mobileView === 'preview' ? 'flex' : 'hidden lg:flex'
-          }`}
+          aria-labelledby={mobileView === 'split' ? 'mobile-tab-split' : 'mobile-tab-preview'}
+          className={`flex flex-col overflow-hidden bg-slate-100 dark:bg-slate-950 ${
+            mobileView === 'split'
+              ? 'order-1 w-full h-[35vh] xs:h-[38vh] min-h-[210px] max-h-[340px] shrink-0 border-b border-slate-300 dark:border-slate-800 shadow-sm'
+              : mobileView === 'preview'
+              ? 'order-1 w-full flex-1 h-full'
+              : 'hidden lg:flex'
+          } lg:order-2 lg:flex-1 lg:h-[calc(100vh-4rem)] lg:border-b-0`}
         >
           {/* Barra de Ferramentas de Pré-visualização */}
           <PreviewToolbar

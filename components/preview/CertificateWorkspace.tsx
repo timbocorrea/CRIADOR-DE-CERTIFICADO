@@ -34,8 +34,8 @@ export const CertificateWorkspace: React.FC<CertificateWorkspaceProps> = React.m
 
       // Margens de folga para respiro visual e enquadramento total (sem corte de bordas)
       const isNarrow = window.innerWidth < 640;
-      const paddingX = isNarrow ? 16 : 48;
-      const paddingY = isNarrow ? 16 : 48;
+      const paddingX = isNarrow ? 8 : 48;
+      const paddingY = isNarrow ? 8 : 48;
 
       const availW = Math.max(rect.width - paddingX, 100);
       const availH = Math.max(rect.height - paddingY, 100);

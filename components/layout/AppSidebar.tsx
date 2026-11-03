@@ -24,14 +24,16 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     {
       id: 'course_issuer' as FunctionalArea,
       label: 'Curso & Emissor',
+      shortLabel: 'Curso',
       icon: 'fa-solid fa-graduation-cap',
     },
     {
       id: 'participants' as FunctionalArea,
       label: 'Participantes',
+      shortLabel: 'Alunos',
       icon: 'fa-solid fa-users',
       badge: studentsCount > 0 ? (
-        <span className="text-xs font-bold px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-700">
+        <span className="text-xs font-bold px-1.5 py-0.2 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300">
           {studentsCount}
         </span>
       ) : null,
@@ -39,9 +41,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     {
       id: 'curriculum' as FunctionalArea,
       label: 'Grade Curricular',
+      shortLabel: 'Grade',
       icon: 'fa-solid fa-book-open',
       badge: curriculumCount > 0 ? (
-        <span className="text-xs font-bold px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700">
+        <span className="text-xs font-bold px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
           {curriculumCount}
         </span>
       ) : null,
@@ -49,6 +52,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
     {
       id: 'design' as FunctionalArea,
       label: 'Design',
+      shortLabel: 'Design',
       icon: 'fa-solid fa-palette',
     },
   ];
@@ -74,7 +78,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   };
 
   return (
-    <aside className="w-full lg:w-[480px] xl:w-[500px] bg-slate-50 dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 flex flex-col h-[calc(100vh-8.5rem)] lg:h-[calc(100vh-4rem)] no-print z-20 shrink-0">
+    <aside className="w-full lg:w-[480px] xl:w-[500px] bg-slate-50 dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 flex flex-col h-full lg:h-[calc(100vh-4rem)] no-print z-20 shrink-0">
       {/* Barra de Navegação das 4 Áreas Funcionais com Semântica WAI-ARIA Tablist */}
       <nav
         className="p-2 sm:p-2.5 bg-white dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 shrink-0"
@@ -113,7 +117,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   {area.badge}
                 </div>
                 <span className="text-xs leading-tight text-center truncate max-w-full">
-                  {area.label}
+                  <span className="hidden sm:inline">{area.label}</span>
+                  <span className="sm:hidden">{area.shortLabel}</span>
                 </span>
               </button>
             );
