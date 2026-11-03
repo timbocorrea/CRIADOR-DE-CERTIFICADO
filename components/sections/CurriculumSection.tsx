@@ -174,7 +174,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
         defaultExpanded={false}
       >
         <div className="space-y-4">
-          <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 select-none">
+          <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 dark:text-slate-200 select-none">
             <input
               type="checkbox"
               id="showHoursColumn"
@@ -186,11 +186,11 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
             <span>Exibir coluna de horas das disciplinas</span>
           </label>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100 dark:border-slate-700/60">
             <div>
               <div className="flex justify-between items-center mb-1 text-xs">
-                <span className="font-semibold text-slate-700">Largura da Coluna (Horas)</span>
-                <span className="font-mono text-blue-600 font-bold">{data.hoursColumnWidth || 80}px</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Largura da Coluna (Horas)</span>
+                <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.hoursColumnWidth || 80}px</span>
               </div>
               <input
                 type="range"
@@ -200,14 +200,14 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
                 value={data.hoursColumnWidth || 80}
                 onChange={onSliderChange}
                 disabled={!data.showHoursColumn}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 disabled:opacity-50"
+                className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500 disabled:opacity-50"
               />
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1 text-xs">
-                <span className="font-semibold text-slate-700">Tamanho da Fonte</span>
-                <span className="font-mono text-blue-600 font-bold">{data.versoCurriculumFontSize}px</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Tamanho da Fonte</span>
+                <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoCurriculumFontSize}px</span>
               </div>
               <input
                 type="range"
@@ -216,14 +216,14 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
                 max="20"
                 value={data.versoCurriculumFontSize}
                 onChange={onSliderChange}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
               />
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1 text-xs">
-                <span className="font-semibold text-slate-700">Espaçamento de Linhas</span>
-                <span className="font-mono text-blue-600 font-bold">{data.versoRowPadding}px</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Espaçamento de Linhas</span>
+                <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoRowPadding}px</span>
               </div>
               <input
                 type="range"
@@ -232,7 +232,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
                 max="30"
                 value={data.versoRowPadding}
                 onChange={onSliderChange}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
               />
             </div>
           </div>

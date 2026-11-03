@@ -488,12 +488,12 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
             </div>
 
             {activeSectionFilter !== 'all' && (
-              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
                 <span>Exibindo apenas a seção selecionada.</span>
                 <button
                   type="button"
                   onClick={() => setActiveSectionFilter('all')}
-                  className="text-blue-600 hover:underline font-medium"
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
                 >
                   Mostrar todas
                 </button>
@@ -522,8 +522,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Margem Superior (Cabeçalho)</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.frontHeaderPadding}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Margem Superior (Cabeçalho)</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.frontHeaderPadding}px</span>
                       </div>
                       <input
                         type="range"
@@ -534,13 +534,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Margem Inferior (Rodapé)</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.frontFooterPadding}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Margem Inferior (Rodapé)</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.frontFooterPadding}px</span>
                       </div>
                       <input
                         type="range"
@@ -551,7 +551,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -559,8 +559,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Margem Lateral da Borda</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.frontSidePadding}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Margem Lateral da Borda</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.frontSidePadding}px</span>
                       </div>
                       <input
                         type="range"
@@ -571,13 +571,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Espessura da Borda</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.frontBorderWidth}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Espessura da Borda</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.frontBorderWidth}px</span>
                       </div>
                       <input
                         type="range"
@@ -588,7 +588,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -596,8 +596,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Recuo da Borda (Margem Externa)</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.frontBorderMargin || 0}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Recuo da Borda (Margem Externa)</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.frontBorderMargin || 0}px</span>
                       </div>
                       <input
                         type="range"
@@ -608,13 +608,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Recuo Lateral Assinaturas</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.signaturesHorizontalPadding}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Recuo Lateral Assinaturas</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.signaturesHorizontalPadding}px</span>
                       </div>
                       <input
                         type="range"
@@ -625,7 +625,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -641,8 +641,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Margem Superior (Cabeçalho)</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoHeaderPadding}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Margem Superior (Cabeçalho)</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoHeaderPadding}px</span>
                       </div>
                       <input
                         type="range"
@@ -653,13 +653,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Margem Inferior (Rodapé)</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoFooterPadding}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Margem Inferior (Rodapé)</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoFooterPadding}px</span>
                       </div>
                       <input
                         type="range"
@@ -670,7 +670,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -678,8 +678,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Margem Lateral da Borda</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoSidePadding !== undefined ? data.versoSidePadding : 64}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Margem Lateral da Borda</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoSidePadding !== undefined ? data.versoSidePadding : 64}px</span>
                       </div>
                       <input
                         type="range"
@@ -690,13 +690,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Espessura da Borda</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoBorderWidth !== undefined ? data.versoBorderWidth : 4}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Espessura da Borda</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoBorderWidth !== undefined ? data.versoBorderWidth : 4}px</span>
                       </div>
                       <input
                         type="range"
@@ -707,7 +707,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -715,8 +715,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Largura Coluna Instituição</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoSplitRatio}% / {100 - data.versoSplitRatio}%</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Largura Coluna Instituição</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoSplitRatio}% / {100 - data.versoSplitRatio}%</span>
                       </div>
                       <input
                         type="range"
@@ -727,13 +727,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Largura Coluna Horas</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.hoursColumnWidth || 80}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Largura Coluna Horas</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.hoursColumnWidth || 80}px</span>
                       </div>
                       <input
                         type="range"
@@ -744,7 +744,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -752,8 +752,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Espaçamento Linhas da Grade</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoRowPadding}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Espaçamento Linhas da Grade</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoRowPadding}px</span>
                       </div>
                       <input
                         type="range"
@@ -764,7 +764,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -794,8 +794,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Offset Título</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.titleVerticalOffset}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Título</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.titleVerticalOffset}px</span>
                       </div>
                       <input
                         type="range"
@@ -806,13 +806,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Offset Assinaturas</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.signaturesVerticalOffset}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Assinaturas</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.signaturesVerticalOffset}px</span>
                       </div>
                       <input
                         type="range"
@@ -823,7 +823,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -839,8 +839,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Offset Grade</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoCurriculumVerticalOffset}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Grade</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoCurriculumVerticalOffset}px</span>
                       </div>
                       <input
                         type="range"
@@ -851,13 +851,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Offset Instituição</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoInstitutionVerticalOffset}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Instituição</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoInstitutionVerticalOffset}px</span>
                       </div>
                       <input
                         type="range"
@@ -868,7 +868,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -898,8 +898,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Título Principal</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.titleFontSize}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Título Principal</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.titleFontSize}px</span>
                       </div>
                       <input
                         type="range"
@@ -910,13 +910,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Subtítulo</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.subtitleFontSize}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Subtítulo</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.subtitleFontSize}px</span>
                       </div>
                       <input
                         type="range"
@@ -927,7 +927,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -935,8 +935,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Nome de Destaque</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.highlightNameFontSize}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Nome de Destaque</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.highlightNameFontSize}px</span>
                       </div>
                       <input
                         type="range"
@@ -947,13 +947,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Corpo do Texto</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.bodyFontSize || 24}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Corpo do Texto</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.bodyFontSize || 24}px</span>
                       </div>
                       <input
                         type="range"
@@ -964,7 +964,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -972,8 +972,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Assinaturas</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.signatureFontSize}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Assinaturas</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.signatureFontSize}px</span>
                       </div>
                       <input
                         type="range"
@@ -984,13 +984,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Rodapé Oficial</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.footerFontSize}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Rodapé Oficial</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.footerFontSize}px</span>
                       </div>
                       <input
                         type="range"
@@ -1001,7 +1001,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -1017,8 +1017,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Título do Verso</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoTitleFontSize || 30}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Título do Verso</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoTitleFontSize || 30}px</span>
                       </div>
                       <input
                         type="range"
@@ -1029,13 +1029,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Dados Instituição / Curso</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoHeaderFontSize}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Dados Instituição / Curso</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoHeaderFontSize}px</span>
                       </div>
                       <input
                         type="range"
@@ -1046,7 +1046,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -1054,8 +1054,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Grade Curricular</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoCurriculumFontSize}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Grade Curricular</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoCurriculumFontSize}px</span>
                       </div>
                       <input
                         type="range"
@@ -1066,13 +1066,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-600">Rodapé do Verso</span>
-                        <span className="font-mono text-blue-600 font-bold">{data.versoFooterFontSize || data.footerFontSize}px</span>
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Rodapé do Verso</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoFooterFontSize || data.footerFontSize}px</span>
                       </div>
                       <input
                         type="range"
@@ -1083,7 +1083,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         onPointerDown={() => ensurePreviewPage(2)}
                         onFocus={() => ensurePreviewPage(2)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                       />
                     </div>
                   </div>
@@ -1112,8 +1112,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <div className="flex justify-between items-center mb-1 text-xs">
-                      <span className="text-slate-600">Tamanho do Selo</span>
-                      <span className="font-mono text-blue-600 font-bold">{data.sealSize}px</span>
+                      <span className="text-slate-700 dark:text-slate-200 font-medium">Tamanho do Selo</span>
+                      <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.sealSize}px</span>
                     </div>
                     <input
                       type="range"
@@ -1124,13 +1124,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                       onPointerDown={() => ensurePreviewPage(1)}
                       onFocus={() => ensurePreviewPage(1)}
                       onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-1 text-xs">
-                      <span className="text-slate-600">Opacidade</span>
-                      <span className="font-mono text-blue-600 font-bold">{data.sealOpacity}%</span>
+                      <span className="text-slate-700 dark:text-slate-200 font-medium">Opacidade</span>
+                      <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.sealOpacity}%</span>
                     </div>
                     <input
                       type="range"
@@ -1141,15 +1141,15 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                       onPointerDown={() => ensurePreviewPage(1)}
                       onFocus={() => ensurePreviewPage(1)}
                       onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                     />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
                   <div>
                     <div className="flex justify-between items-center mb-1 text-xs">
-                      <span className="text-slate-600">Offset Vertical</span>
-                      <span className="font-mono text-blue-600 font-bold">{data.sealVerticalOffset}px</span>
+                      <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Vertical</span>
+                      <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.sealVerticalOffset}px</span>
                     </div>
                     <input
                       type="range"
@@ -1160,13 +1160,13 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                       onPointerDown={() => ensurePreviewPage(1)}
                       onFocus={() => ensurePreviewPage(1)}
                       onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                     />
                   </div>
                   <div>
                     <div className="flex justify-between items-center mb-1 text-xs">
-                      <span className="text-slate-600">Offset Horizontal</span>
-                      <span className="font-mono text-blue-600 font-bold">{data.sealHorizontalOffset}px</span>
+                      <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Horizontal</span>
+                      <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.sealHorizontalOffset}px</span>
                     </div>
                     <input
                       type="range"
@@ -1177,7 +1177,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                       onPointerDown={() => ensurePreviewPage(1)}
                       onFocus={() => ensurePreviewPage(1)}
                       onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                      className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
                     />
                   </div>
                 </div>
