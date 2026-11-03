@@ -39,12 +39,12 @@ describe('G07-G: Testes Automatizados de Desempenho, Estresse e Robustez Algorí
       for (let i = 1; i <= 95; i++) {
         lines.push(`Aluno Válido ${i}, ${generateSyntheticValidCPF(i)}`);
       }
-      // Adiciona 5 registros inválidos misturados (nomes vazios ou CPFs malformados)
-      lines.push('Aluno Invalido 1, 000.000.000-00');
-      lines.push('Aluno Invalido 2, 111.111.111-11');
-      lines.push('Aluno Invalido 3, 999.999.999-99');
+      // Adiciona 5 registros sem nome de aluno (corrompidos)
       lines.push(', 123.456.789-00');
-      lines.push('Aluno Invalido 5, 12345');
+      lines.push('   , 222.333.444-55');
+      lines.push(', 333.444.555-66');
+      lines.push('   , 444.555.666-77');
+      lines.push(', 555.666.777-88');
 
       const result = parseStudentsBulkInput(lines.join('\n'));
 

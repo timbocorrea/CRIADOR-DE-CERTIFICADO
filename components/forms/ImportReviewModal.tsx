@@ -87,16 +87,9 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
     setItems((prev) => prev.map((item) => ({ ...item, selected: selectAll })));
   };
 
-  // Remove todos os inválidos da lista
+  // Remove linhas sem nome da lista
   const handleRemoveInvalid = () => {
-    setItems((prev) =>
-      prev.filter((item) => {
-        const clean = cleanCPF(item.cpf);
-        const hasValidCpf = clean.length === 11 && validateCPF(clean);
-        const hasName = item.name.trim().length > 0;
-        return hasValidCpf && hasName;
-      })
-    );
+    setItems((prev) => prev.filter((item) => item.name.trim().length > 0));
   };
 
   // Análise detalhada de cada item com detecção de duplicatas cruzadas
@@ -117,7 +110,7 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
       const isAlreadyInEnrolled = isDuplicateCPF(item.cpf, existingStudents);
       const isDuplicateInBatch = clean && cpfCounts[clean] > 1;
 
-      let status: 'valid' | 'duplicate' | 'invalid_cpf' | 'incomplete';
+      let status: 'valid' | 'duplicate' | 'incomplete';
       let statusLabel: string;
       let statusVariant: 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -130,10 +123,6 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
         status = 'valid';
         statusLabel = 'Sem CPF';
         statusVariant = 'neutral';
-      } else if (!isValidCpf) {
-        status = 'invalid_cpf';
-        statusLabel = 'CPF Inválido';
-        statusVariant = 'danger';
       } else if (isAlreadyInEnrolled) {
         status = 'duplicate';
         statusLabel = 'Já na Turma';
@@ -142,10 +131,15 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
         status = 'duplicate';
         statusLabel = 'Duplicado no Lote';
         statusVariant = 'warning';
-      } else {
+      } else if (isValidCpf) {
         status = 'valid';
         statusLabel = 'Válido';
         statusVariant = 'success';
+      } else {
+        // CPF com dígitos ou formato livre (não bloqueia a emissão nem a importação)
+        status = 'valid';
+        statusLabel = isClean11 ? 'CPF Informado' : 'Documento';
+        statusVariant = 'neutral';
       }
 
       return {
@@ -153,7 +147,7 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
         status,
         statusLabel,
         statusVariant,
-        canImport: status === 'valid' || status === 'duplicate', // permite duplicado se operador insistir, mas avisa
+        canImport: Boolean(trimmedName),
       };
     });
   }, [items, existingStudents]);
@@ -162,15 +156,15 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
   const totalCount = analyzedItems.length;
   const validCount = analyzedItems.filter((i) => i.status === 'valid').length;
   const selectedCount = analyzedItems.filter((i) => i.selected).length;
-  const readyToImportCount = analyzedItems.filter((i) => i.selected && i.name.trim() && (!cleanCPF(i.cpf) || validateCPF(i.cpf))).length;
+  const readyToImportCount = analyzedItems.filter((i) => i.selected && i.name.trim()).length;
 
   const handleConfirm = () => {
     const validStudentsToInsert: Student[] = analyzedItems
-      .filter((i) => i.selected && i.name.trim() && (!cleanCPF(i.cpf) || validateCPF(i.cpf)))
+      .filter((i) => i.selected && i.name.trim())
       .map((i) => ({
         id: generateId(),
         name: i.name.trim(),
-        cpf: cleanCPF(i.cpf) ? formatCPF(i.cpf) : '',
+        cpf: i.cpf.trim() ? (cleanCPF(i.cpf).length === 11 ? formatCPF(i.cpf) : i.cpf.trim()) : '',
         displayName: i.name.trim(),
       }));
 
@@ -383,7 +377,7 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
           </AppButton>
 
           <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            Somente participantes com nome preenchido e CPF válido serão importados.
+            Todos os participantes com nome preenchido serão importados. O CPF é opcional e não restringe a emissão.
           </p>
         </div>
       </div>

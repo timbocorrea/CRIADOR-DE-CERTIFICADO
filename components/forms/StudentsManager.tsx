@@ -38,10 +38,6 @@ export const StudentsManager: React.FC<StudentsManagerProps> = ({
     }
     // CPF é opcional
     if (trimmedCpf) {
-      if (!validateCPF(trimmedCpf)) {
-        alert('CPF inválido. Por favor, informe um CPF válido com 11 dígitos e dígitos verificadores corretos.');
-        return;
-      }
       if (isDuplicateCPF(trimmedCpf, students)) {
         alert('Este CPF já está cadastrado para outro aluno nesta turma.');
         return;

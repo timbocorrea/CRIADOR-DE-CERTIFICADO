@@ -3,7 +3,7 @@ import { Student, ExtractedStudentCandidate } from '../../types';
 import { validateCPF, isDuplicateCPF } from '../../utils/security';
 import { parseStudentsBulkInput, splitDelimitedLine } from '../../utils/importParser';
 import { processUploadedFile, fileToBase64 } from '../../utils/fileParser';
-import { extractStudentsFromImage, loadAISettings } from '../../services/unifiedAIService';
+import { extractStudentsFromImage, loadAISettings, hasAvailableAIKey } from '../../services/unifiedAIService';
 import { AISettingsModal } from '../ai/AISettingsModal';
 import { ImportReviewModal } from '../forms/ImportReviewModal';
 import {
@@ -72,14 +72,14 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
     }
   };
 
-  // Validação em tempo real do CPF digitado
+  // Validação informativa do CPF digitado
   const cpfValidation = useMemo(() => {
     const trimmed = newStudentCpf.trim();
-    if (!trimmed) return { isValid: false, message: '' };
+    if (!trimmed) return { isValid: true, message: 'CPF opcional' };
     const isValid = validateCPF(trimmed);
     const isDup = isDuplicateCPF(trimmed, students);
-    if (!isValid) return { isValid: false, message: 'CPF inválido (dígito incorreto)' };
     if (isDup) return { isValid: false, message: 'CPF já cadastrado nesta turma' };
+    if (!isValid) return { isValid: true, message: 'CPF informado (formato livre)' };
     return { isValid: true, message: 'CPF válido' };
   }, [newStudentCpf, students]);
 
@@ -111,10 +111,6 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
     }
     // CPF é opcional
     if (trimmedCpf) {
-      if (!validateCPF(trimmedCpf)) {
-        setIndividualError('CPF inválido. Verifique se os 11 dígitos estão corretos.');
-        return;
-      }
       if (isDuplicateCPF(trimmedCpf, students)) {
         setIndividualError('Este CPF já foi cadastrado para outro aluno nesta turma.');
         return;
@@ -165,14 +161,37 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
   const handleOpenReviewFromText = () => {
     if (!bulkInput.trim()) return;
     const lines = bulkInput.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-    const candidates: ExtractedStudentCandidate[] = lines.map((line) => {
+    const candidates: ExtractedStudentCandidate[] = [];
+
+    lines.forEach((line) => {
       const parts = splitDelimitedLine(line);
-      const name = parts[0] || line;
-      const cpf = parts.length > 1 ? parts[1] : '';
-      return {
-        name,
-        cpf,
-      };
+      const firstCol = parts[0]?.trim().toLowerCase();
+      const secondCol = parts.length > 1 ? parts[1]?.trim().toLowerCase() : '';
+      const isHeader =
+        (firstCol === 'nome' || firstCol === 'aluno' || firstCol === 'participante' || firstCol === 'nome do aluno') &&
+        (!secondCol || secondCol === 'cpf' || secondCol === 'documento' || secondCol === 'doc');
+
+      if (isHeader) return;
+
+      let name = '';
+      let cpf = '';
+      if (parts.length === 1) {
+        name = parts[0];
+      } else if (parts.length === 2) {
+        name = parts[0];
+        cpf = parts[1];
+      } else {
+        name = parts.slice(0, parts.length - 1).join(', ');
+        cpf = parts[parts.length - 1];
+      }
+
+      if (name.trim()) {
+        candidates.push({
+          name: name.trim(),
+          cpf: cpf.trim(),
+          confidence: 'high',
+        });
+      }
     });
 
     if (candidates.length > 0) {
@@ -189,11 +208,7 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
   // Processamento de imagens com IA Vision e Fallback Multi-Provedor
   const handleProcessImage = async (file: File, sourceLabel: string) => {
     const settings = loadAISettings();
-    const hasAnyKey = Boolean(
-      settings.geminiApiKey?.trim() ||
-      settings.groqApiKey?.trim() ||
-      settings.openrouterApiKey?.trim()
-    );
+    const hasAnyKey = hasAvailableAIKey(settings);
 
     if (!hasAnyKey) {
       if (onNotify) {

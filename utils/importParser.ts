@@ -76,13 +76,24 @@ export function parseStudentsBulkInput(
   const lines = rawText.split('\n').filter(line => line.trim() !== '');
   const validStudents: Student[] = [];
   const errors: string[] = [];
-  const seenCPFs = new Set<string>(existingStudents.map(s => cleanCPF(s.cpf)));
+  const seenCPFs = new Set<string>(existingStudents.map(s => cleanCPF(s.cpf)).filter(Boolean));
 
   lines.forEach((line, index) => {
     const lineNum = index + 1;
     const parts = splitDelimitedLine(line);
 
     if (parts.length === 0 || (parts.length === 1 && !parts[0])) {
+      return;
+    }
+
+    // Identifica e ignora linha de cabeçalho (ex: "Nome, CPF" ou "Aluno\tDocumento")
+    const firstCol = parts[0]?.trim().toLowerCase();
+    const secondCol = parts.length > 1 ? parts[1]?.trim().toLowerCase() : '';
+    const isHeader =
+      (firstCol === 'nome' || firstCol === 'aluno' || firstCol === 'participante' || firstCol === 'nome completo' || firstCol === 'nome do aluno') &&
+      (!secondCol || secondCol === 'cpf' || secondCol === 'documento' || secondCol === 'doc');
+
+    if (isHeader) {
       return;
     }
 
@@ -118,22 +129,24 @@ export function parseStudentsBulkInput(
       return;
     }
 
-    // CPF é opcional: valida e checa duplicidade somente se preenchido
+    // CPF é opcional e não é fator limitante para emissão do certificado:
     let formattedCpf = '';
     if (rawCpf) {
-      if (!validateCPF(rawCpf)) {
-        errors.push(`Linha ${lineNum} (${name}): CPF inválido (${rawCpf}).`);
-        return;
-      }
-
       const clean = cleanCPF(rawCpf);
-      if (seenCPFs.has(clean)) {
-        errors.push(`Linha ${lineNum} (${name}): CPF já cadastrado (${formatCPF(rawCpf)}).`);
+      if (clean && clean.length === 11) {
+        formattedCpf = formatCPF(clean);
+      } else {
+        formattedCpf = rawCpf;
+      }
+
+      if (clean && seenCPFs.has(clean)) {
+        errors.push(`Linha ${lineNum} (${name}): CPF já cadastrado (${formattedCpf}).`);
         return;
       }
 
-      seenCPFs.add(clean);
-      formattedCpf = formatCPF(rawCpf);
+      if (clean) {
+        seenCPFs.add(clean);
+      }
     }
 
     validStudents.push({

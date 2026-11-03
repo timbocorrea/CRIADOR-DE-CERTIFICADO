@@ -61,6 +61,18 @@ export function getEffectiveProviderKey(provider: AIProviderId, customSettings?:
   return { key: system, isCustom: false, hasSystemFallback: false };
 }
 
+export function hasAvailableAIKey(customSettings?: AISettings): boolean {
+  const settings = customSettings || loadAISettings();
+  return Boolean(
+    settings.geminiApiKey?.trim() ||
+    settings.groqApiKey?.trim() ||
+    settings.openrouterApiKey?.trim() ||
+    SYSTEM_AI_KEYS.gemini?.trim() ||
+    SYSTEM_AI_KEYS.groq?.trim() ||
+    SYSTEM_AI_KEYS.openrouter?.trim()
+  );
+}
+
 export const getInitialDefaultAISettings = (): AISettings => {
   return {
     geminiApiKey: getEnvKey('VITE_GEMINI_API_KEY') || getEnvKey('GEMINI_API_KEY') || '',
@@ -467,8 +479,7 @@ interface ProviderKeyAttempt {
  */
 function buildExecutionAttempts(
   queue: AIProviderId[],
-  settings: AISettings,
-  isExplicitCustomSettings: boolean = false
+  settings: AISettings
 ): ProviderKeyAttempt[] {
   const attempts: ProviderKeyAttempt[] = [];
 
@@ -484,13 +495,8 @@ function buildExecutionAttempts(
     }
   }
 
-  // Fallback Automático: Chaves internas do sistema
-  // Se o chamador forneceu explicitamente um objeto de configuração com todas as chaves vazias (caso típico de teste unitário),
-  // não injeta as chaves do sistema para permitir a validação de NO_KEY_CONFIGURED.
-  const hasCustomKeys = attempts.length > 0;
-  const isExplicitEmptyTest = isExplicitCustomSettings && !hasCustomKeys;
-
-  if (!isExplicitEmptyTest) {
+  // Fallback Automático: Chaves internas do sistema (a não ser que explicitamente desabilitadas para testes unitários)
+  if (!settings.disableSystemFallback) {
     for (const provider of queue) {
       const customKey = provider === 'gemini'
         ? settings.geminiApiKey?.trim()
@@ -530,7 +536,7 @@ export async function extractStudentsFromImage(
     queue.push('gemini', 'groq', 'openrouter');
   }
 
-  const attempts = buildExecutionAttempts(queue, settings, Boolean(customSettings));
+  const attempts = buildExecutionAttempts(queue, settings);
 
   if (attempts.length === 0) {
     return {
@@ -872,7 +878,7 @@ export async function enhanceCertificateText(
     queue.push('gemini', 'groq', 'openrouter');
   }
 
-  const attempts = buildExecutionAttempts(queue, settings, Boolean(customSettings));
+  const attempts = buildExecutionAttempts(queue, settings);
 
   if (attempts.length === 0) {
     return {

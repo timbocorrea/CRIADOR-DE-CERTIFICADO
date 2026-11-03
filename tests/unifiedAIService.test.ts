@@ -115,10 +115,9 @@ describe('Unified AI Service & Fallback Gateway', () => {
 
       clearAISettings();
       const reset = loadAISettings();
-      expect(reset).toEqual(DEFAULT_AI_SETTINGS);
-      // expect(reset.geminiApiKey).toBe('');
-      // expect(reset.groqApiKey).toBe('');
-      // expect(reset.openrouterApiKey).toBe('');
+      expect(reset.geminiApiKey).toBe('');
+      expect(reset.groqApiKey).toBe('');
+      expect(reset.openrouterApiKey).toBe('');
       expect(reset.preferredProvider).toBe('auto');
     });
   });
@@ -130,6 +129,7 @@ describe('Unified AI Service & Fallback Gateway', () => {
         groqApiKey: '',
         openrouterApiKey: '',
         preferredProvider: 'auto',
+        disableSystemFallback: true,
       });
 
       expect(result.success).toBe(false);
@@ -297,6 +297,7 @@ describe('Unified AI Service & Fallback Gateway', () => {
         groqApiKey: '',
         openrouterApiKey: '',
         preferredProvider: 'auto',
+        disableSystemFallback: true,
       });
       expect(res.success).toBe(false);
       expect(res.error).toBe('NO_KEY_CONFIGURED');

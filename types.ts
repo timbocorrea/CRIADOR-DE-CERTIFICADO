@@ -83,6 +83,7 @@ export interface AISettings {
   groqApiKey: string;
   openrouterApiKey: string;
   preferredProvider: 'auto' | 'gemini' | 'groq' | 'openrouter';
+  disableSystemFallback?: boolean;
 }
 
 export interface ExtractedStudentCandidate {

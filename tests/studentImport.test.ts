@@ -41,7 +41,7 @@ describe('G04-G: Integridade de Importação com Aspas e Delimitadores (CM-MED-0
     expect(res.validStudents[2].name).toBe('Carlos Pereira');
   });
 
-  it('deve rejeitar CPFs inválidos e aceitar participantes sem CPF normalmente', () => {
+  it('deve aceitar participantes com CPFs informados e participantes sem CPF sem bloqueio', () => {
     const raw = `
       Aluno Válido, 529.982.247-25
       Aluno Com CPF Errado, 111.111.111-11
@@ -50,16 +50,46 @@ describe('G04-G: Integridade de Importação com Aspas e Delimitadores (CM-MED-0
     `;
 
     const res = parseStudentsBulkInput(raw);
-    expect(res.validStudents.length).toBe(3);
+    expect(res.validStudents.length).toBe(4);
     expect(res.validStudents[0].name).toBe('Aluno Válido');
     expect(res.validStudents[0].cpf).toBe('529.982.247-25');
-    expect(res.validStudents[1].name).toBe('Aluno Sem CPF');
-    expect(res.validStudents[1].cpf).toBe('');
-    expect(res.validStudents[2].name).toBe('Outro Aluno Sem CPF');
+    expect(res.validStudents[1].name).toBe('Aluno Com CPF Errado');
+    expect(res.validStudents[1].cpf).toBe('111.111.111-11');
+    expect(res.validStudents[2].name).toBe('Aluno Sem CPF');
     expect(res.validStudents[2].cpf).toBe('');
+    expect(res.validStudents[3].name).toBe('Outro Aluno Sem CPF');
+    expect(res.validStudents[3].cpf).toBe('');
+    expect(res.errors.length).toBe(0);
+  });
 
-    expect(res.errors.length).toBe(1);
-    expect(res.errors[0]).toContain('Linha 2 (Aluno Com CPF Errado): CPF inválido');
+  it('deve importar todos os 10 alunos de planilha mesmo com CPFs sintéticos ou fictícios', () => {
+    const sheetCsv = `
+Ana Beatriz Ferreira,284.915.730-97
+Carlos Eduardo de Souza,519.842.370-04
+Juliana Maria Silveira,367.481.920-96
+Lucas Gabriel Oliveira,840.193.520-00
+Mariana Ribeiro Alves,726.351.480-07
+Rodrigo Santos Mendes,495.823.160-33
+Camila Cristina Barbosa,631.974.250-09
+Felipe Augusto Lima,952.836.410-60
+Larissa Cristina Rocha,184.629.750-30
+Thiago Henrique Martins,317.582.940-04
+`;
+    const res = parseStudentsBulkInput(sheetCsv);
+    expect(res.validStudents.length).toBe(10);
+    expect(res.errors.length).toBe(0);
+    expect(res.validStudents.map((s) => s.name)).toEqual([
+      'Ana Beatriz Ferreira',
+      'Carlos Eduardo de Souza',
+      'Juliana Maria Silveira',
+      'Lucas Gabriel Oliveira',
+      'Mariana Ribeiro Alves',
+      'Rodrigo Santos Mendes',
+      'Camila Cristina Barbosa',
+      'Felipe Augusto Lima',
+      'Larissa Cristina Rocha',
+      'Thiago Henrique Martins',
+    ]);
   });
 
   it('deve rejeitar CPFs duplicados contra a lista de alunos existentes', () => {
