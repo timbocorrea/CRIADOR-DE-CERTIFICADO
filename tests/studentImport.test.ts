@@ -41,18 +41,25 @@ describe('G04-G: Integridade de Importação com Aspas e Delimitadores (CM-MED-0
     expect(res.validStudents[2].name).toBe('Carlos Pereira');
   });
 
-  it('deve rejeitar e reportar CPFs inválidos com identificação da linha', () => {
+  it('deve rejeitar CPFs inválidos e aceitar participantes sem CPF normalmente', () => {
     const raw = `
       Aluno Válido, 529.982.247-25
       Aluno Com CPF Errado, 111.111.111-11
       Aluno Sem CPF
+      Outro Aluno Sem CPF,
     `;
 
     const res = parseStudentsBulkInput(raw);
-    expect(res.validStudents.length).toBe(1);
-    expect(res.errors.length).toBe(2);
+    expect(res.validStudents.length).toBe(3);
+    expect(res.validStudents[0].name).toBe('Aluno Válido');
+    expect(res.validStudents[0].cpf).toBe('529.982.247-25');
+    expect(res.validStudents[1].name).toBe('Aluno Sem CPF');
+    expect(res.validStudents[1].cpf).toBe('');
+    expect(res.validStudents[2].name).toBe('Outro Aluno Sem CPF');
+    expect(res.validStudents[2].cpf).toBe('');
+
+    expect(res.errors.length).toBe(1);
     expect(res.errors[0]).toContain('Linha 2 (Aluno Com CPF Errado): CPF inválido');
-    expect(res.errors[1]).toContain('Linha 3: Formato inválido');
   });
 
   it('deve rejeitar CPFs duplicados contra a lista de alunos existentes', () => {

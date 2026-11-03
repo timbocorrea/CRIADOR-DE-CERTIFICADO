@@ -7,6 +7,7 @@ import {
   clearAISettings,
   testProviderConnection,
   DEFAULT_AI_SETTINGS,
+  SYSTEM_AI_KEYS,
 } from '../../services/unifiedAIService';
 
 interface AISettingsModalProps {
@@ -72,24 +73,21 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({
   };
 
   const handleTestKey = async (provider: AIProviderId, key: string) => {
-    if (!key || !key.trim()) {
-      if (onNotify) onNotify('warning', 'Chave Vazia', 'Preencha a chave de API antes de testar.');
-      return;
-    }
-
     setTestingProvider(provider);
     const result = await testProviderConnection(provider, key);
     setTestResults((prev) => ({ ...prev, [provider]: result }));
     setTestingProvider(null);
 
     if (result.success) {
-      // Salva instantaneamente na validação bem-sucedida
-      setSettings((prev) => {
-        const updated = { ...prev };
-        saveAISettings(updated);
-        setSaveStatus('saved');
-        return updated;
-      });
+      if (key?.trim()) {
+        // Salva instantaneamente na validação bem-sucedida de chave pessoal
+        setSettings((prev) => {
+          const updated = { ...prev };
+          saveAISettings(updated);
+          setSaveStatus('saved');
+          return updated;
+        });
+      }
       if (onNotify) onNotify('success', 'Conexão Bem-Sucedida', result.message);
     } else {
       if (onNotify) onNotify('error', 'Falha na Validação', result.message);
@@ -168,10 +166,10 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({
         <div className="p-3 bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/50 rounded-xl space-y-1">
           <div className="flex items-center gap-2 font-bold text-blue-900 dark:text-blue-300">
             <i className="fa-solid fa-wand-magic-sparkles text-blue-600 dark:text-blue-400"></i>
-            <span>Cascata Inteligente Multi-Provedor (Failover Automático)</span>
+            <span>Central de Inteligência Artificial & OCR com Prioridade 1</span>
           </div>
           <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-            Cadastre os provedores gratuitos que desejar. Se o primeiro atingir o limite ou falhar, o sistema chaveia automaticamente para o próximo em milissegundos.
+            O CertificaMaster já possui chaves de IA internas ativas. Caso queira utilizar sua própria chave gratuita pessoal, basta colá-la abaixo: ela assumirá automaticamente a <strong className="text-blue-700 dark:text-blue-300">Prioridade 1 de Execução</strong> com fallback automático para o sistema se necessário.
           </p>
         </div>
 
@@ -183,8 +181,15 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({
                 1
               </span>
               <span className="font-bold text-slate-800 dark:text-slate-100">Google Gemini Flash</span>
-              <AppBadge variant={settings.geminiApiKey?.trim() ? 'success' : 'neutral'} size="sm">
-                {settings.geminiApiKey?.trim() ? 'Configurado' : 'Opcional'}
+              <AppBadge
+                variant={settings.geminiApiKey?.trim() ? 'success' : SYSTEM_AI_KEYS.gemini ? 'info' : 'neutral'}
+                size="sm"
+              >
+                {settings.geminiApiKey?.trim()
+                  ? 'Chave Pessoal (Prioridade 1)'
+                  : SYSTEM_AI_KEYS.gemini
+                  ? 'Chave do Sistema Ativa'
+                  : 'Opcional'}
               </AppBadge>
             </div>
             <a
@@ -202,7 +207,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({
             <div className="flex-1">
               <AppInput
                 type={showKeys.gemini ? 'text' : 'password'}
-                placeholder="Cole sua chave AIzaSy..."
+                placeholder={SYSTEM_AI_KEYS.gemini ? "Chave do sistema pronta (Cole aqui para Prioridade 1)..." : "Cole sua chave AIzaSy..."}
                 value={settings.geminiApiKey}
                 onChange={(e) => handleChangeKey('geminiApiKey', e.target.value)}
                 rightElement={
@@ -245,8 +250,15 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({
                 2
               </span>
               <span className="font-bold text-slate-800 dark:text-slate-100">Groq Cloud (Llama 3.2 Vision)</span>
-              <AppBadge variant={settings.groqApiKey?.trim() ? 'success' : 'neutral'} size="sm">
-                {settings.groqApiKey?.trim() ? 'Configurado' : 'Opcional'}
+              <AppBadge
+                variant={settings.groqApiKey?.trim() ? 'success' : SYSTEM_AI_KEYS.groq ? 'info' : 'neutral'}
+                size="sm"
+              >
+                {settings.groqApiKey?.trim()
+                  ? 'Chave Pessoal (Prioridade 1)'
+                  : SYSTEM_AI_KEYS.groq
+                  ? 'Chave do Sistema Ativa'
+                  : 'Opcional'}
               </AppBadge>
             </div>
             <a
@@ -264,7 +276,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({
             <div className="flex-1">
               <AppInput
                 type={showKeys.groq ? 'text' : 'password'}
-                placeholder="Cole sua chave gsk_..."
+                placeholder={SYSTEM_AI_KEYS.groq ? "Chave do sistema pronta (Cole aqui para Prioridade 1)..." : "Cole sua chave gsk_..."}
                 value={settings.groqApiKey}
                 onChange={(e) => handleChangeKey('groqApiKey', e.target.value)}
                 rightElement={
@@ -307,8 +319,15 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({
                 3
               </span>
               <span className="font-bold text-slate-800 dark:text-slate-100">OpenRouter (Modelos Livres)</span>
-              <AppBadge variant={settings.openrouterApiKey?.trim() ? 'success' : 'neutral'} size="sm">
-                {settings.openrouterApiKey?.trim() ? 'Configurado' : 'Opcional'}
+              <AppBadge
+                variant={settings.openrouterApiKey?.trim() ? 'success' : SYSTEM_AI_KEYS.openrouter ? 'info' : 'neutral'}
+                size="sm"
+              >
+                {settings.openrouterApiKey?.trim()
+                  ? 'Chave Pessoal (Prioridade 1)'
+                  : SYSTEM_AI_KEYS.openrouter
+                  ? 'Chave do Sistema Ativa'
+                  : 'Opcional'}
               </AppBadge>
             </div>
             <a
@@ -326,7 +345,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({
             <div className="flex-1">
               <AppInput
                 type={showKeys.openrouter ? 'text' : 'password'}
-                placeholder="Cole sua chave sk-or-v1-..."
+                placeholder={SYSTEM_AI_KEYS.openrouter ? "Chave do sistema pronta (Cole aqui para Prioridade 1)..." : "Cole sua chave sk-or-v1-..."}
                 value={settings.openrouterApiKey}
                 onChange={(e) => handleChangeKey('openrouterApiKey', e.target.value)}
                 rightElement={

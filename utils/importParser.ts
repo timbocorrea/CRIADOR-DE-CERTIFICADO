@@ -90,8 +90,9 @@ export function parseStudentsBulkInput(
     let rawCpf = '';
 
     if (parts.length === 1) {
-      errors.push(`Linha ${lineNum}: Formato inválido. Esperado "Nome, CPF".`);
-      return;
+      // Nome avulso sem CPF (CPF é opcional)
+      name = parts[0];
+      rawCpf = '';
     } else if (parts.length === 2) {
       name = parts[0];
       rawCpf = parts[1];
@@ -117,27 +118,28 @@ export function parseStudentsBulkInput(
       return;
     }
 
-    if (!rawCpf) {
-      errors.push(`Linha ${lineNum} (${name}): CPF ausente.`);
-      return;
+    // CPF é opcional: valida e checa duplicidade somente se preenchido
+    let formattedCpf = '';
+    if (rawCpf) {
+      if (!validateCPF(rawCpf)) {
+        errors.push(`Linha ${lineNum} (${name}): CPF inválido (${rawCpf}).`);
+        return;
+      }
+
+      const clean = cleanCPF(rawCpf);
+      if (seenCPFs.has(clean)) {
+        errors.push(`Linha ${lineNum} (${name}): CPF já cadastrado (${formatCPF(rawCpf)}).`);
+        return;
+      }
+
+      seenCPFs.add(clean);
+      formattedCpf = formatCPF(rawCpf);
     }
 
-    if (!validateCPF(rawCpf)) {
-      errors.push(`Linha ${lineNum} (${name}): CPF inválido (${rawCpf}).`);
-      return;
-    }
-
-    const clean = cleanCPF(rawCpf);
-    if (seenCPFs.has(clean)) {
-      errors.push(`Linha ${lineNum} (${name}): CPF já cadastrado (${formatCPF(rawCpf)}).`);
-      return;
-    }
-
-    seenCPFs.add(clean);
     validStudents.push({
       id: generateId(),
       name: name,
-      cpf: formatCPF(rawCpf),
+      cpf: formattedCpf,
       displayName: name
     });
   });

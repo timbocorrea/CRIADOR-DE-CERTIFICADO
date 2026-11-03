@@ -121,9 +121,14 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
       let statusLabel: string;
       let statusVariant: 'success' | 'warning' | 'danger' | 'neutral';
 
-      if (!trimmedName || !clean) {
+      if (!trimmedName) {
         status = 'incomplete';
-        statusLabel = !trimmedName ? 'Sem Nome' : 'Sem CPF';
+        statusLabel = 'Sem Nome';
+        statusVariant = 'danger';
+      } else if (!clean) {
+        // Aluno com nome preenchido e sem CPF (CPF é opcional)
+        status = 'valid';
+        statusLabel = 'Sem CPF';
         statusVariant = 'neutral';
       } else if (!isValidCpf) {
         status = 'invalid_cpf';
@@ -157,15 +162,15 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
   const totalCount = analyzedItems.length;
   const validCount = analyzedItems.filter((i) => i.status === 'valid').length;
   const selectedCount = analyzedItems.filter((i) => i.selected).length;
-  const readyToImportCount = analyzedItems.filter((i) => i.selected && i.name.trim() && validateCPF(i.cpf)).length;
+  const readyToImportCount = analyzedItems.filter((i) => i.selected && i.name.trim() && (!cleanCPF(i.cpf) || validateCPF(i.cpf))).length;
 
   const handleConfirm = () => {
     const validStudentsToInsert: Student[] = analyzedItems
-      .filter((i) => i.selected && i.name.trim() && validateCPF(i.cpf))
+      .filter((i) => i.selected && i.name.trim() && (!cleanCPF(i.cpf) || validateCPF(i.cpf)))
       .map((i) => ({
         id: generateId(),
         name: i.name.trim(),
-        cpf: formatCPF(i.cpf),
+        cpf: cleanCPF(i.cpf) ? formatCPF(i.cpf) : '',
         displayName: i.name.trim(),
       }));
 

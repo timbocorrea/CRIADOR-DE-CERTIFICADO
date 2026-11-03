@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CertificateData } from '../../types';
 import { AutoSaveStatus } from '../../hooks/useProjectPersistence';
 import { ImportProjectResult } from '../../utils/projectPersistence';
+import {
+  getLocalBatchHistory,
+  deleteBatchFromHistory,
+  SavedBatchSummary,
+} from '../../services/batchHistoryService';
 import {
   AppDialog,
   AppButton,
@@ -38,6 +43,23 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
   const [importRequiresPassword, setImportRequiresPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [batchHistory, setBatchHistory] = useState<SavedBatchSummary[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setBatchHistory(getLocalBatchHistory());
+    }
+  }, [isOpen]);
+
+  const handleRestoreBatch = (batch: SavedBatchSummary) => {
+    onApplyImportedData(batch.certificateData);
+    setSuccessMessage(`Turma "${batch.courseName}" restaurada no editor com ${batch.totalStudents} participante(s)!`);
+  };
+
+  const handleDeleteBatch = (id: string) => {
+    const updated = deleteBatchFromHistory(id);
+    setBatchHistory(updated);
+  };
 
   if (!isOpen) return null;
 
@@ -256,6 +278,74 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
                   Descriptografar
                 </AppButton>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* 4. Histórico de Turmas Salvas & Recuperação Instantânea */}
+        <div className="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                <i className="fa-solid fa-clock-rotate-left text-blue-600 dark:text-blue-400"></i>
+                Turmas Salvas & Recuperação Instantânea
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Restaure turmas emitidas anteriormente para reemitir certificados ou alterar dados.
+              </p>
+            </div>
+            <AppBadge variant={batchHistory.length > 0 ? 'info' : 'neutral'} size="sm">
+              {batchHistory.length} turma(s)
+            </AppBadge>
+          </div>
+
+          {batchHistory.length === 0 ? (
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 italic py-3 text-center bg-white dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
+              Nenhuma turma salva ainda. Ao exportar certificados, as turmas ficam salvas aqui para restauração e reemissão com 1 clique.
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+              {batchHistory.map((b) => (
+                <div
+                  key={b.id}
+                  className="p-2.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2 shadow-xs"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">
+                      {b.courseName}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 flex flex-wrap items-center gap-2 mt-0.5">
+                      <span><i className="fa-regular fa-calendar mr-1"></i>{b.completionDate}</span>
+                      <span><i className="fa-solid fa-user-graduate mr-1"></i>{b.totalStudents} aluno(s)</span>
+                      <span><i className="fa-regular fa-clock mr-1"></i>{b.workloadHours}h</span>
+                      {b.syncedCloud && (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          <i className="fa-solid fa-cloud mr-1"></i>Nuvem
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <AppButton
+                      type="button"
+                      size="sm"
+                      variant="primary"
+                      onClick={() => handleRestoreBatch(b)}
+                      title="Restaurar turma no editor para reemitir certificados"
+                    >
+                      Restaurar no Editor
+                    </AppButton>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteBatch(b.id)}
+                      className="text-slate-400 hover:text-red-500 p-1.5 text-xs transition-colors"
+                      title="Remover do histórico"
+                    >
+                      <i className="fa-regular fa-trash-can"></i>
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

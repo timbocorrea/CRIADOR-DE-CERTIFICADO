@@ -7,6 +7,7 @@ import {
   PDFProgressInfo,
   PageRenderTask
 } from '../services/pdf';
+import { recordBatchInHistory } from '../services/batchHistoryService';
 
 export interface PDFExportProcessCallbacks {
   onError?: (message: string) => void;
@@ -92,6 +93,10 @@ export function usePDFExportProcess(
       );
 
       if (result.success) {
+        // Grava lote no histórico para recuperação e sincronização
+        recordBatchInHistory(data, data.students).catch((err) =>
+          console.warn('Falha na gravação do histórico:', err)
+        );
         notifySuccess('Certificados gerados com sucesso!');
       } else if (result.cancelled) {
         // Cancelado amigavelmente

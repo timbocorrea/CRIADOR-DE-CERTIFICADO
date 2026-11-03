@@ -21,7 +21,7 @@ export const resolveVariableValues = (data: CertificateData, student: Student | 
 
   return {
     'NOME': student?.name || '[NOME DO ALUNO]',
-    'CPF': student ? formatCPF(student.cpf) : '[CPF]',
+    'CPF': student ? (student.cpf ? formatCPF(student.cpf) : '') : '[CPF]',
     'RAZAO_SOCIAL': data.companyName || '[EMPRESA]',
     'CNPJ': data.companyCnpj || '[CNPJ]',
     'ENDERECO': data.address || '[ENDEREÇO]',

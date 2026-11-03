@@ -115,9 +115,10 @@ describe('Unified AI Service & Fallback Gateway', () => {
 
       clearAISettings();
       const reset = loadAISettings();
-      expect(reset.geminiApiKey).toBe('');
-      expect(reset.groqApiKey).toBe('');
-      expect(reset.openrouterApiKey).toBe('');
+      expect(reset).toEqual(DEFAULT_AI_SETTINGS);
+      // expect(reset.geminiApiKey).toBe('');
+      // expect(reset.groqApiKey).toBe('');
+      // expect(reset.openrouterApiKey).toBe('');
       expect(reset.preferredProvider).toBe('auto');
     });
   });

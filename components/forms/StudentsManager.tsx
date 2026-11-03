@@ -36,17 +36,16 @@ export const StudentsManager: React.FC<StudentsManagerProps> = ({
       alert('O nome completo do aluno é obrigatório.');
       return;
     }
-    if (!trimmedCpf) {
-      alert('O CPF do aluno é obrigatório.');
-      return;
-    }
-    if (!validateCPF(trimmedCpf)) {
-      alert('CPF inválido. Por favor, informe um CPF válido com 11 dígitos e dígitos verificadores corretos.');
-      return;
-    }
-    if (isDuplicateCPF(trimmedCpf, students)) {
-      alert('Este CPF já está cadastrado para outro aluno nesta turma.');
-      return;
+    // CPF é opcional
+    if (trimmedCpf) {
+      if (!validateCPF(trimmedCpf)) {
+        alert('CPF inválido. Por favor, informe um CPF válido com 11 dígitos e dígitos verificadores corretos.');
+        return;
+      }
+      if (isDuplicateCPF(trimmedCpf, students)) {
+        alert('Este CPF já está cadastrado para outro aluno nesta turma.');
+        return;
+      }
     }
 
     const res = onAddStudent(trimmedName, trimmedCpf);

@@ -109,17 +109,16 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
       setIndividualError('O nome completo do aluno é obrigatório.');
       return;
     }
-    if (!trimmedCpf) {
-      setIndividualError('O CPF do aluno é obrigatório.');
-      return;
-    }
-    if (!validateCPF(trimmedCpf)) {
-      setIndividualError('CPF inválido. Verifique se os 11 dígitos estão corretos.');
-      return;
-    }
-    if (isDuplicateCPF(trimmedCpf, students)) {
-      setIndividualError('Este CPF já foi cadastrado para outro aluno nesta turma.');
-      return;
+    // CPF é opcional
+    if (trimmedCpf) {
+      if (!validateCPF(trimmedCpf)) {
+        setIndividualError('CPF inválido. Verifique se os 11 dígitos estão corretos.');
+        return;
+      }
+      if (isDuplicateCPF(trimmedCpf, students)) {
+        setIndividualError('Este CPF já foi cadastrado para outro aluno nesta turma.');
+        return;
+      }
     }
 
     const res = onAddStudent(trimmedName, trimmedCpf);
@@ -372,14 +371,13 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
             <div>
               <AppInput
                 id="studentCpf"
-                label="CPF do Aluno"
-                placeholder="000.000.000-00"
+                label="CPF do Aluno (Opcional)"
+                placeholder="000.000.000-00 (Opcional)"
                 value={newStudentCpf}
                 onChange={(e) => {
                   setNewStudentCpf(e.target.value);
                   if (individualError) setIndividualError(null);
                 }}
-                required
                 icon="fa-solid fa-id-card"
                 rightElement={
                   newStudentCpf.trim().length > 0 ? (
@@ -520,7 +518,7 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
                 Ou cole a lista de participantes manualmente:
               </span>
               <span className="text-[11px] text-slate-400">
-                (Nome, CPF separados por vírgula ou tabulação)
+                (Apenas nomes ou Nome, CPF por linha)
               </span>
             </div>
 
@@ -528,7 +526,7 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
               rows={3}
               value={bulkInput}
               onChange={(e) => setBulkInput(e.target.value)}
-              placeholder="Exemplo:&#10;João da Silva, 123.456.789-00&#10;Maria Santos, 987.654.321-11"
+              placeholder="Exemplo:&#10;Alexandre Correa dos Santos&#10;Janaina da Silva, 123.456.789-00&#10;Ana Cristina Lima"
               className="w-full rounded-xl border border-slate-200 dark:border-slate-700 p-3 font-mono text-xs focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
             />
 
