@@ -1,8 +1,10 @@
 import { CertificateData, Student } from '../types';
 import { isCloudAvailable, saveBatchWithCertificates } from './supabaseService';
+import { getCurrentOperatorSession } from './authService';
 
 export interface SavedBatchSummary {
   id: string;
+  ownerUsername: string;
   courseName: string;
   completionDate: string;
   workloadHours: string;
@@ -13,24 +15,55 @@ export interface SavedBatchSummary {
 }
 
 const STORAGE_KEY = 'certificamaster_batch_history';
+const USER_BATCH_STORAGE_PREFIX = 'certificamaster_batch_history_user_v1_';
 
-export function getLocalBatchHistory(): SavedBatchSummary[] {
+function getNormalizedUserKey(username?: string): string {
+  const activeUser = username || getCurrentOperatorSession()?.username || 'default';
+  return activeUser.trim().toLowerCase().replace(/[^a-z0-9._@-]/g, '_') || 'default';
+}
+
+function getUserBatchStorageKey(username?: string): string {
+  return `${USER_BATCH_STORAGE_PREFIX}${getNormalizedUserKey(username)}`;
+}
+
+/**
+ * Obtém o banco de dados de certificados/turmas já gerados especificamente pelo usuário logado.
+ */
+export function getLocalBatchHistory(username?: string): SavedBatchSummary[] {
   try {
     if (typeof localStorage === 'undefined') return [];
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    const userKey = getUserBatchStorageKey(username);
+    const normalizedOwner = (username || getCurrentOperatorSession()?.username || 'default').trim().toLowerCase();
+
+    const rawUser = localStorage.getItem(userKey);
+    if (rawUser) {
+      const parsedUser = JSON.parse(rawUser);
+      if (Array.isArray(parsedUser)) {
+        return parsedUser;
+      }
+    }
+
+    // Compatibilidade com histórico anterior na chave global (filtra apenas os que pertencem ao usuário ou sem dono definido)
+    const rawGlobal = localStorage.getItem(STORAGE_KEY);
+    if (!rawGlobal) return [];
+    const parsedGlobal = JSON.parse(rawGlobal);
+    if (!Array.isArray(parsedGlobal)) return [];
+
+    return parsedGlobal.filter(
+      (b: SavedBatchSummary) => !b.ownerUsername || b.ownerUsername === normalizedOwner
+    );
   } catch (err) {
     console.warn('Erro ao carregar histórico de turmas:', err);
     return [];
   }
 }
 
-export function saveLocalBatchHistory(batches: SavedBatchSummary[]): void {
+export function saveLocalBatchHistory(batches: SavedBatchSummary[], username?: string): void {
   try {
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(batches.slice(0, 30)));
+      const trimmed = batches.slice(0, 50);
+      localStorage.setItem(getUserBatchStorageKey(username), JSON.stringify(trimmed));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
     }
   } catch (err) {
     console.warn('Erro ao gravar histórico de turmas:', err);
@@ -39,8 +72,10 @@ export function saveLocalBatchHistory(batches: SavedBatchSummary[]): void {
 
 export async function recordBatchInHistory(
   data: CertificateData,
-  students: Student[]
+  students: Student[],
+  username?: string
 ): Promise<SavedBatchSummary> {
+  const activeOwner = (username || getCurrentOperatorSession()?.username || 'default').trim().toLowerCase();
   const batchId = `BATCH-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
   const now = new Date().toISOString();
 
@@ -58,6 +93,7 @@ export async function recordBatchInHistory(
 
   const newEntry: SavedBatchSummary = {
     id: batchId,
+    ownerUsername: activeOwner,
     courseName: data.courseName || 'Curso Sem Nome',
     completionDate: data.courseDate || new Date().toLocaleDateString('pt-BR'),
     workloadHours: data.totalHours || '0',
@@ -70,16 +106,17 @@ export async function recordBatchInHistory(
     },
   };
 
-  const current = getLocalBatchHistory();
+  const current = getLocalBatchHistory(activeOwner);
   const updated = [newEntry, ...current.filter((b) => b.id !== batchId)];
-  saveLocalBatchHistory(updated);
+  saveLocalBatchHistory(updated, activeOwner);
 
   return newEntry;
 }
 
-export function deleteBatchFromHistory(id: string): SavedBatchSummary[] {
-  const current = getLocalBatchHistory();
+export function deleteBatchFromHistory(id: string, username?: string): SavedBatchSummary[] {
+  const activeOwner = (username || getCurrentOperatorSession()?.username || 'default').trim().toLowerCase();
+  const current = getLocalBatchHistory(activeOwner);
   const updated = current.filter((b) => b.id !== id);
-  saveLocalBatchHistory(updated);
+  saveLocalBatchHistory(updated, activeOwner);
   return updated;
 }

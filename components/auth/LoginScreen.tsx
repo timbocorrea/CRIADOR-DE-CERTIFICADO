@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   loginOperator,
   registerOperator,
   listOperators,
+  syncOperatorsFromCloud,
+  getAdminGovernanceSettings,
+  isMasterUsername,
   OperatorSession,
 } from '../../services/authService';
 import { AppButton, AppInput } from '../ui';
@@ -16,10 +19,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   onAuthenticated,
   onOpenValidation,
 }) => {
-  const existingOperators = listOperators();
-  const [mode, setMode] = useState<'login' | 'register'>(
-    existingOperators.length > 0 ? 'login' : 'register'
-  );
+  const [existingOperators, setExistingOperators] = useState(() => listOperators());
+  const governance = getAdminGovernanceSettings();
+  const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState(
     existingOperators.length === 1 ? existingOperators[0].username : ''
   );
@@ -27,6 +29,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void syncOperatorsFromCloud().then((ops) => {
+      setExistingOperators(ops);
+    });
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,65 +86,82 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         </div>
 
         {/* Seletor Entrar / Criar Acesso Personalizado */}
-        <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-          <button
-            type="button"
-            onClick={() => {
-              setMode('login');
-              setError(null);
-            }}
-            className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-              mode === 'login'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
-            }`}
-          >
-            <i className="fa-solid fa-right-to-bracket text-xs" aria-hidden="true"></i>
-            <span>Entrar</span>
-          </button>
+        {governance.allowSelfRegistration ? (
+          <div className="grid grid-cols-2 gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+            <button
+              type="button"
+              onClick={() => {
+                setMode('login');
+                setError(null);
+              }}
+              className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                mode === 'login'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
+              }`}
+            >
+              <i className="fa-solid fa-right-to-bracket text-xs" aria-hidden="true"></i>
+              <span>Entrar</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setMode('register');
-              setError(null);
-            }}
-            className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-              mode === 'register'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
-            }`}
-          >
-            <i className="fa-solid fa-user-plus text-xs" aria-hidden="true"></i>
-            <span>Criar Meu Acesso</span>
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                setMode('register');
+                setError(null);
+              }}
+              className={`py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                mode === 'register'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/70'
+              }`}
+            >
+              <i className="fa-solid fa-user-plus text-xs" aria-hidden="true"></i>
+              <span>Criar Meu Acesso</span>
+            </button>
+          </div>
+        ) : null}
 
         {/* Lista rápida de operadores já salvos no dispositivo */}
         {mode === 'login' && existingOperators.length > 0 && (
           <div className="space-y-1.5">
             <span className="text-[11px] font-semibold text-slate-400">
-              Operadores neste dispositivo (toque para preencher):
+              Contas neste dispositivo (toque para preencher):
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {existingOperators.map((op) => (
-                <button
-                  key={op.username}
-                  type="button"
-                  onClick={() => {
-                    setUsername(op.username);
-                    setError(null);
-                  }}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all ${
-                    username.trim().toLowerCase() === op.username
-                      ? 'bg-blue-950/90 text-blue-300 border-blue-500'
-                      : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:border-slate-600'
-                  }`}
-                >
-                  <i className="fa-solid fa-user-shield text-[10px]" aria-hidden="true"></i>
-                  <span>{op.displayName || op.username}</span>
-                </button>
-              ))}
+              {existingOperators.map((op) => {
+                const isOpMaster = isMasterUsername(op.username);
+                const isBlocked = op.status !== 'active' && !isOpMaster;
+                return (
+                  <button
+                    key={op.username}
+                    type="button"
+                    onClick={() => {
+                      setUsername(op.username);
+                      setError(null);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+                      username.trim().toLowerCase() === op.username
+                        ? 'bg-blue-950/90 text-blue-300 border-blue-500'
+                        : isBlocked
+                        ? 'bg-red-950/40 text-red-300/80 border-red-800/60'
+                        : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:border-slate-600'
+                    }`}
+                  >
+                    <i
+                      className={`fa-solid ${
+                        isOpMaster
+                          ? 'fa-crown text-amber-400'
+                          : isBlocked
+                          ? 'fa-ban text-red-400'
+                          : 'fa-user text-blue-400'
+                      } text-[10px]`}
+                      aria-hidden="true"
+                    ></i>
+                    <span>{op.displayName || op.username}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

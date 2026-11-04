@@ -21,6 +21,9 @@ interface AppHeaderProps {
   mobileView?: 'split' | 'editor' | 'preview';
   onSelectMobileView?: (view: 'split' | 'editor' | 'preview') => void;
   operatorName?: string;
+  isMasterAdmin?: boolean;
+  onOpenAdminPanel?: () => void;
+  onOpenGeneratedDatabase?: () => void;
   onLogout?: () => void;
 }
 
@@ -41,6 +44,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   mobileView = 'split',
   onSelectMobileView,
   operatorName,
+  isMasterAdmin = false,
+  onOpenAdminPanel,
+  onOpenGeneratedDatabase,
   onLogout,
 }) => {
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
@@ -106,7 +112,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
           {operatorName && (
             <span className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 font-semibold flex items-center gap-1.5">
-              <i className="fa-solid fa-user-check text-blue-400 text-[10px]" aria-hidden="true"></i>
+              <i
+                className={`fa-solid ${isMasterAdmin ? 'fa-crown text-amber-400' : 'fa-user-check text-blue-400'} text-[10px]`}
+                aria-hidden="true"
+              ></i>
               <span>{operatorName}</span>
             </span>
           )}
@@ -247,8 +256,38 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                 )}
               </div>
 
-              {/* Seção 2: Ferramentas do Projeto */}
+              {/* Seção 2: Banco de Certificados, Admin Master e Ferramentas do Projeto */}
               <div className="p-1 space-y-1">
+                {onOpenGeneratedDatabase && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      onOpenGeneratedDatabase();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-emerald-300 bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-800/70 flex items-center gap-2.5 transition-colors"
+                  >
+                    <i className="fa-solid fa-database text-xs text-emerald-400" aria-hidden="true"></i>
+                    <span>Certificados Já Gerados (Re-exportar)</span>
+                  </button>
+                )}
+
+                {isMasterAdmin && onOpenAdminPanel && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      onOpenAdminPanel();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-amber-300 bg-amber-950/50 hover:bg-amber-900/60 border border-amber-800/70 flex items-center gap-2.5 transition-colors"
+                  >
+                    <i className="fa-solid fa-user-shield text-xs text-amber-400" aria-hidden="true"></i>
+                    <span>Painel Admin (Gerenciar Usuários)</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   role="menuitem"
@@ -392,6 +431,36 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           >
             <i className="fa-solid fa-stamp text-emerald-400 text-sm" aria-hidden="true"></i>
           </button>
+        )}
+
+        {/* Painel Admin Master (Exclusivo para timbo.correa@gmail.com) */}
+        {isMasterAdmin && onOpenAdminPanel && (
+          <AppButton
+            type="button"
+            size="sm"
+            variant="secondary"
+            icon="fa-solid fa-user-shield"
+            onClick={onOpenAdminPanel}
+            className="bg-amber-950/80 hover:bg-amber-900 text-amber-300 border-amber-700/80 hover:text-amber-100 min-h-[36px]"
+            title="Painel Administrativo Master: Gerenciar, permitir e bloquear usuários"
+          >
+            <span className="hidden xl:inline">Painel Admin</span>
+          </AppButton>
+        )}
+
+        {/* Banco de Certificados Já Gerados pelo Usuário */}
+        {onOpenGeneratedDatabase && (
+          <AppButton
+            type="button"
+            size="sm"
+            variant="secondary"
+            icon="fa-solid fa-database"
+            onClick={onOpenGeneratedDatabase}
+            className="bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border-emerald-800/80 hover:text-white min-h-[36px]"
+            title="Acessar banco de certificados já gerados por você para recuperar e exportar novamente"
+          >
+            <span className="hidden sm:inline">Meus Certificados</span>
+          </AppButton>
         )}
 
         {/* Project Management Modal Button */}

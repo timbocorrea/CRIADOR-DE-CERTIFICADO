@@ -22,6 +22,7 @@ import { LoginScreen } from './components/auth/LoginScreen';
 import {
   getCurrentOperatorSession,
   logoutOperator,
+  isMasterUsername,
   OperatorSession,
 } from './services/authService';
 
@@ -37,6 +38,14 @@ const ExportProgressDialog = lazy(() =>
 );
 const ProjectPersistenceModal = lazy(() =>
   import('./components/persistence/ProjectPersistenceModal').then((m) => ({ default: m.ProjectPersistenceModal }))
+);
+const GeneratedCertificatesDatabaseModal = lazy(() =>
+  import('./components/persistence/GeneratedCertificatesDatabaseModal').then((m) => ({
+    default: m.GeneratedCertificatesDatabaseModal,
+  }))
+);
+const UserManagementModal = lazy(() =>
+  import('./components/admin/UserManagementModal').then((m) => ({ default: m.UserManagementModal }))
 );
 const AISettingsModal = lazy(() =>
   import('./components/ai/AISettingsModal').then((m) => ({ default: m.AISettingsModal }))
@@ -127,6 +136,8 @@ const AppContent: React.FC = () => {
   const lastAutoZoomRef = useRef<number>(0.65);
   const [isFullscreenPreviewOpen, setIsFullscreenPreviewOpen] = useState<boolean>(false);
   const [isPersistenceModalOpen, setIsPersistenceModalOpen] = useState<boolean>(false);
+  const [isGeneratedDatabaseModalOpen, setIsGeneratedDatabaseModalOpen] = useState<boolean>(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
   const [isAISettingsModalOpen, setIsAISettingsModalOpen] = useState<boolean>(false);
   const [isValidationModalOpen, setIsValidationModalOpen] = useState<boolean>(false);
   const [validationInitialCode, setValidationInitialCode] = useState<string>('');
@@ -260,6 +271,11 @@ const AppContent: React.FC = () => {
           }
         }}
         operatorName={operatorSession.displayName || operatorSession.username}
+        isMasterAdmin={
+          operatorSession.role === 'master' || isMasterUsername(operatorSession.username)
+        }
+        onOpenAdminPanel={() => setIsAdminModalOpen(true)}
+        onOpenGeneratedDatabase={() => setIsGeneratedDatabaseModalOpen(true)}
         onLogout={handleLogout}
       />
 
@@ -458,6 +474,41 @@ const AppContent: React.FC = () => {
             onImportProject={importFullProject}
             onApplyImportedData={loadFullProject}
             onResetDraft={resetSavedDraft}
+          />
+        )}
+
+        {isGeneratedDatabaseModalOpen && (
+          <GeneratedCertificatesDatabaseModal
+            isOpen={isGeneratedDatabaseModalOpen}
+            currentUsername={operatorSession.username}
+            onClose={() => setIsGeneratedDatabaseModalOpen(false)}
+            onRestoreAndEdit={(restoredData, selectedIdx = 0) => {
+              loadFullProject(restoredData);
+              setCurrentStudentIdx(selectedIdx);
+              toast.success(
+                'Certificado Recuperado',
+                `Os dados do curso "${restoredData.courseName || 'Sem Nome'}" foram carregados no editor.`
+              );
+            }}
+            onRestoreAndExportNow={(restoredData, mode, selectedIdx = 0) => {
+              loadFullProject(restoredData);
+              setCurrentStudentIdx(selectedIdx);
+              const targetStudent =
+                restoredData.students?.[selectedIdx] || restoredData.students?.[0] || null;
+              setTimeout(() => {
+                startExport(mode, restoredData, targetStudent);
+              }, 80);
+            }}
+            onNotify={handleNotify}
+          />
+        )}
+
+        {isAdminModalOpen && (
+          <UserManagementModal
+            isOpen={isAdminModalOpen}
+            currentUsername={operatorSession.username}
+            onClose={() => setIsAdminModalOpen(false)}
+            onNotify={handleNotify}
           />
         )}
 

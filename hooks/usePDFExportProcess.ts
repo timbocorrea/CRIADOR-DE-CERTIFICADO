@@ -41,12 +41,21 @@ export function usePDFExportProcess(
     }
   }, [callbacks]);
 
-  const startExport = useCallback(async (mode: ExportMode) => {
-    if (mode !== 'individual' && data.students.length === 0) {
+  const startExport = useCallback(async (
+    mode: ExportMode,
+    overrideData?: CertificateData,
+    overrideStudent?: Student | null
+  ) => {
+    const activeData = overrideData || data;
+    const activeStudent = overrideStudent !== undefined
+      ? overrideStudent
+      : (currentStudent || (activeData.students.length > 0 ? activeData.students[0] : null));
+
+    if (mode !== 'individual' && activeData.students.length === 0) {
       notifyError('Adicione pelo menos um aluno para exportação.');
       return;
     }
-    if (mode === 'individual' && !currentStudent && data.students.length === 0) {
+    if (mode === 'individual' && !activeStudent && activeData.students.length === 0) {
       notifyError('Selecione um aluno para emitir o certificado individual.');
       return;
     }
@@ -60,9 +69,9 @@ export function usePDFExportProcess(
       const result = await executePDFExport(
         {
           mode,
-          data,
-          students: data.students,
-          selectedStudent: currentStudent || (data.students.length > 0 ? data.students[0] : null),
+          data: activeData,
+          students: activeData.students,
+          selectedStudent: activeStudent,
           signal: controller.signal,
           onProgress: (prog) => {
             setExportProgress(prog);
@@ -93,11 +102,11 @@ export function usePDFExportProcess(
       );
 
       if (result.success) {
-        // Grava lote no histórico para recuperação e sincronização
-        recordBatchInHistory(data, data.students).catch((err) =>
+        // Grava lote no histórico do usuário atual para recuperação e re-exportação
+        recordBatchInHistory(activeData, activeData.students).catch((err) =>
           console.warn('Falha na gravação do histórico:', err)
         );
-        notifySuccess('Certificados gerados com sucesso!');
+        notifySuccess('Certificados gerados e registrados no seu banco com sucesso!');
       } else if (result.cancelled) {
         // Cancelado amigavelmente
       } else if (result.error) {
