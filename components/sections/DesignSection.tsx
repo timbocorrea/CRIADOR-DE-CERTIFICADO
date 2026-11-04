@@ -2206,8 +2206,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                           <input
                             type="range"
                             name="versoQrCodeVerticalOffset"
-                            min="-200"
-                            max="200"
+                            min="-450"
+                            max="450"
                             value={data.versoQrCodeVerticalOffset || 0}
                             onPointerDown={() => ensurePreviewPage(2)}
                             onFocus={() => ensurePreviewPage(2)}
@@ -2223,8 +2223,8 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                           <input
                             type="range"
                             name="versoQrCodeHorizontalOffset"
-                            min="-250"
-                            max="250"
+                            min="-450"
+                            max="450"
                             value={data.versoQrCodeHorizontalOffset || 0}
                             onPointerDown={() => ensurePreviewPage(2)}
                             onFocus={() => ensurePreviewPage(2)}

@@ -1041,10 +1041,10 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
               'Posição da Coluna Institucional (Verso)',
               'versoInstitutionVerticalOffset',
               'versoInstitutionHorizontalOffset',
-              -200,
-              200,
-              -300,
-              300
+              -400,
+              400,
+              -400,
+              400
             )}
 
             {/* Controles do QR Code de Autenticidade no Verso */}
@@ -1094,10 +1094,10 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
                     'Posição do QR Code no Verso',
                     'versoQrCodeVerticalOffset',
                     'versoQrCodeHorizontalOffset',
-                    -200,
-                    200,
-                    -250,
-                    250
+                    -450,
+                    450,
+                    -450,
+                    450
                   )}
                 </>
               )}

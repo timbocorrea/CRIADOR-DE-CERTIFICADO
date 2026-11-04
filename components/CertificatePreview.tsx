@@ -413,28 +413,30 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
       >
         <div
           onClick={(e) => handleZoneClick(e, 'verso_institution')}
-          title={isInteractive ? 'Clique para editar Dados da Instituição e Curso no Verso' : undefined}
-          className={`space-y-8 ${getInteractiveClass('verso_institution')}`}
+          title={isInteractive ? 'Clique para editar Dados da Instituição, Curso e QR Code no Verso' : undefined}
+          className={`flex flex-col h-full ${getInteractiveClass('verso_institution')}`}
           style={{ transform: `translate(${data.versoInstitutionHorizontalOffset || 0}px, ${data.versoInstitutionVerticalOffset || 0}px)` }}
         >
-          {data.providerName && (
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Empresa Fornecedora / Realização</p>
-              <p className="font-semibold text-gray-700 leading-tight" style={{ fontSize: `${data.versoHeaderFontSize}px` }}>{data.providerName}</p>
-              {data.providerCnpj && <p className="text-xs text-gray-500 mt-1">CNPJ: {data.providerCnpj}</p>}
+          <div className="space-y-8">
+            {data.providerName && (
+              <div>
+                <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Empresa Fornecedora / Realização</p>
+                <p className="font-semibold text-gray-700 leading-tight" style={{ fontSize: `${data.versoHeaderFontSize}px` }}>{data.providerName}</p>
+                {data.providerCnpj && <p className="text-xs text-gray-500 mt-1">CNPJ: {data.providerCnpj}</p>}
+              </div>
+            )}
+            
+            <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100 shadow-sm">
+               <p className="text-[10px] font-bold text-blue-800 uppercase mb-2">Curso Ministrado</p>
+               <p className="font-bold text-gray-800 leading-tight mb-2" style={{ fontSize: `${data.versoHeaderFontSize}px` }}>{data.courseName || '[NOME DO CURSO]'}</p>
+               <p className="text-sm text-gray-600 font-bold">Carga Total: {data.totalHours || '0'}h</p>
             </div>
-          )}
-          
-          <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100 shadow-sm">
-             <p className="text-[10px] font-bold text-blue-800 uppercase mb-2">Curso Ministrado</p>
-             <p className="font-bold text-gray-800 leading-tight mb-2" style={{ fontSize: `${data.versoHeaderFontSize}px` }}>{data.courseName || '[NOME DO CURSO]'}</p>
-             <p className="text-sm text-gray-600 font-bold">Carga Total: {data.totalHours || '0'}h</p>
           </div>
 
-          {/* QR CODE DE AUTENTICIDADE E REGISTRO PÚBLICO DO ALUNO */}
+          {/* QR CODE DE AUTENTICIDADE E REGISTRO PÚBLICO DO ALUNO (Alinhado na base inferior da coluna por padrão) */}
           {data.showVersoQrCode !== false && qrSvgMarkup && (
             <div
-              className="p-3.5 rounded-xl border border-slate-200 bg-white shadow-xs flex items-center gap-3.5"
+              className="mt-auto p-3.5 rounded-xl border border-slate-200 bg-white shadow-xs flex items-center gap-3.5"
               style={{
                 transform: `translate(${data.versoQrCodeHorizontalOffset || 0}px, ${data.versoQrCodeVerticalOffset || 0}px)`
               }}

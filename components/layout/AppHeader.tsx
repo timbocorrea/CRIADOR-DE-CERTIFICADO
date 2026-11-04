@@ -28,6 +28,11 @@ interface AppHeaderProps {
   onLogout?: () => void;
 }
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
 export const AppHeader: React.FC<AppHeaderProps> = ({
   courseName,
   studentsCount,
@@ -52,7 +57,35 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onLogout,
 }) => {
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const actionMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    const handleAppInstalled = () => {
+      setDeferredInstallPrompt(null);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallPwa = async () => {
+    if (!deferredInstallPrompt) return;
+    try {
+      await deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      setDeferredInstallPrompt(null);
+    } catch {
+      setDeferredInstallPrompt(null);
+    }
+  };
 
   // Fecha menu ao clicar fora ou pressionar ESC
   useEffect(() => {
@@ -334,6 +367,21 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                     <span>Validar Autenticidade (QR Code)</span>
                   </button>
                 )}
+
+                {deferredInstallPrompt && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      void handleInstallPwa();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/80 flex items-center gap-2.5 transition-colors shadow-xs"
+                  >
+                    <i className="fa-solid fa-download text-xs text-indigo-100" aria-hidden="true"></i>
+                    <span>Instalar Aplicativo (PWA)</span>
+                  </button>
+                )}
               </div>
 
               {/* Seção 3: Preferências de Tema */}
@@ -435,6 +483,21 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           >
             <i className="fa-solid fa-stamp text-emerald-400 text-sm" aria-hidden="true"></i>
           </button>
+        )}
+
+        {/* Instalar Aplicativo PWA (Aparece automaticamente quando o navegador suporta instalação) */}
+        {deferredInstallPrompt && (
+          <AppButton
+            type="button"
+            size="sm"
+            variant="primary"
+            icon="fa-solid fa-download"
+            onClick={() => void handleInstallPwa()}
+            className="!bg-indigo-600 hover:!bg-indigo-500 active:!bg-indigo-700 !text-white !border !border-indigo-400/80 font-semibold shadow-sm min-h-[36px]"
+            title="Instalar o CertificaMaster como aplicativo no seu computador ou celular (PWA)"
+          >
+            <span className="hidden xl:inline">Instalar App</span>
+          </AppButton>
         )}
 
         {/* Painel Admin Master (Exclusivo para timbo.correa@gmail.com) */}

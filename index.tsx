@@ -15,3 +15,10 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+// Registro do Service Worker para PWA (Instalação em Desktop/Mobile e Cache Offline)
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
