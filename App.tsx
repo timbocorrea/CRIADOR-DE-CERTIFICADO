@@ -216,9 +216,9 @@ const AppContent: React.FC = () => {
           aria-labelledby={mobileView === 'split' ? 'mobile-tab-split' : 'mobile-tab-editor'}
           className={`shrink-0 ${
             mobileView === 'split'
-              ? 'order-2 w-full flex-1 min-h-0 flex flex-col overflow-hidden'
+              ? 'max-lg:order-2 max-lg:w-full max-lg:flex-1 max-lg:min-h-0 max-lg:flex max-lg:flex-col max-lg:overflow-hidden'
               : mobileView === 'editor'
-              ? 'order-1 w-full flex-1 h-full flex flex-col overflow-hidden'
+              ? 'max-lg:order-1 max-lg:w-full max-lg:flex-1 max-lg:h-full max-lg:flex max-lg:flex-col max-lg:overflow-hidden'
               : 'hidden lg:flex lg:flex-col'
           } lg:order-1 lg:w-[480px] xl:w-[500px] lg:h-[calc(100vh-4rem)] lg:flex lg:flex-col`}
         >
@@ -320,11 +320,11 @@ const AppContent: React.FC = () => {
           aria-labelledby={mobileView === 'split' ? 'mobile-tab-split' : 'mobile-tab-preview'}
           className={`flex flex-col overflow-hidden bg-slate-100 dark:bg-slate-950 ${
             mobileView === 'split'
-              ? 'order-1 w-full h-[35vh] xs:h-[38vh] min-h-[210px] max-h-[340px] shrink-0 border-b border-slate-300 dark:border-slate-800 shadow-sm'
+              ? 'max-lg:order-1 max-lg:w-full max-lg:h-[35vh] max-lg:min-h-[210px] max-lg:max-h-[340px] max-lg:shrink-0 max-lg:border-b max-lg:border-slate-300 dark:max-lg:border-slate-800 max-lg:shadow-sm'
               : mobileView === 'preview'
-              ? 'order-1 w-full flex-1 h-full'
+              ? 'max-lg:order-1 max-lg:w-full max-lg:flex-1 max-lg:h-full'
               : 'hidden lg:flex'
-          } lg:order-2 lg:flex-1 lg:h-[calc(100vh-4rem)] lg:border-b-0`}
+          } lg:order-2 lg:flex-1 lg:h-[calc(100vh-4rem)] lg:min-h-0 lg:max-h-none lg:w-auto lg:border-b-0`}
         >
           {/* Barra de Ferramentas de Pré-visualização */}
           <PreviewToolbar
