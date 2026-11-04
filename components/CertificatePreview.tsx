@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CertificateData, Student, CurriculumItem } from '../types';
-import { renderSafeCertificateText } from '../utils/helpers';
+import { renderSafeCertificateText, formatHighlightName } from '../utils/helpers';
 import { formatRegistryForDisplay } from '../utils/professionalRegistry';
 
 interface CertificatePreviewProps {
@@ -27,7 +27,8 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
 }) => {
   // Versão 1: Frente
   if (page === 1) {
-    const displayHighlightName = student?.displayName || student?.name || '[NOME DE DESTAQUE]';
+    const rawHighlightName = student?.displayName || student?.name || '[Nome de Destaque]';
+    const displayHighlightName = formatHighlightName(rawHighlightName);
 
     return (
       <div

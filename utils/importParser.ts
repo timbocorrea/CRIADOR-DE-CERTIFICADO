@@ -1,6 +1,6 @@
 import { Student } from '../types';
 import { validateCPF, formatCPF, cleanCPF } from './security';
-import { generateId } from './helpers';
+import { generateId, formatHighlightName } from './helpers';
 
 export interface ImportParseResult {
   validStudents: Student[];
@@ -153,7 +153,7 @@ export function parseStudentsBulkInput(
       id: generateId(),
       name: name,
       cpf: formattedCpf,
-      displayName: name
+      displayName: formatHighlightName(name)
     });
   });
 

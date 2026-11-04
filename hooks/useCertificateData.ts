@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { CertificateData, DEFAULT_BASE_TEXT, Student, Instructor, CurriculumItem } from '../types';
-import { generateId } from '../utils/helpers';
+import { generateId, formatHighlightName } from '../utils/helpers';
 import { formatCPF } from '../utils/security';
 import { calculateCurriculumHours, checkWorkloadDivergence, WorkloadDivergenceInfo } from '../utils/workloadCalculator';
 
@@ -73,7 +73,7 @@ export function addStudentToData(data: CertificateData, name: string, rawCpf: st
     id: generateId(),
     name: trimmedName,
     cpf: formatCPF(trimmedCpf),
-    displayName: trimmedName
+    displayName: formatHighlightName(trimmedName)
   };
   return {
     data: { ...data, students: [...data.students, newStudent] },

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { AppDialog, AppButton, AppBadge, AppInput } from '../ui';
 import { Student, ExtractedStudentCandidate } from '../../types';
 import { validateCPF, formatCPF, cleanCPF, isDuplicateCPF } from '../../utils/security';
-import { generateId } from '../../utils/helpers';
+import { generateId, formatHighlightName } from '../../utils/helpers';
 
 interface EditableCandidate {
   tempId: string;
@@ -165,7 +165,7 @@ export const ImportReviewModal: React.FC<ImportReviewModalProps> = ({
         id: generateId(),
         name: i.name.trim(),
         cpf: i.cpf.trim() ? (cleanCPF(i.cpf).length === 11 ? formatCPF(i.cpf) : i.cpf.trim()) : '',
-        displayName: i.name.trim(),
+        displayName: formatHighlightName(i.name.trim()),
       }));
 
     if (validStudentsToInsert.length > 0) {

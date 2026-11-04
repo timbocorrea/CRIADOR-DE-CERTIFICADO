@@ -43,6 +43,37 @@ export const fileToBase64 = (file: File): Promise<string> => {
 };
 
 /**
+ * Formata nomes próprios ou frases no estilo Capitalizado (Title Case em Português),
+ * mantendo preposições e artigos curtos em letras minúsculas (ex: "de", "da", "do", "dos", "das", "e").
+ */
+const LOWERCASE_PARTICLES = new Set([
+  'de', 'da', 'do', 'dos', 'das', 'e', 'em', 'na', 'no', 'nas', 'nos', 'por', 'para', 'com', 'a', 'o', 'as', 'os',
+]);
+
+export const formatHighlightName = (raw: string | undefined | null): string => {
+  if (!raw) return '';
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+
+  // Se o texto estiver envolto em colchetes ex: "[NOME DE DESTAQUE]", preserva os colchetes ou formata internamente
+  const hasBrackets = trimmed.startsWith('[') && trimmed.endsWith(']') && trimmed.length > 2;
+  const core = hasBrackets ? trimmed.slice(1, -1).trim() : trimmed;
+
+  const words = core.split(/\s+/);
+  const formatted = words
+    .map((word, index) => {
+      const lower = word.toLocaleLowerCase('pt-BR');
+      if (index > 0 && LOWERCASE_PARTICLES.has(lower)) {
+        return lower;
+      }
+      return lower.charAt(0).toLocaleUpperCase('pt-BR') + lower.slice(1);
+    })
+    .join(' ');
+
+  return hasBrackets ? `[${formatted}]` : formatted;
+};
+
+/**
  * Geração de identificadores únicos criptograficamente seguros (CM-BAIXO-003).
  * Utiliza crypto.randomUUID() com fallback seguro.
  */
