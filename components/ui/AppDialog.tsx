@@ -23,6 +23,28 @@ export const AppDialog: React.FC<AppDialogProps> = ({
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
+  const closedByPopStateRef = useRef(false);
+
+  // Intercepta o botão Voltar do celular/navegador para fechar o modal sem sair do sistema
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined' || !window.history?.pushState) return;
+
+    closedByPopStateRef.current = false;
+    window.history.pushState({ modal: 'app-dialog' }, '');
+
+    const handlePopState = () => {
+      closedByPopStateRef.current = true;
+      onClose();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (!closedByPopStateRef.current && window.history.state?.modal === 'app-dialog') {
+        window.history.back();
+      }
+    };
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen) {
