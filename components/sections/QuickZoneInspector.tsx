@@ -1046,6 +1046,62 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
               -300,
               300
             )}
+
+            {/* Controles do QR Code de Autenticidade no Verso */}
+            <div className="p-3.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/80 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <i className="fa-solid fa-qrcode text-emerald-600 dark:text-emerald-400 text-sm"></i>
+                  <div>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                      QR Code de Validação & Registro do Aluno
+                    </p>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-300">
+                      Ao escanear o QR Code, abre o domínio com todos os dados autenticados do aluno
+                    </p>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  name="showVersoQrCode"
+                  checked={data.showVersoQrCode !== false}
+                  onChange={onCheckboxChange}
+                  className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                />
+              </div>
+
+              {data.showVersoQrCode !== false && (
+                <>
+                  <div>
+                    <div className="flex justify-between items-center mb-1 text-xs">
+                      <span className="text-slate-700 dark:text-slate-200 font-medium">Tamanho do QR Code</span>
+                      <span className="font-mono text-emerald-700 dark:text-emerald-400 font-bold">
+                        {data.versoQrCodeSize || 96}px
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      name="versoQrCodeSize"
+                      min="60"
+                      max="160"
+                      value={data.versoQrCodeSize || 96}
+                      onChange={onSliderChange}
+                      className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                    />
+                  </div>
+
+                  {renderOffsetPair(
+                    'Posição do QR Code no Verso',
+                    'versoQrCodeVerticalOffset',
+                    'versoQrCodeHorizontalOffset',
+                    -200,
+                    200,
+                    -250,
+                    250
+                  )}
+                </>
+              )}
+            </div>
           </div>
         )}
 

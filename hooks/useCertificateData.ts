@@ -79,6 +79,10 @@ export const INITIAL_CERTIFICATE_DATA: CertificateData = {
   frontBorderMargin: 0,
   versoBorderWidth: 4,
   versoSidePadding: 64,
+  showVersoQrCode: true,
+  versoQrCodeSize: 96,
+  versoQrCodeVerticalOffset: 0,
+  versoQrCodeHorizontalOffset: 0,
 };
 
 export const MAX_INSTRUCTORS = 4;

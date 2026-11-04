@@ -3,6 +3,10 @@ import React from 'react';
 import { CertificateData, Student, CurriculumItem, CertificateElementZone } from '../types';
 import { renderSafeCertificateText, formatHighlightName } from '../utils/helpers';
 import { formatRegistryForDisplay } from '../utils/professionalRegistry';
+import {
+  buildCertificateVerificationUrl,
+  generateQrCodeSvgMarkup,
+} from '../utils/qrCodeValidator';
 
 interface CertificatePreviewProps {
   data: CertificateData;
@@ -346,6 +350,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   // Versão 2: Verso (Conteúdo Programático com Paginador de Grade Extensa)
   const items = curriculumSlice || data.curriculum;
   const isLastVersoPage = !versoTotalPages || versoTotalPages === 1 || versoPageNumber === versoTotalPages;
+  const qrVerification = buildCertificateVerificationUrl(data, student);
+  const qrSvgMarkup = data.showVersoQrCode !== false ? generateQrCodeSvgMarkup(qrVerification.url) : '';
+  const qrSizePx = data.versoQrCodeSize || 96;
 
   // Ajuste fino dinâmico de densidade para acomodar até 12 disciplinas com legibilidade total
   const compactRowPadding = items.length > 8 
@@ -423,6 +430,33 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
              <p className="font-bold text-gray-800 leading-tight mb-2" style={{ fontSize: `${data.versoHeaderFontSize}px` }}>{data.courseName || '[NOME DO CURSO]'}</p>
              <p className="text-sm text-gray-600 font-bold">Carga Total: {data.totalHours || '0'}h</p>
           </div>
+
+          {/* QR CODE DE AUTENTICIDADE E REGISTRO PÚBLICO DO ALUNO */}
+          {data.showVersoQrCode !== false && qrSvgMarkup && (
+            <div
+              className="p-3.5 rounded-xl border border-slate-200 bg-white shadow-xs flex items-center gap-3.5"
+              style={{
+                transform: `translate(${data.versoQrCodeHorizontalOffset || 0}px, ${data.versoQrCodeVerticalOffset || 0}px)`
+              }}
+            >
+              <div
+                className="shrink-0 bg-white p-1.5 rounded-lg border border-slate-300 shadow-2xs"
+                style={{ width: `${qrSizePx}px`, height: `${qrSizePx}px` }}
+                dangerouslySetInnerHTML={{ __html: qrSvgMarkup }}
+              />
+              <div className="min-w-0 space-y-1">
+                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 text-[9px] font-extrabold uppercase tracking-wider">
+                  <span>Verificação Digital</span>
+                </div>
+                <p className="text-[11px] font-bold text-slate-800 leading-snug">
+                  Aponte a câmera para o QR Code para consultar o registro oficial e os dados deste certificado.
+                </p>
+                <p className="text-[10px] font-mono font-bold text-blue-900 tracking-wide">
+                  Cód: {qrVerification.validationCode}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
         
         <div 

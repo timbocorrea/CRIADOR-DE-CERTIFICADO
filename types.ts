@@ -101,6 +101,10 @@ export interface CertificateData {
   versoBorderWidth?: number;
   versoSidePadding?: number;
   frontBorderMargin?: number;
+  showVersoQrCode?: boolean;
+  versoQrCodeSize?: number;
+  versoQrCodeVerticalOffset?: number;
+  versoQrCodeHorizontalOffset?: number;
 }
 
 export const DEFAULT_BASE_TEXT = "Certificamos que {{NOME}}, portador do CPF {{CPF}}, concluiu com êxito o curso de {{CURSO}}, realizado em {{DATA}}, com carga horária total de {{CARGA_HORARIA}} horas, sob a responsabilidade técnica de {{RAZAO_SOCIAL}}, inscrita no CNPJ {{CNPJ}}, com sede em {{ENDERECO}}.";

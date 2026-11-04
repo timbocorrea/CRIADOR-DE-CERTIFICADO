@@ -83,6 +83,10 @@ export interface NonSensitiveConfig {
   titleFontFamily?: string;
   highlightNameFontFamily?: string;
   bodyFontFamily?: string;
+  showVersoQrCode?: boolean;
+  versoQrCodeSize?: number;
+  versoQrCodeVerticalOffset?: number;
+  versoQrCodeHorizontalOffset?: number;
 }
 
 /**
@@ -157,7 +161,11 @@ export function saveNonSensitiveConfig(data: CertificateData): boolean {
       frontBorderWidth: data.frontBorderWidth,
       titleFontFamily: data.titleFontFamily || "'Playfair Display', serif",
       highlightNameFontFamily: data.highlightNameFontFamily || "'Alex Brush', cursive",
-      bodyFontFamily: data.bodyFontFamily || "'Playfair Display', serif"
+      bodyFontFamily: data.bodyFontFamily || "'Playfair Display', serif",
+      showVersoQrCode: data.showVersoQrCode !== false,
+      versoQrCodeSize: data.versoQrCodeSize || 96,
+      versoQrCodeVerticalOffset: data.versoQrCodeVerticalOffset || 0,
+      versoQrCodeHorizontalOffset: data.versoQrCodeHorizontalOffset || 0
     };
 
     storage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(payload));

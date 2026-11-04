@@ -147,14 +147,17 @@ const AppContent: React.FC = () => {
   const [isAISettingsModalOpen, setIsAISettingsModalOpen] = useState<boolean>(false);
   const [isValidationModalOpen, setIsValidationModalOpen] = useState<boolean>(false);
   const [validationInitialCode, setValidationInitialCode] = useState<string>('');
+  const [validationInitialToken, setValidationInitialToken] = useState<string>('');
 
-  // Detecta parâmetro de validação na URL (?validar=CODIGO ou ?code=CODIGO)
+  // Detecta parâmetro de validação na URL (?validar=CODIGO&cert=TOKEN ou ?code=CODIGO)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const code = params.get('validar') || params.get('code');
-      if (code) {
-        setValidationInitialCode(code.trim());
+      const token = params.get('cert') || '';
+      if (code || token) {
+        if (code) setValidationInitialCode(code.trim());
+        if (token) setValidationInitialToken(token.trim());
         setIsValidationModalOpen(true);
       }
     }
@@ -248,6 +251,7 @@ const AppContent: React.FC = () => {
           }}
           onOpenValidation={() => {
             setValidationInitialCode('');
+            setValidationInitialToken('');
             setIsValidationModalOpen(true);
           }}
         />
@@ -258,8 +262,10 @@ const AppContent: React.FC = () => {
               onClose={() => {
                 setIsValidationModalOpen(false);
                 setValidationInitialCode('');
+                setValidationInitialToken('');
               }}
               initialCode={validationInitialCode}
+              initialToken={validationInitialToken}
             />
           )}
         </Suspense>
@@ -282,6 +288,7 @@ const AppContent: React.FC = () => {
         onOpenAISettings={() => setIsAISettingsModalOpen(true)}
         onOpenValidation={() => {
           setValidationInitialCode('');
+          setValidationInitialToken('');
           setIsValidationModalOpen(true);
         }}
         currentStudentName={currentStudent?.name}
@@ -594,8 +601,10 @@ const AppContent: React.FC = () => {
             onClose={() => {
               setIsValidationModalOpen(false);
               setValidationInitialCode('');
+              setValidationInitialToken('');
             }}
             initialCode={validationInitialCode}
+            initialToken={validationInitialToken}
           />
         )}
       </Suspense>

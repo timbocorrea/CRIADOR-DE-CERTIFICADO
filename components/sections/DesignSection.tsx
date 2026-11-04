@@ -2134,19 +2134,110 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
             </div>
           )}
 
-          {/* 4. Controles do Selo Digital */}
+          {/* 4. Controles do Selo Digital e QR Code de Validação no Verso */}
           {showSeal && (
             <div className={mobileAdvancedSection === 'seal' ? 'block' : 'hidden lg:block'}>
             <AppCard
-              title="Selo Digital e Efeitos"
-              description="Dimensões, opacidade e posição do carimbo de autenticidade"
-              icon="fa-solid fa-stamp"
+              title="Selo Digital & QR Code de Validação (Verso)"
+              description="Dimensões, opacidade e posição do carimbo e do QR Code de autenticidade do aluno"
+              icon="fa-solid fa-qrcode"
               headerClassName="max-lg:hidden"
               contentClassName="p-3.5 sm:p-5"
               isCollapsible={true}
               isExpanded={isMobileViewport || activeSectionFilter !== 'all' || expandedCards.seal}
               onToggleExpand={() => toggleCard('seal')}
             >
+              <div className="space-y-4">
+              <FaceGroup
+                page={2}
+                previewPage={previewPage}
+                onSelectPage={onSelectPage}
+                title="VERSO (QR Code de Registro & Validação do Aluno)"
+                icon="fa-solid fa-qrcode"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200/70 dark:border-slate-700/70">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
+                        Exibir QR Code no Verso do Certificado
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 block">
+                        Ao ler o QR Code com o celular, abre o domínio oficial já com os dados autenticados do aluno
+                      </span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      name="showVersoQrCode"
+                      checked={data.showVersoQrCode !== false}
+                      onChange={(e) => {
+                        ensurePreviewPage(2);
+                        onCheckboxChange?.(e);
+                      }}
+                      className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                  </div>
+
+                  {data.showVersoQrCode !== false && (
+                    <>
+                      <div>
+                        <div className="flex justify-between items-center mb-1 text-xs">
+                          <span className="text-slate-700 dark:text-slate-200 font-medium">Tamanho do QR Code</span>
+                          <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoQrCodeSize || 96}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          name="versoQrCodeSize"
+                          min="60"
+                          max="160"
+                          value={data.versoQrCodeSize || 96}
+                          onPointerDown={() => ensurePreviewPage(2)}
+                          onFocus={() => ensurePreviewPage(2)}
+                          onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                          className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-700 dark:text-slate-200 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoQrCodeVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoQrCodeVerticalOffset"
+                            min="-200"
+                            max="200"
+                            value={data.versoQrCodeVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-700 dark:text-slate-200 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoQrCodeHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoQrCodeHorizontalOffset"
+                            min="-250"
+                            max="250"
+                            value={data.versoQrCodeHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </FaceGroup>
+
               <FaceGroup
                 page={1}
                 previewPage={previewPage}
@@ -2227,6 +2318,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   </div>
                 </div>
               </FaceGroup>
+              </div>
             </AppCard>
             </div>
           )}

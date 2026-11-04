@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { AppDialog, AppInput, AppButton, AppBadge } from '../ui';
 import { verifyCertificatePublic, PublicVerificationResult, isCloudAvailable } from '../../services/supabaseService';
+import { verifySignedCertificateToken } from '../../utils/qrCodeValidator';
 
 interface CertificateValidationModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialCode?: string;
+  initialToken?: string;
 }
 
 export const CertificateValidationModal: React.FC<CertificateValidationModalProps> = ({
   isOpen,
   onClose,
   initialCode = '',
+  initialToken = '',
 }) => {
   const [code, setCode] = useState(initialCode);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,6 +22,31 @@ export const CertificateValidationModal: React.FC<CertificateValidationModalProp
 
   useEffect(() => {
     if (isOpen) {
+      if (initialToken) {
+        const tokenCheck = verifySignedCertificateToken(initialToken);
+        if (tokenCheck.isValid && tokenCheck.payload) {
+          const p = tokenCheck.payload;
+          setCode(p.code);
+          setResult({
+            isValid: true,
+            certificate: {
+              validationCode: p.code,
+              studentName: p.n,
+              studentCpfMasked: p.cpf,
+              courseName: p.c,
+              workloadHours: p.h,
+              completionDate: p.d,
+              organizationName: p.o,
+              cnpj: p.j,
+              techResponsibleName: p.tr,
+              techResponsibleRegistration: p.trr,
+              issuedAt: p.iat,
+            },
+          });
+          return;
+        }
+      }
+
       if (initialCode) {
         setCode(initialCode);
         handleValidate(initialCode);
@@ -26,7 +54,7 @@ export const CertificateValidationModal: React.FC<CertificateValidationModalProp
         setResult(null);
       }
     }
-  }, [isOpen, initialCode]);
+  }, [isOpen, initialCode, initialToken]);
 
   const handleValidate = async (lookupCode: string) => {
     const trimmed = lookupCode.trim();
@@ -135,6 +163,17 @@ export const CertificateValidationModal: React.FC<CertificateValidationModalProp
                   {result.certificate.cnpj ? ` • CNPJ: ${result.certificate.cnpj}` : ''}
                 </span>
               </div>
+              {result.certificate.techResponsibleName && (
+                <div className="sm:col-span-2">
+                  <span className="text-slate-500 dark:text-slate-400 block">Responsável Técnico:</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200">
+                    {result.certificate.techResponsibleName}
+                    {result.certificate.techResponsibleRegistration
+                      ? ` (${result.certificate.techResponsibleRegistration})`
+                      : ''}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="pt-2 text-[10px] text-slate-400 dark:text-slate-500 flex items-center justify-between border-t border-emerald-200/40 dark:border-emerald-900/20">

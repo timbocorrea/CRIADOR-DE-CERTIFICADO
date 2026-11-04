@@ -7,6 +7,10 @@
 
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { CertificateData, Student } from '../types';
+import {
+  buildCertificateVerificationUrl,
+  maskStudentCpfForPublicRegistry,
+} from '../utils/qrCodeValidator';
 
 export interface PublicVerificationResult {
   isValid: boolean;
@@ -165,19 +169,12 @@ export async function saveBatchWithCertificates(
       return { success: false, error: batchError?.message || 'Falha ao criar lote no banco de dados.' };
     }
 
-    // 2. Cria os certificados individuais com hash
-    const appBaseUrl = import.meta.env.VITE_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+    // 2. Cria os certificados individuais com o mesmo código determinístico e URL do QR Code impresso no verso
     const certRows = await Promise.all(
       students.map(async (student) => {
         const rawCpf = (student.cpf || '').replace(/\D/g, '');
-        const maskedCpf = rawCpf.length === 11
-          ? `***.${rawCpf.substring(3, 6)}.${rawCpf.substring(6, 9)}-**`
-          : '***.***.***-**';
-        
-        // Gera código de validação único seguro
-        const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-        const validationCode = `CM-${new Date().getFullYear()}-${randomPart}`;
-        const qrPayload = `${appBaseUrl}/?validar=${validationCode}`;
+        const maskedCpf = maskStudentCpfForPublicRegistry(student.cpf);
+        const { validationCode, url: qrPayload } = buildCertificateVerificationUrl(data, student);
 
         return {
           batch_id: batch.id,
