@@ -123,7 +123,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           </div>
 
           <div 
-            className={`w-full flex items-end ${data.showTechResponsible ? 'justify-between' : 'justify-around'}`}
+            className={`w-full flex items-start ${data.showTechResponsible ? 'justify-between' : 'justify-around'}`}
             style={{ 
               transform: `translateY(${data.signaturesVerticalOffset}px)`,
               paddingLeft: `${data.signaturesHorizontalPadding}px`,
@@ -148,7 +148,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 )}
               </div>
             ) : (
-              <div className="flex items-end gap-4 max-w-[500px]">
+              <div className="flex items-start gap-4 max-w-[500px]">
                 {data.instructors.slice(0, 4).map((inst, idx) => {
                   const scaleFactor = data.instructors.length > 2 ? 0.85 : 0.95;
                   const effectiveFontSize = Math.max(9, Math.floor(data.signatureFontSize * scaleFactor));
@@ -193,6 +193,14 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 <div className="w-full border-t border-gray-400 mb-1"></div>
                 <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
                   {data.techResponsibleName || 'Responsável Técnico'}
+                </p>
+                {data.techResponsibleCompetencies && (
+                  <p style={{ fontSize: `${data.signatureFontSize * 0.7}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[220px] leading-tight">
+                    {data.techResponsibleCompetencies}
+                  </p>
+                )}
+                <p style={{ fontSize: `${Math.max(8, data.signatureFontSize * 0.7)}px` }} className="font-bold text-gray-400 uppercase mt-1">
+                  Responsável Técnico
                 </p>
               </div>
             )}
