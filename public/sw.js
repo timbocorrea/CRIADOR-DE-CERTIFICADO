@@ -1,10 +1,12 @@
-const CACHE_NAME = 'certificamaster-pwa-v2';
+const CACHE_NAME = 'certificamaster-pwa-v3';
 const CORE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
   '/favicon.svg',
-  '/pwa-icon.svg'
+  '/pwa-icon.svg',
+  '/pwa-192x192.png',
+  '/pwa-512x512.png'
 ];
 
 self.addEventListener('install', (event) => {

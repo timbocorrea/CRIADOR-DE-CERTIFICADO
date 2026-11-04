@@ -275,7 +275,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="h-[100dvh] max-h-[100dvh] flex flex-col bg-slate-900 font-sans text-slate-800 antialiased overflow-hidden">
+    <div className="h-[100dvh] max-h-[100dvh] pwa-safe-bottom flex flex-col bg-slate-900 font-sans text-slate-800 antialiased overflow-hidden">
       {/* 1. Barra Superior Corporativa com Menus Responsivos */}
       <AppHeader
         courseName={data.courseName}

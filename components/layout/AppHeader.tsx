@@ -109,7 +109,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     };
   }, []);
   return (
-    <header className="h-16 bg-slate-900 text-white px-3 sm:px-5 flex items-center justify-between border-b border-slate-800 shrink-0 select-none no-print z-30">
+    <header className="pwa-safe-header h-16 bg-slate-900 text-white px-3 sm:px-5 flex items-center justify-between border-b border-slate-800 shrink-0 select-none no-print z-30">
       {/* Brand Identity & Project info */}
       <div className="flex items-center gap-2.5 sm:gap-4 min-w-0 pr-2">
         <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">

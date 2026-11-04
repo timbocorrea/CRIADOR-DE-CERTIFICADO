@@ -12,8 +12,20 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+html, body {
   font-family: 'Inter', sans-serif;
+  background-color: #0f172a;
+  overscroll-behavior-y: none;
+}
+
+/* Integração PWA com Barra de Status Transparente (Topo) e Navbar do Celular (Base) */
+.pwa-safe-header {
+  padding-top: env(safe-area-inset-top, 0px);
+  min-height: calc(4rem + env(safe-area-inset-top, 0px));
+}
+
+.pwa-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 html.dark {
