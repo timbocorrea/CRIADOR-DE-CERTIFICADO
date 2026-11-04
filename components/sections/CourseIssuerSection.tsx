@@ -5,6 +5,12 @@ import { requestAIEnhanceText } from '../../services/aiService';
 import { validateAITextResponse } from '../../utils/aiValidator';
 import { MAX_INSTRUCTORS } from '../../hooks/useCertificateData';
 import {
+  REGISTRY_TYPES,
+  parseRegistry,
+  buildRegistry,
+  formatRegistryForDisplay,
+} from '../../utils/professionalRegistry';
+import {
   AppCard,
   AppInput,
   AppTextarea,
@@ -47,6 +53,25 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
   const [newInstructorName, setNewInstructorName] = useState('');
   const [newInstructorCompetencies, setNewInstructorCompetencies] = useState('');
   const [instructorError, setInstructorError] = useState<string | null>(null);
+
+  // Registro profissional do Responsável Técnico (CREA, CRM, CRO, ...)
+  const registry = parseRegistry(data.techResponsibleCompetencies);
+  const [useCustomRegistry, setUseCustomRegistry] = useState<boolean>(
+    () => !REGISTRY_TYPES.some((t) => t.value === parseRegistry(data.techResponsibleCompetencies).type)
+  );
+  const [customRegistryType, setCustomRegistryType] = useState<string>(() => {
+    const initial = parseRegistry(data.techResponsibleCompetencies).type;
+    return REGISTRY_TYPES.some((t) => t.value === initial) ? '' : initial;
+  });
+  const isKnownRegistryType = !useCustomRegistry && REGISTRY_TYPES.some((t) => t.value === registry.type);
+  const registryPreview = formatRegistryForDisplay(data.techResponsibleCompetencies);
+
+  const updateRegistry = (type: string, number: string) => {
+    const value = type ? buildRegistry(type, number) : number;
+    onChange({
+      target: { name: 'techResponsibleCompetencies', value },
+    } as unknown as React.ChangeEvent<HTMLInputElement>);
+  };
 
   // Tags disponíveis para interpolação
   const availableTags = [
@@ -494,19 +519,63 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
                   />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5 sm:col-span-2">
                   <div className="h-6 flex items-center">
-                    <label htmlFor="techResponsibleCompetencies" className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">
-                      Registro Profissional / CREA
+                    <label htmlFor="techRegistryType" className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">
+                      Registro Profissional (Conselho e Número)
                     </label>
                   </div>
-                  <AppInput
-                    id="techResponsibleCompetencies"
-                    name="techResponsibleCompetencies"
-                    placeholder="Ex: 12345/D (prefixo CREA- automático)"
-                    value={data.techResponsibleCompetencies}
-                    onChange={onChange}
-                  />
+                  <div className="grid grid-cols-[minmax(0,10rem)_minmax(0,1fr)] gap-2">
+                    <div className="flex flex-col gap-1.5">
+                      <select
+                        id="techRegistryType"
+                        aria-label="Tipo de registro profissional"
+                        value={isKnownRegistryType ? registry.type : 'OUTRO'}
+                        onChange={(e) => {
+                          if (e.target.value === 'OUTRO') {
+                            setUseCustomRegistry(true);
+                            updateRegistry(customRegistryType, registry.number);
+                          } else {
+                            setUseCustomRegistry(false);
+                            updateRegistry(e.target.value, registry.number);
+                          }
+                        }}
+                        className="w-full h-10 px-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50"
+                      >
+                        {REGISTRY_TYPES.map((t) => (
+                          <option key={t.value} value={t.value}>
+                            {t.label}
+                          </option>
+                        ))}
+                        <option value="OUTRO">Outro (digitar sigla)</option>
+                      </select>
+                      {!isKnownRegistryType && (
+                        <AppInput
+                          id="techRegistryCustomType"
+                          aria-label="Sigla do conselho"
+                          placeholder="Sigla (ex: CRMV)"
+                          value={customRegistryType}
+                          onChange={(e) => {
+                            const clean = e.target.value.replace(/[^A-Za-zÀ-ÿ]/g, '').toUpperCase().slice(0, 10);
+                            setCustomRegistryType(clean);
+                            updateRegistry(clean, registry.number);
+                          }}
+                        />
+                      )}
+                    </div>
+                    <AppInput
+                      id="techResponsibleCompetencies"
+                      aria-label="Número do registro"
+                      placeholder="Número (ex: 12345/SP)"
+                      value={registry.number}
+                      onChange={(e) => updateRegistry(isKnownRegistryType ? registry.type : customRegistryType, e.target.value)}
+                    />
+                  </div>
+                  {registryPreview && (
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      No certificado: <strong className="text-slate-700 dark:text-slate-200">{registryPreview}</strong>
+                    </p>
+                  )}
                 </div>
               </div>
             )}

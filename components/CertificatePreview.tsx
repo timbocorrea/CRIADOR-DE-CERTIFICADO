@@ -2,6 +2,7 @@
 import React from 'react';
 import { CertificateData, Student, CurriculumItem } from '../types';
 import { renderSafeCertificateText } from '../utils/helpers';
+import { formatRegistryForDisplay } from '../utils/professionalRegistry';
 
 interface CertificatePreviewProps {
   data: CertificateData;
@@ -197,9 +198,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 <p style={{ fontSize: `${Math.max(8, data.signatureFontSize * 0.7)}px` }} className="font-bold text-gray-400 uppercase mt-1">
                   Responsável Técnico
                 </p>
-                {data.techResponsibleCompetencies && data.techResponsibleCompetencies.trim() && (
+                {formatRegistryForDisplay(data.techResponsibleCompetencies) && (
                   <p style={{ fontSize: `${data.signatureFontSize * 0.7}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[220px] leading-tight">
-                    {`CREA-${data.techResponsibleCompetencies.trim().replace(/^crea[\s\-:\/º°nN.]*/i, '')}`}
+                    {formatRegistryForDisplay(data.techResponsibleCompetencies)}
                   </p>
                 )}
               </div>
