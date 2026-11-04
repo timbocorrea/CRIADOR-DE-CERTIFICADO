@@ -142,7 +142,8 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
         title="Dados Gerais do Curso"
         description="Identificação do treinamento e carga horária"
         icon="fa-solid fa-graduation-cap"
-        defaultExpanded={true}
+        isCollapsible={true}
+        defaultExpanded={false}
       >
         <div className="space-y-3">
           <AppInput
@@ -308,12 +309,13 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
         title="Instrutores e Assinaturas"
         description={`Profissionais responsáveis pelo treinamento (${data.instructors.length} de ${MAX_INSTRUCTORS})`}
         icon="fa-solid fa-chalkboard-user"
+        isCollapsible={true}
+        defaultExpanded={false}
         badge={
           <AppBadge variant={data.instructors.length >= MAX_INSTRUCTORS ? 'warning' : 'neutral'} size="sm">
             {data.instructors.length} / {MAX_INSTRUCTORS}
           </AppBadge>
         }
-        defaultExpanded={true}
       >
         <div className="space-y-4">
           {/* Lista de Instrutores Cadastrados */}
