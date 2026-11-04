@@ -21,12 +21,12 @@ export const AppBadge: React.FC<AppBadgeProps> = ({
   };
 
   const variantClasses = {
-    default: 'bg-blue-50 text-blue-700 border border-blue-200',
-    info: 'bg-sky-50 text-sky-700 border border-sky-200',
-    success: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-    warning: 'bg-amber-50 text-amber-700 border border-amber-200',
-    danger: 'bg-red-50 text-red-700 border border-red-200',
-    neutral: 'bg-slate-100 text-slate-700 border border-slate-200',
+    default: 'bg-blue-50 dark:bg-blue-950/90 text-blue-700 dark:text-blue-200 border border-blue-200 dark:border-blue-700/80',
+    info: 'bg-sky-50 dark:bg-sky-950/90 text-sky-700 dark:text-sky-200 border border-sky-200 dark:border-sky-700/80',
+    success: 'bg-emerald-50 dark:bg-emerald-950/90 text-emerald-700 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-700/80',
+    warning: 'bg-amber-50 dark:bg-amber-950/90 text-amber-700 dark:text-amber-200 border border-amber-200 dark:border-amber-700/80',
+    danger: 'bg-red-50 dark:bg-red-950/90 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-700/80',
+    neutral: 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-100 border border-slate-200 dark:border-slate-600',
   };
 
   return (

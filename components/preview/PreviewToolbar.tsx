@@ -48,34 +48,34 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = React.memo(({
       {/* 1. Carrossel de Alunos */}
       <div className="flex items-center gap-2">
         <div
-          className={`flex items-center gap-1 sm:gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/60 ${
-            totalStudents === 0 ? 'opacity-40 grayscale pointer-events-none' : ''
+          className={`flex items-center gap-1 sm:gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700 ${
+            totalStudents === 0 ? 'pointer-events-none' : ''
           }`}
         >
           <button
             type="button"
-            disabled={currentStudentIdx === 0}
+            disabled={currentStudentIdx === 0 || totalStudents === 0}
             onClick={onPrevStudent}
-            className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-40 transition-all text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-50 transition-all text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
             title="Aluno anterior"
             aria-label="Aluno anterior"
           >
             <i className="fa-solid fa-chevron-left" aria-hidden="true"></i>
           </button>
 
-          <div className="text-xs font-semibold text-slate-800 dark:text-slate-200 px-1 sm:px-2 min-w-[70px] sm:min-w-[140px] text-center truncate">
+          <div className="text-xs font-semibold text-slate-800 dark:text-slate-100 px-1 sm:px-2 min-w-[70px] sm:min-w-[140px] text-center truncate">
             {totalStudents > 0 ? (
               <>
-                <span className="hidden sm:inline text-slate-500 dark:text-slate-400">Aluno </span>
+                <span className="hidden sm:inline text-slate-500 dark:text-slate-300">Aluno </span>
                 <span className="text-blue-600 dark:text-blue-400 font-bold">{currentStudentIdx + 1}</span>{' '}
-                <span className="text-slate-500 dark:text-slate-400">
+                <span className="text-slate-500 dark:text-slate-300">
                   <span className="hidden sm:inline">de </span>
                   <span className="sm:hidden">/ </span>
                   {totalStudents}
                 </span>
               </>
             ) : (
-              <span className="text-slate-400 dark:text-slate-500 italic">Sem alunos</span>
+              <span className="text-slate-500 dark:text-slate-300 italic">Sem alunos</span>
             )}
           </div>
 
@@ -83,7 +83,7 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = React.memo(({
             type="button"
             disabled={currentStudentIdx === totalStudents - 1 || totalStudents === 0}
             onClick={onNextStudent}
-            className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-40 transition-all text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-50 transition-all text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
             title="Próximo aluno"
             aria-label="Próximo aluno"
           >

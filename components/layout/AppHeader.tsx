@@ -266,9 +266,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                       setIsActionMenuOpen(false);
                       onOpenGeneratedDatabase();
                     }}
-                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-emerald-300 bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-800/70 flex items-center gap-2.5 transition-colors"
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/80 flex items-center gap-2.5 transition-colors shadow-xs"
                   >
-                    <i className="fa-solid fa-database text-xs text-emerald-400" aria-hidden="true"></i>
+                    <i className="fa-solid fa-database text-xs text-emerald-100" aria-hidden="true"></i>
                     <span>Certificados Já Gerados (Re-exportar)</span>
                   </button>
                 )}
@@ -281,9 +281,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                       setIsActionMenuOpen(false);
                       onOpenAdminPanel();
                     }}
-                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-amber-300 bg-amber-950/50 hover:bg-amber-900/60 border border-amber-800/70 flex items-center gap-2.5 transition-colors"
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-white bg-amber-600 hover:bg-amber-500 border border-amber-500/80 flex items-center gap-2.5 transition-colors shadow-xs"
                   >
-                    <i className="fa-solid fa-user-shield text-xs text-amber-400" aria-hidden="true"></i>
+                    <i className="fa-solid fa-user-shield text-xs text-amber-100" aria-hidden="true"></i>
                     <span>Painel Admin (Gerenciar Usuários)</span>
                   </button>
                 )}
@@ -295,9 +295,9 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                     setIsActionMenuOpen(false);
                     onOpenProjectModal();
                   }}
-                  className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800 flex items-center gap-2.5 transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center gap-2.5 transition-colors"
                 >
-                  <i className="fa-solid fa-floppy-disk text-xs text-slate-400" aria-hidden="true"></i>
+                  <i className="fa-solid fa-floppy-disk text-xs text-blue-300" aria-hidden="true"></i>
                   <span>Gerenciar Projeto (.certproj)</span>
                 </button>
 
@@ -438,10 +438,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <AppButton
             type="button"
             size="sm"
-            variant="secondary"
+            variant="primary"
             icon="fa-solid fa-user-shield"
             onClick={onOpenAdminPanel}
-            className="bg-amber-950/80 hover:bg-amber-900 text-amber-300 border-amber-700/80 hover:text-amber-100 min-h-[36px]"
+            className="!bg-amber-600 hover:!bg-amber-500 active:!bg-amber-700 !text-white !border !border-amber-500/80 font-semibold shadow-sm min-h-[36px]"
             title="Painel Administrativo Master: Gerenciar, permitir e bloquear usuários"
           >
             <span className="hidden xl:inline">Painel Admin</span>
@@ -453,10 +453,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <AppButton
             type="button"
             size="sm"
-            variant="secondary"
+            variant="success"
             icon="fa-solid fa-database"
             onClick={onOpenGeneratedDatabase}
-            className="bg-emerald-950/70 hover:bg-emerald-900 text-emerald-300 border-emerald-800/80 hover:text-white min-h-[36px]"
+            className="!bg-emerald-600 hover:!bg-emerald-500 active:!bg-emerald-700 !text-white !border !border-emerald-500/80 font-semibold shadow-sm min-h-[36px]"
             title="Acessar banco de certificados já gerados por você para recuperar e exportar novamente"
           >
             <span className="hidden sm:inline">Meus Certificados</span>
@@ -467,10 +467,10 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         <AppButton
           type="button"
           size="sm"
-          variant="secondary"
+          variant="primary"
           icon="fa-solid fa-floppy-disk"
           onClick={onOpenProjectModal}
-          className="bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 hover:text-white min-h-[36px]"
+          className="!bg-slate-700 hover:!bg-slate-600 active:!bg-slate-800 !text-white !border !border-slate-500/80 font-semibold shadow-sm min-h-[36px]"
           title="Salvar projeto completo (.certproj) ou carregar arquivo"
         >
           <span className="hidden sm:inline">Projeto</span>
@@ -481,11 +481,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <AppButton
             type="button"
             size="sm"
-            variant="outline"
+            variant="primary"
             icon="fa-solid fa-user-check"
             onClick={onExportIndividual}
             disabled={isGenerating}
-            className="border-slate-700 text-slate-200 hover:bg-slate-800 hover:text-white hidden md:inline-flex min-h-[36px]"
+            className="!bg-slate-700 hover:!bg-slate-600 !text-white !border !border-slate-500/80 font-semibold hidden md:inline-flex min-h-[36px]"
             title={`Emitir certificado individual para ${currentStudentName || 'o aluno selecionado'}`}
           >
             <span>Emitir Individual</span>

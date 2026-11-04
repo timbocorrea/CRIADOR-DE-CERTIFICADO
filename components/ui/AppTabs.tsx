@@ -27,7 +27,7 @@ export const AppTabs: React.FC<AppTabsProps> = ({
       <div
         role="tablist"
         aria-orientation="horizontal"
-        className={`flex bg-slate-100 p-1 rounded-xl gap-1 border border-slate-200/60 ${className}`}
+        className={`flex bg-slate-100 dark:bg-slate-800/90 p-1 rounded-xl gap-1 border border-slate-200/60 dark:border-slate-700 ${className}`}
       >
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
@@ -41,8 +41,8 @@ export const AppTabs: React.FC<AppTabsProps> = ({
               onClick={() => onChange(tab.id)}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
                 isActive
-                  ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                  ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-200 shadow-sm border border-slate-200/50 dark:border-slate-600'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/60'
               }`}
             >
               {tab.icon && <i className={tab.icon}></i>}
