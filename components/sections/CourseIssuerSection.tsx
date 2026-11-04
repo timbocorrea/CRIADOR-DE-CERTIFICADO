@@ -309,6 +309,8 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
         title="Dados Gerais do Curso"
         description="Identificação do treinamento e carga horária"
         icon="fa-solid fa-graduation-cap"
+        headerClassName="max-lg:hidden"
+        contentClassName="p-3.5 sm:p-5"
         isCollapsible={true}
         isExpanded={isMobileViewport ? true : desktopExpanded.general}
         onToggleExpand={(exp) => setDesktopExpanded((prev) => ({ ...prev, general: exp }))}
@@ -416,6 +418,8 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
         title="Texto Base do Certificado"
         description="Fórmula de certificação impressa no anverso"
         icon="fa-solid fa-paragraph"
+        headerClassName="max-lg:hidden"
+        contentClassName="p-3.5 sm:p-5"
         isCollapsible={true}
         isExpanded={isMobileViewport ? true : desktopExpanded.basetext}
         onToggleExpand={(exp) => setDesktopExpanded((prev) => ({ ...prev, basetext: exp }))}
@@ -482,6 +486,8 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
         title="Instrutores e Assinaturas"
         description={`Profissionais responsáveis pelo treinamento (${data.instructors.length} de ${MAX_INSTRUCTORS})`}
         icon="fa-solid fa-chalkboard-user"
+        headerClassName="max-lg:hidden"
+        contentClassName="p-3.5 sm:p-5"
         isCollapsible={true}
         isExpanded={isMobileViewport ? true : desktopExpanded.instructors}
         onToggleExpand={(exp) => setDesktopExpanded((prev) => ({ ...prev, instructors: exp }))}
@@ -578,6 +584,8 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
         title="Instituição & Responsável Técnico"
         description="Identificação jurídica e registro profissional do emissor"
         icon="fa-solid fa-building"
+        headerClassName="max-lg:hidden"
+        contentClassName="p-3.5 sm:p-5"
         isCollapsible={true}
         isExpanded={isMobileViewport ? true : desktopExpanded.institution}
         onToggleExpand={(exp) => setDesktopExpanded((prev) => ({ ...prev, institution: exp }))}

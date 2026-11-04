@@ -13,6 +13,7 @@ export interface AppCardProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  headerClassName?: string;
   contentClassName?: string;
 }
 
@@ -29,6 +30,7 @@ export const AppCard: React.FC<AppCardProps> = ({
   children,
   footer,
   className = '',
+  headerClassName = '',
   contentClassName = 'p-5',
 }) => {
   const [internalExpanded, setInternalExpanded] = useState<boolean>(defaultExpanded);
@@ -62,7 +64,7 @@ export const AppCard: React.FC<AppCardProps> = ({
           onClick={toggleExpand}
           className={`px-4 sm:px-5 py-3.5 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/60 ${
             isCollapsible ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/90 select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600' : ''
-          }`}
+          } ${headerClassName}`}
         >
           <div className="flex items-center gap-2.5 min-w-0">
             {icon && (
