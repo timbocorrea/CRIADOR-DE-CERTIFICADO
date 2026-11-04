@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Student, ExtractedStudentCandidate } from '../../types';
 import { validateCPF, isDuplicateCPF } from '../../utils/security';
 import { parseStudentsBulkInput, splitDelimitedLine } from '../../utils/importParser';
@@ -62,6 +62,65 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
 
   // Estado para busca/filtro
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Submenu suspenso (exibe apenas 1 opção por vez em telas mobile, como na aba Curso)
+  type ParticipantsSubSection = 'individual' | 'smart_import' | 'list';
+  const [mobileSubSection, setMobileSubSection] = useState<ParticipantsSubSection>('individual');
+  const [isMobileSubMenuOpen, setIsMobileSubMenuOpen] = useState<boolean>(false);
+  const mobileSubMenuRef = useRef<HTMLDivElement>(null);
+
+  const participantsSubSections: { id: ParticipantsSubSection; label: string; description: string; icon: string }[] = [
+    {
+      id: 'individual',
+      label: 'Novo Participante (Cadastro Manual)',
+      description: 'Adicionar estudante individualmente com Nome e CPF',
+      icon: 'fa-solid fa-user-plus',
+    },
+    {
+      id: 'smart_import',
+      label: 'Importação em Lote & Conversor IA',
+      description: 'Importar fotos/prints do WhatsApp, planilhas ou texto',
+      icon: 'fa-solid fa-file-import',
+    },
+    {
+      id: 'list',
+      label: `Turma de Participantes (${students.length} cadastrado${students.length === 1 ? '' : 's'})`,
+      description: 'Lista de alunos, busca rápida e Nome de Destaque',
+      icon: 'fa-solid fa-users',
+    },
+  ];
+
+  const activeMobileSubInfo =
+    participantsSubSections.find((s) => s.id === mobileSubSection) || participantsSubSections[0];
+
+  const [desktopExpanded, setDesktopExpanded] = useState<Record<ParticipantsSubSection, boolean>>({
+    individual: true,
+    smart_import: true,
+    list: true,
+  });
+  const [isMobileViewport, setIsMobileViewport] = useState<boolean>(
+    () => typeof window !== 'undefined' && window.innerWidth < 1024
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobileViewport(window.innerWidth < 1024);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleOutside = (event: MouseEvent) => {
+      if (mobileSubMenuRef.current && !mobileSubMenuRef.current.contains(event.target as Node)) {
+        setIsMobileSubMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
 
   // Abre o modal de configurações de IA (global ou local)
   const handleOpenAISettingsModal = () => {
@@ -360,13 +419,93 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
   };
 
   return (
-    <div className="space-y-4 animate-fadeIn" onPaste={handlePaste}>
+    <div className="space-y-3 sm:space-y-4 animate-fadeIn" onPaste={handlePaste}>
+      {/* Seletor de Submenu Mobile (< lg): Permite selecionar uma opção e exibir apenas o campo dela na tela */}
+      <div ref={mobileSubMenuRef} className="lg:hidden relative">
+        <button
+          type="button"
+          onClick={() => setIsMobileSubMenuOpen((prev) => !prev)}
+          aria-expanded={isMobileSubMenuOpen}
+          aria-haspopup="listbox"
+          className="w-full p-3 rounded-xl bg-white dark:bg-slate-800/95 border-2 border-blue-500/70 dark:border-blue-600/80 shadow-sm flex items-center justify-between gap-3 text-left transition-all"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shrink-0 shadow-xs">
+              <i className={activeMobileSubInfo.icon} aria-hidden="true"></i>
+            </div>
+            <div className="min-w-0">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                Selecionar Opção de Alunos (Toque para trocar)
+              </span>
+              <span className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                {activeMobileSubInfo.label}
+              </span>
+            </div>
+          </div>
+
+          <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 flex items-center justify-center shrink-0">
+            <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${isMobileSubMenuOpen ? 'rotate-180' : ''}`}></i>
+          </div>
+        </button>
+
+        {isMobileSubMenuOpen && (
+          <div
+            role="listbox"
+            aria-label="Opções de Participantes e Alunos"
+            className="absolute left-0 right-0 mt-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-1.5 z-30 space-y-1 animate-fadeIn"
+          >
+            {participantsSubSections.map((section) => {
+              const isSelected = mobileSubSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => {
+                    setMobileSubSection(section.id);
+                    setIsMobileSubMenuOpen(false);
+                  }}
+                  className={`w-full p-2.5 rounded-lg flex items-center gap-2.5 text-left transition-colors ${
+                    isSelected
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs shrink-0 ${
+                      isSelected
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
+                    }`}
+                  >
+                    <i className={section.icon} aria-hidden="true"></i>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold truncate">{section.label}</p>
+                    <p className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                      {section.description}
+                    </p>
+                  </div>
+                  {isSelected && <i className="fa-solid fa-check text-xs shrink-0" aria-hidden="true"></i>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* 1. Formulário de Cadastro Individual */}
+      <div className={mobileSubSection === 'individual' ? 'block' : 'hidden lg:block'}>
       <AppCard
         title="Novo Participante"
         description="Cadastro manual de estudante para a turma"
         icon="fa-solid fa-user-plus"
-        defaultExpanded={true}
+        headerClassName="max-lg:hidden"
+        contentClassName="p-3.5 sm:p-5"
+        isCollapsible={true}
+        isExpanded={isMobileViewport ? true : desktopExpanded.individual}
+        onToggleExpand={(exp) => setDesktopExpanded((prev) => ({ ...prev, individual: exp }))}
       >
         <form onSubmit={handleAddSingle} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -427,14 +566,19 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
           </div>
         </form>
       </AppCard>
+      </div>
 
       {/* 2. Importação Massiva / Em Lote Inteligente */}
+      <div className={mobileSubSection === 'smart_import' ? 'block' : 'hidden lg:block'}>
       <AppCard
         title="Importação em Lote & Conversor Inteligente"
         description="Importe por arrastar arquivos, fotos/prints de WhatsApp ou planilhas"
         icon="fa-solid fa-file-import"
+        headerClassName="max-lg:hidden"
+        contentClassName="p-3.5 sm:p-5"
         isCollapsible={true}
-        defaultExpanded={true}
+        isExpanded={isMobileViewport ? true : desktopExpanded.smart_import}
+        onToggleExpand={(exp) => setDesktopExpanded((prev) => ({ ...prev, smart_import: exp }))}
         action={
           <AppButton
             type="button"
@@ -450,6 +594,22 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
         }
       >
         <div className="space-y-4">
+          {/* Atalho visível no mobile já que o cabeçalho do card fica oculto abaixo do seletor */}
+          <div className="lg:hidden flex items-center justify-between gap-2 pb-1 border-b border-slate-100 dark:border-slate-800">
+            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+              Extração por IA ou planilha
+            </span>
+            <AppButton
+              type="button"
+              variant="ghost"
+              size="xs"
+              icon="fa-solid fa-microchip"
+              onClick={handleOpenAISettingsModal}
+              className="text-[11px] text-blue-600 dark:text-blue-400"
+            >
+              Configurar IAs
+            </AppButton>
+          </div>
           {/* Zona Drag & Drop e Ctrl+V */}
           <div
             onDragOver={(e) => {
@@ -592,18 +752,24 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
           </div>
         </div>
       </AppCard>
+      </div>
 
       {/* 3. Lista e Busca de Participantes Cadastrados */}
+      <div className={mobileSubSection === 'list' ? 'block' : 'hidden lg:block'}>
       <AppCard
         title="Turma de Participantes"
         description="Lista de estudantes para os quais serão emitidos os certificados"
         icon="fa-solid fa-users"
+        headerClassName="max-lg:hidden"
+        contentClassName="p-3.5 sm:p-5"
         badge={
           <AppBadge variant={students.length > 0 ? 'default' : 'neutral'} size="sm">
             {students.length} cadastrado(s)
           </AppBadge>
         }
-        defaultExpanded={true}
+        isCollapsible={true}
+        isExpanded={isMobileViewport ? true : desktopExpanded.list}
+        onToggleExpand={(exp) => setDesktopExpanded((prev) => ({ ...prev, list: exp }))}
       >
         <div className="space-y-3">
           {/* Campo de Busca Rápida */}
@@ -726,6 +892,7 @@ export const ParticipantsSection: React.FC<ParticipantsSectionProps> = ({
           )}
         </div>
       </AppCard>
+      </div>
 
       {/* Modal de Revisão de Candidatos Extraídos */}
       <ImportReviewModal

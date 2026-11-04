@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CertificateData } from '../../types';
 import { readImageAsBase64 } from '../../utils/imageManager';
 import {
@@ -117,7 +117,106 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
   // Alternância entre Modo Padrão e Modo Avançado
   const [designMode, setDesignMode] = useState<'standard' | 'advanced'>('standard');
 
-  // Menu Suspenso / Filtro de Seção do Modo Avançado
+  // Submenu suspenso para Modo Padrão (< lg): exibe apenas 1 opção por vez em telas mobile
+  type StandardSubSection = 'alignment' | 'bold' | 'assets';
+  const [mobileStandardSection, setMobileStandardSection] = useState<StandardSubSection>('alignment');
+  const [isMobileStandardMenuOpen, setIsMobileStandardMenuOpen] = useState<boolean>(false);
+  const mobileStandardMenuRef = useRef<HTMLDivElement>(null);
+
+  const standardSubSections: { id: StandardSubSection; label: string; description: string; icon: string }[] = [
+    {
+      id: 'alignment',
+      label: 'Alinhamento do Texto Principal',
+      description: 'Esquerda, Centro, Direita ou Justificado na frente',
+      icon: 'fa-solid fa-align-center',
+    },
+    {
+      id: 'bold',
+      label: 'Destaque em Negrito nas Variáveis',
+      description: 'Marque quais variáveis devem receber tipografia em negrito',
+      icon: 'fa-solid fa-bold',
+    },
+    {
+      id: 'assets',
+      label: 'Ativos Visuais & Selos (Imagens)',
+      description: 'Imagem de fundo, assinatura principal e selo digital',
+      icon: 'fa-solid fa-images',
+    },
+  ];
+
+  const activeMobileStandardInfo =
+    standardSubSections.find((s) => s.id === mobileStandardSection) || standardSubSections[0];
+
+  const [standardDesktopExpanded, setStandardDesktopExpanded] = useState<Record<StandardSubSection, boolean>>({
+    alignment: true,
+    bold: true,
+    assets: true,
+  });
+
+  // Submenu suspenso para Modo Avançado (< lg): exibe apenas 1 opção por vez em telas mobile
+  type MobileAdvancedSection = 'dimensions' | 'offsets' | 'typography' | 'seal';
+  const [mobileAdvancedSection, setMobileAdvancedSection] = useState<MobileAdvancedSection>('dimensions');
+  const [isMobileAdvancedMenuOpen, setIsMobileAdvancedMenuOpen] = useState<boolean>(false);
+  const mobileAdvancedMenuRef = useRef<HTMLDivElement>(null);
+
+  const advancedSubSections: { id: MobileAdvancedSection; label: string; description: string; icon: string }[] = [
+    {
+      id: 'dimensions',
+      label: 'Dimensões, Margens, Bordas & Colunas',
+      description: 'Margens da borda, espessura e largura de cada coluna',
+      icon: 'fa-solid fa-ruler-combined',
+    },
+    {
+      id: 'offsets',
+      label: 'Ajustes de Posição (Vertical e Horizontal)',
+      description: 'Deslocamentos cima/baixo (V) e esquerda/direita (H)',
+      icon: 'fa-solid fa-up-down-left-right',
+    },
+    {
+      id: 'typography',
+      label: 'Tamanhos de Fontes & Nome de Destaque',
+      description: 'Tamanhos em pixels e exibição do Nome de Destaque',
+      icon: 'fa-solid fa-font',
+    },
+    {
+      id: 'seal',
+      label: 'Selo Digital e Efeitos',
+      description: 'Dimensões, opacidade e posição do carimbo',
+      icon: 'fa-solid fa-stamp',
+    },
+  ];
+
+  const activeMobileAdvancedInfo =
+    advancedSubSections.find((s) => s.id === mobileAdvancedSection) || advancedSubSections[0];
+
+  const [isMobileViewport, setIsMobileViewport] = useState<boolean>(
+    () => typeof window !== 'undefined' && window.innerWidth < 1024
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobileViewport(window.innerWidth < 1024);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleOutside = (event: MouseEvent) => {
+      if (mobileStandardMenuRef.current && !mobileStandardMenuRef.current.contains(event.target as Node)) {
+        setIsMobileStandardMenuOpen(false);
+      }
+      if (mobileAdvancedMenuRef.current && !mobileAdvancedMenuRef.current.contains(event.target as Node)) {
+        setIsMobileAdvancedMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
+
+  // Menu Suspenso / Filtro de Seção do Modo Avançado (Desktop)
   const [activeSectionFilter, setActiveSectionFilter] = useState<AdvancedSectionId>('all');
 
   // Controle de estado recolhido/expandido dos cards quando em visualização de todas as seções
@@ -228,13 +327,93 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
 
       {/* MODO PADRÃO (SIMPLIFICADO) */}
       {designMode === 'standard' && (
-        <div className="space-y-4 animate-fadeIn">
-          {/* Alinhamento do Texto */}
+        <div className="space-y-3 sm:space-y-4 animate-fadeIn">
+          {/* Seletor de Submenu Mobile (< lg): Permite selecionar uma opção do Modo Padrão e exibir apenas o campo dela na tela */}
+          <div ref={mobileStandardMenuRef} className="lg:hidden relative">
+            <button
+              type="button"
+              onClick={() => setIsMobileStandardMenuOpen((prev) => !prev)}
+              aria-expanded={isMobileStandardMenuOpen}
+              aria-haspopup="listbox"
+              className="w-full p-3 rounded-xl bg-white dark:bg-slate-800/95 border-2 border-blue-500/70 dark:border-blue-600/80 shadow-sm flex items-center justify-between gap-3 text-left transition-all"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shrink-0 shadow-xs">
+                  <i className={activeMobileStandardInfo.icon} aria-hidden="true"></i>
+                </div>
+                <div className="min-w-0">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    Selecionar Opção de Design (Toque para trocar)
+                  </span>
+                  <span className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {activeMobileStandardInfo.label}
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 flex items-center justify-center shrink-0">
+                <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${isMobileStandardMenuOpen ? 'rotate-180' : ''}`}></i>
+              </div>
+            </button>
+
+            {isMobileStandardMenuOpen && (
+              <div
+                role="listbox"
+                aria-label="Opções de Design (Modo Padrão)"
+                className="absolute left-0 right-0 mt-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-1.5 z-30 space-y-1 animate-fadeIn"
+              >
+                {standardSubSections.map((section) => {
+                  const isSelected = mobileStandardSection === section.id;
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => {
+                        setMobileStandardSection(section.id);
+                        setIsMobileStandardMenuOpen(false);
+                      }}
+                      className={`w-full p-2.5 rounded-lg flex items-center gap-2.5 text-left transition-colors ${
+                        isSelected
+                          ? 'bg-blue-600 text-white'
+                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs shrink-0 ${
+                          isSelected
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
+                        }`}
+                      >
+                        <i className={section.icon} aria-hidden="true"></i>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold truncate">{section.label}</p>
+                        <p className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                          {section.description}
+                        </p>
+                      </div>
+                      {isSelected && <i className="fa-solid fa-check text-xs shrink-0" aria-hidden="true"></i>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* 1. Alinhamento do Texto */}
+          <div className={mobileStandardSection === 'alignment' ? 'block' : 'hidden lg:block'}>
           <AppCard
             title="Alinhamento do Texto Principal"
             description="Orientação tipográfica do certificado na frente"
             icon="fa-solid fa-align-center"
-            defaultExpanded={true}
+            headerClassName="max-lg:hidden"
+            contentClassName="p-3.5 sm:p-5"
+            isCollapsible={true}
+            isExpanded={isMobileViewport ? true : standardDesktopExpanded.alignment}
+            onToggleExpand={(exp) => setStandardDesktopExpanded((prev) => ({ ...prev, alignment: exp }))}
           >
             <div className="grid grid-cols-4 gap-2">
               {[
@@ -265,13 +444,19 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
               })}
             </div>
           </AppCard>
+          </div>
 
-          {/* Destaque em Negrito nas Variáveis */}
+          {/* 2. Destaque em Negrito nas Variáveis */}
+          <div className={mobileStandardSection === 'bold' ? 'block' : 'hidden lg:block'}>
           <AppCard
             title="Destaque em Negrito"
             description="Marque quais variáveis devem receber tipografia em negrito"
             icon="fa-solid fa-bold"
-            defaultExpanded={true}
+            headerClassName="max-lg:hidden"
+            contentClassName="p-3.5 sm:p-5"
+            isCollapsible={true}
+            isExpanded={isMobileViewport ? true : standardDesktopExpanded.bold}
+            onToggleExpand={(exp) => setStandardDesktopExpanded((prev) => ({ ...prev, bold: exp }))}
           >
             <div className="grid grid-cols-2 gap-2">
               {AVAILABLE_VARIABLES.map((v) => {
@@ -301,13 +486,19 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
               })}
             </div>
           </AppCard>
+          </div>
 
-          {/* Ativos Visuais Rápidos (Upload de Imagens) */}
+          {/* 3. Ativos Visuais Rápidos (Upload de Imagens) */}
+          <div className={mobileStandardSection === 'assets' ? 'block' : 'hidden lg:block'}>
           <AppCard
             title="Ativos Visuais & Selos"
             description="Imagens institucionais, carimbos e assinaturas digitais"
             icon="fa-solid fa-images"
-            defaultExpanded={true}
+            headerClassName="max-lg:hidden"
+            contentClassName="p-3.5 sm:p-5"
+            isCollapsible={true}
+            isExpanded={isMobileViewport ? true : standardDesktopExpanded.assets}
+            onToggleExpand={(exp) => setStandardDesktopExpanded((prev) => ({ ...prev, assets: exp }))}
           >
             <div className="space-y-3">
               {/* Imagem de Fundo */}
@@ -422,14 +613,90 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
               </div>
             </div>
           </AppCard>
+          </div>
         </div>
       )}
 
       {/* MODO AVANÇADO (AJUSTES PRECISOS COM MENU SUSPENSO E SINCRONIZAÇÃO AUTOMÁTICA) */}
       {designMode === 'advanced' && (
-        <div className="space-y-4 animate-fadeIn">
-          {/* Menu Suspenso de Seleção de Seção & Ações de Recolhimento */}
-          <div className="p-3 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-2.5">
+        <div className="space-y-3 sm:space-y-4 animate-fadeIn">
+          {/* Seletor de Submenu Mobile (< lg): Permite selecionar uma opção do Modo Avançado e exibir apenas o campo dela na tela */}
+          <div ref={mobileAdvancedMenuRef} className="lg:hidden relative">
+            <button
+              type="button"
+              onClick={() => setIsMobileAdvancedMenuOpen((prev) => !prev)}
+              aria-expanded={isMobileAdvancedMenuOpen}
+              aria-haspopup="listbox"
+              className="w-full p-3 rounded-xl bg-white dark:bg-slate-800/95 border-2 border-blue-500/70 dark:border-blue-600/80 shadow-sm flex items-center justify-between gap-3 text-left transition-all"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shrink-0 shadow-xs">
+                  <i className={activeMobileAdvancedInfo.icon} aria-hidden="true"></i>
+                </div>
+                <div className="min-w-0">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    Selecionar Ajuste Avançado (Toque para trocar)
+                  </span>
+                  <span className="block text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                    {activeMobileAdvancedInfo.label}
+                  </span>
+                </div>
+              </div>
+
+              <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 flex items-center justify-center shrink-0">
+                <i className={`fa-solid fa-chevron-down text-xs transition-transform duration-200 ${isMobileAdvancedMenuOpen ? 'rotate-180' : ''}`}></i>
+              </div>
+            </button>
+
+            {isMobileAdvancedMenuOpen && (
+              <div
+                role="listbox"
+                aria-label="Opções de Ajustes Avançados de Design"
+                className="absolute left-0 right-0 mt-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-1.5 z-30 space-y-1 animate-fadeIn"
+              >
+                {advancedSubSections.map((section) => {
+                  const isSelected = mobileAdvancedSection === section.id;
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => {
+                        setMobileAdvancedSection(section.id);
+                        setIsMobileAdvancedMenuOpen(false);
+                      }}
+                      className={`w-full p-2.5 rounded-lg flex items-center gap-2.5 text-left transition-colors ${
+                        isSelected
+                          ? 'bg-blue-600 text-white'
+                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs shrink-0 ${
+                          isSelected
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400'
+                        }`}
+                      >
+                        <i className={section.icon} aria-hidden="true"></i>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold truncate">{section.label}</p>
+                        <p className={`text-[10px] truncate ${isSelected ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                          {section.description}
+                        </p>
+                      </div>
+                      {isSelected && <i className="fa-solid fa-check text-xs shrink-0" aria-hidden="true"></i>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Menu Suspenso de Seleção de Seção & Ações de Recolhimento (Desktop lg+) */}
+          <div className="hidden lg:block p-3 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-2.5">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
@@ -505,12 +772,15 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
 
           {/* 1. Dimensões, Margens, Bordas & Colunas */}
           {showDimensions && (
+            <div className={mobileAdvancedSection === 'dimensions' ? 'block' : 'hidden lg:block'}>
             <AppCard
               title="Dimensões, Margens, Bordas & Colunas"
               description="Margens da borda, espessura e largura de cada coluna do documento"
               icon="fa-solid fa-ruler-combined"
+              headerClassName="max-lg:hidden"
+              contentClassName="p-3.5 sm:p-5"
               isCollapsible={true}
-              isExpanded={activeSectionFilter !== 'all' || expandedCards.dimensions}
+              isExpanded={isMobileViewport || activeSectionFilter !== 'all' || expandedCards.dimensions}
               onToggleExpand={() => toggleCard('dimensions')}
             >
               <div className="space-y-4">
@@ -773,16 +1043,20 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                 </FaceGroup>
               </div>
             </AppCard>
+            </div>
           )}
 
           {/* 2. Ajustes de Posição Vertical e Horizontal (Todos os Campos) */}
           {showOffsets && (
+            <div className={mobileAdvancedSection === 'offsets' ? 'block' : 'hidden lg:block'}>
             <AppCard
               title="Ajustes de Posição (Vertical e Horizontal)"
               description="Deslocamentos milimétricos para cima/baixo (V) e esquerda/direita (H) em todos os campos"
               icon="fa-solid fa-up-down-left-right"
+              headerClassName="max-lg:hidden"
+              contentClassName="p-3.5 sm:p-5"
               isCollapsible={true}
-              isExpanded={activeSectionFilter !== 'all' || expandedCards.offsets}
+              isExpanded={isMobileViewport || activeSectionFilter !== 'all' || expandedCards.offsets}
               onToggleExpand={() => toggleCard('offsets')}
             >
               <div className="space-y-4">
@@ -1247,16 +1521,20 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                 </FaceGroup>
               </div>
             </AppCard>
+            </div>
           )}
 
           {/* 3. Tamanhos de Fontes Específicos */}
           {showTypography && (
+            <div className={mobileAdvancedSection === 'typography' ? 'block' : 'hidden lg:block'}>
             <AppCard
               title="Tamanhos de Fontes por Elemento"
               description="Definição precisa em pixels das fontes do documento"
               icon="fa-solid fa-font"
+              headerClassName="max-lg:hidden"
+              contentClassName="p-3.5 sm:p-5"
               isCollapsible={true}
-              isExpanded={activeSectionFilter !== 'all' || expandedCards.typography}
+              isExpanded={isMobileViewport || activeSectionFilter !== 'all' || expandedCards.typography}
               onToggleExpand={() => toggleCard('typography')}
             >
               <div className="space-y-4">
@@ -1560,16 +1838,20 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                 </FaceGroup>
               </div>
             </AppCard>
+            </div>
           )}
 
           {/* 4. Controles do Selo Digital */}
           {showSeal && (
+            <div className={mobileAdvancedSection === 'seal' ? 'block' : 'hidden lg:block'}>
             <AppCard
               title="Selo Digital e Efeitos"
               description="Dimensões, opacidade e posição do carimbo de autenticidade"
               icon="fa-solid fa-stamp"
+              headerClassName="max-lg:hidden"
+              contentClassName="p-3.5 sm:p-5"
               isCollapsible={true}
-              isExpanded={activeSectionFilter !== 'all' || expandedCards.seal}
+              isExpanded={isMobileViewport || activeSectionFilter !== 'all' || expandedCards.seal}
               onToggleExpand={() => toggleCard('seal')}
             >
               <FaceGroup
@@ -1653,6 +1935,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                 </div>
               </FaceGroup>
             </AppCard>
+            </div>
           )}
         </div>
       )}
