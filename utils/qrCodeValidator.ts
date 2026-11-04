@@ -52,13 +52,14 @@ export function maskStudentCpfForPublicRegistry(cpf?: string): string {
  * no formato CM-ANO-XXXXXX (ex: CM-2026-8F4K9A).
  */
 export function generateStudentValidationCode(data: CertificateData, student: Student | null): string {
+  const idPart = (student?.id || 'PREVIEW').trim().toUpperCase();
   const name = (student?.name || 'ALUNO DEMONSTRACAO').trim().toUpperCase();
   const cpfDigits = (student?.cpf || '00000000000').replace(/\D/g, '');
   const course = (data.courseName || 'CURSO PADRAO').trim().toUpperCase();
   const date = (data.courseDate || '').trim();
   const company = (data.companyName || '').trim().toUpperCase();
 
-  const hash = computeDeterministicHash(`${name}|${cpfDigits}|${course}|${date}|${company}`);
+  const hash = computeDeterministicHash(`${idPart}|${name}|${cpfDigits}|${course}|${date}|${company}`);
   const yearMatch = date.match(/\b(20\d{2})\b/);
   const year = yearMatch ? yearMatch[1] : new Date().getFullYear().toString();
 

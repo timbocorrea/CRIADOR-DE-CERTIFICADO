@@ -22,6 +22,7 @@ import { syncCustomFontsStylesheet } from './utils/fontManager';
 import { PreviewToolbar } from './components/preview/PreviewToolbar';
 import { CertificateWorkspace } from './components/preview/CertificateWorkspace';
 import { LoginScreen } from './components/auth/LoginScreen';
+import { PwaInstallPromptBanner } from './components/pwa/PwaInstallPromptBanner';
 import {
   getCurrentOperatorSession,
   logoutOperator,
@@ -616,6 +617,7 @@ const App: React.FC = () => {
   return (
     <ToastProvider>
       <AppContent />
+      <PwaInstallPromptBanner />
     </ToastProvider>
   );
 };
