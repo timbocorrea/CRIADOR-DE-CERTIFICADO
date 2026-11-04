@@ -179,7 +179,7 @@ const AppContent: React.FC = () => {
   }, [handleToggleZoomMode]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-900 font-sans text-slate-800 antialiased overflow-hidden">
+    <div className="h-[100dvh] max-h-[100dvh] flex flex-col bg-slate-900 font-sans text-slate-800 antialiased overflow-hidden">
       {/* 1. Barra Superior Corporativa com Menus Responsivos */}
       <AppHeader
         courseName={data.courseName}

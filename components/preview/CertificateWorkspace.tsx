@@ -67,8 +67,10 @@ export const CertificateWorkspace: React.FC<CertificateWorkspaceProps> = React.m
   return (
     <div
       ref={containerRef}
-      className={`flex-1 bg-slate-200/70 dark:bg-slate-950 p-2 sm:p-4 overflow-auto flex flex-col items-center relative select-none scrollbar-thin scrollbar-thumb-slate-400 dark:scrollbar-thumb-slate-700 ${
-        zoomMode === 'auto' ? 'justify-center' : 'justify-start'
+      className={`flex-1 bg-slate-200/70 dark:bg-slate-950 p-2 sm:p-4 flex flex-col items-center relative select-none scrollbar-thin scrollbar-thumb-slate-400 dark:scrollbar-thumb-slate-700 ${
+        zoomMode === 'auto'
+          ? 'overflow-hidden justify-center'
+          : 'overflow-auto justify-start'
       }`}
     >
       {/* Container de Pré-visualização com Enquadramento Inteiro e Zoom Interativo */}
