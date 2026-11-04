@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
-import { useCertificateData } from './hooks/useCertificateData';
+import { useCertificateData, INITIAL_CERTIFICATE_DATA } from './hooks/useCertificateData';
 import { useProjectPersistence } from './hooks/useProjectPersistence';
 import { usePDFExportProcess } from './hooks/usePDFExportProcess';
 import { useTheme } from './hooks/useTheme';
@@ -213,6 +213,19 @@ const AppContent: React.FC = () => {
     toast.info('Sessão Encerrada', 'Seu rascunho permanece salvo automaticamente no seu usuário.');
   }, [toast]);
 
+  const handleClearDraftOutside = useCallback(() => {
+    if (
+      confirm(
+        'Deseja realmente limpar o rascunho atual e voltar o certificado para o padrão inicial?'
+      )
+    ) {
+      resetSavedDraft();
+      loadFullProject({ ...INITIAL_CERTIFICATE_DATA });
+      setSelectedZone(null);
+      toast.info('Rascunho Limpo', 'A edição atual foi zerada para o modelo padrão.');
+    }
+  }, [resetSavedDraft, loadFullProject, toast]);
+
   // Se o operador ainda não autenticou seu login/senha, exibe a Tela de Acesso Personalizado
   if (!operatorSession) {
     return (
@@ -255,6 +268,7 @@ const AppContent: React.FC = () => {
         autoSaveStatus={autoSaveStatus}
         lastSavedTime={lastSavedTime}
         onOpenProjectModal={() => setIsPersistenceModalOpen(true)}
+        onClearDraft={handleClearDraftOutside}
         onOpenExportModal={() => setIsExportModalOpen(true)}
         onExportIndividual={() => startExport('individual')}
         onOpenAISettings={() => setIsAISettingsModalOpen(true)}

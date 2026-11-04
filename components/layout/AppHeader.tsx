@@ -9,7 +9,8 @@ interface AppHeaderProps {
   studentsCount: number;
   autoSaveStatus: 'saved' | 'saving' | 'error' | 'idle';
   lastSavedTime: Date | null;
-  onOpenProjectModal: () => void;
+  onOpenProjectModal?: () => void;
+  onClearDraft?: () => void;
   onOpenExportModal: () => void;
   onExportIndividual: () => void;
   onOpenAISettings?: () => void;
@@ -33,6 +34,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   autoSaveStatus,
   lastSavedTime,
   onOpenProjectModal,
+  onClearDraft,
   onOpenExportModal,
   onExportIndividual,
   onOpenAISettings,
@@ -288,18 +290,20 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   </button>
                 )}
 
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setIsActionMenuOpen(false);
-                    onOpenProjectModal();
-                  }}
-                  className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center gap-2.5 transition-colors"
-                >
-                  <i className="fa-solid fa-floppy-disk text-xs text-blue-300" aria-hidden="true"></i>
-                  <span>Gerenciar Projeto (.certproj)</span>
-                </button>
+                {onClearDraft && (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      onClearDraft();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 border border-rose-500/80 flex items-center gap-2.5 transition-colors shadow-xs"
+                  >
+                    <i className="fa-solid fa-eraser text-xs text-rose-100" aria-hidden="true"></i>
+                    <span>Limpar Rascunho (Zerar Edição)</span>
+                  </button>
+                )}
 
                 {onOpenAISettings && (
                   <button
@@ -463,18 +467,20 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </AppButton>
         )}
 
-        {/* Project Management Modal Button */}
-        <AppButton
-          type="button"
-          size="sm"
-          variant="primary"
-          icon="fa-solid fa-floppy-disk"
-          onClick={onOpenProjectModal}
-          className="!bg-slate-700 hover:!bg-slate-600 active:!bg-slate-800 !text-white !border !border-slate-500/80 font-semibold shadow-sm min-h-[36px]"
-          title="Salvar projeto completo (.certproj) ou carregar arquivo"
-        >
-          <span className="hidden sm:inline">Projeto</span>
-        </AppButton>
+        {/* Limpar Rascunho (Fora, direto no cabeçalho, substituindo o botão Projeto) */}
+        {onClearDraft && (
+          <AppButton
+            type="button"
+            size="sm"
+            variant="danger"
+            icon="fa-solid fa-eraser"
+            onClick={onClearDraft}
+            className="!bg-rose-600 hover:!bg-rose-500 active:!bg-rose-700 !text-white !border !border-rose-500/80 font-semibold shadow-sm min-h-[36px]"
+            title="Limpar rascunho atual e zerar o certificado para o padrão inicial"
+          >
+            <span className="hidden sm:inline">Limpar Rascunho</span>
+          </AppButton>
+        )}
 
         {/* Emitir Individual (Aluno Ativo) */}
         {studentsCount > 0 && (
