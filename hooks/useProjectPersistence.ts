@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { CertificateData } from '../types';
+import { INITIAL_CERTIFICATE_DATA } from './useCertificateData';
 import {
   saveNonSensitiveConfig,
   loadNonSensitiveConfig,
   clearSavedConfig,
+  saveFullUserWorkspace,
+  loadFullUserWorkspace,
+  clearFullUserWorkspace,
   exportProjectPackage,
   importProjectPackage,
   ImportProjectResult
@@ -13,27 +17,50 @@ export type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'disabled';
 
 export function useProjectPersistence(
   data: CertificateData,
-  onRestoreConfig?: (restored: Partial<CertificateData>) => void
+  onRestoreConfig?: (restored: Partial<CertificateData>) => void,
+  userId: string = 'default'
 ) {
   const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveStatus>('idle');
   const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
   const debounceTimerRef = useRef<any>(null);
-  const hasInitializedRef = useRef<boolean>(false);
+  const loadedUserRef = useRef<string | null>(null);
+  const latestDataRef = useRef<CertificateData>(data);
+  const latestUserIdRef = useRef<string>(userId);
 
-  // Restaura configurações salvas automaticamente na montagem inicial
+  latestDataRef.current = data;
+  latestUserIdRef.current = userId;
+
+  // Restaura o projeto completo salvo para o usuário logado ao entrar ou trocar de usuário
   useEffect(() => {
-    if (!hasInitializedRef.current) {
-      hasInitializedRef.current = true;
-      const savedConfig = loadNonSensitiveConfig();
-      if (savedConfig && onRestoreConfig) {
-        onRestoreConfig(savedConfig);
+    const normalizedUser = (userId || 'default').trim().toLowerCase();
+    if (loadedUserRef.current !== normalizedUser) {
+      loadedUserRef.current = normalizedUser;
+      const savedWorkspace = loadFullUserWorkspace(normalizedUser);
+      if (savedWorkspace && onRestoreConfig) {
+        onRestoreConfig({
+          ...INITIAL_CERTIFICATE_DATA,
+          ...savedWorkspace
+        });
+        setAutoSaveStatus('saved');
+        setLastSavedTime(new Date());
+      } else {
+        const savedConfig = loadNonSensitiveConfig();
+        if (savedConfig && onRestoreConfig) {
+          onRestoreConfig({
+            ...INITIAL_CERTIFICATE_DATA,
+            ...savedConfig
+          });
+        } else if (onRestoreConfig) {
+          onRestoreConfig({ ...INITIAL_CERTIFICATE_DATA });
+        }
       }
     }
-  }, [onRestoreConfig]);
+  }, [userId, onRestoreConfig]);
 
-  // Auto-save debounced apenas de configurações não sensíveis
+  // Auto-save imediato a cada alteração para o usuário logado
   useEffect(() => {
-    if (!hasInitializedRef.current) return;
+    const normalizedUser = (userId || 'default').trim().toLowerCase();
+    if (loadedUserRef.current !== normalizedUser) return;
 
     setAutoSaveStatus('saving');
     if (debounceTimerRef.current) {
@@ -41,21 +68,49 @@ export function useProjectPersistence(
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      const success = saveNonSensitiveConfig(data);
-      if (success) {
+      const fullSaved = saveFullUserWorkspace(normalizedUser, data);
+      saveNonSensitiveConfig(data);
+      if (fullSaved) {
         setAutoSaveStatus('saved');
         setLastSavedTime(new Date());
       } else {
         setAutoSaveStatus('idle');
       }
-    }, 1200);
+    }, 250);
 
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [data]);
+  }, [data, userId]);
+
+  // Garantia contra fechamento acidental da aba/navegador: grava sincronamente antes de fechar
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const flushSaveSynchronously = () => {
+      const activeUser = (latestUserIdRef.current || 'default').trim().toLowerCase();
+      saveFullUserWorkspace(activeUser, latestDataRef.current);
+      saveNonSensitiveConfig(latestDataRef.current);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushSaveSynchronously();
+      }
+    };
+
+    window.addEventListener('beforeunload', flushSaveSynchronously);
+    window.addEventListener('pagehide', flushSaveSynchronously);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', flushSaveSynchronously);
+      window.removeEventListener('pagehide', flushSaveSynchronously);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // Exportar Projeto Completo como arquivo para download
   const exportFullProject = useCallback(async (password?: string): Promise<{ success: boolean; error?: string }> => {
@@ -86,12 +141,14 @@ export function useProjectPersistence(
     return importProjectPackage(jsonText, password);
   }, []);
 
-  // Limpar Rascunho do LocalStorage
+  // Limpar Rascunho do LocalStorage (do usuário atual)
   const resetSavedDraft = useCallback(() => {
+    const normalizedUser = (userId || 'default').trim().toLowerCase();
+    clearFullUserWorkspace(normalizedUser);
     clearSavedConfig();
     setAutoSaveStatus('idle');
     setLastSavedTime(null);
-  }, []);
+  }, [userId]);
 
   return {
     autoSaveStatus,

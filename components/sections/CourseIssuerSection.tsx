@@ -316,6 +316,67 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
         onToggleExpand={(exp) => setDesktopExpanded((prev) => ({ ...prev, general: exp }))}
       >
         <div className="space-y-3">
+          {/* Campos Separados para Título e Subtítulo do Certificado */}
+          <div className="p-3 rounded-xl bg-blue-50/50 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/60 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-800 dark:text-blue-300 flex items-center gap-1.5">
+                <i className="fa-solid fa-heading text-[11px]" aria-hidden="true"></i>
+                Cabeçalho do Certificado (Campos Separados)
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <AppInput
+                id="certificateTitle"
+                name="certificateTitle"
+                label="Título Principal"
+                placeholder="Ex: CERTIFICADO"
+                value={data.certificateTitle ?? 'CERTIFICADO'}
+                onChange={onChange}
+                icon="fa-solid fa-font"
+              />
+
+              <AppInput
+                id="certificateSubtitle"
+                name="certificateSubtitle"
+                label="Subtítulo / Finalidade"
+                placeholder="Ex: DE PARTICIPAÇÃO ou DE CONCLUSÃO"
+                value={data.certificateSubtitle ?? 'DE PARTICIPAÇÃO'}
+                onChange={onChange}
+                icon="fa-solid fa-tag"
+              />
+            </div>
+
+            {/* Atalhos rápidos para o Subtítulo */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mr-1">
+                Sugestões rápidas:
+              </span>
+              {['DE PARTICIPAÇÃO', 'DE CONCLUSÃO', 'DE CAPACITAÇÃO', 'DE TREINAMENTO', 'DE QUALIFICAÇÃO'].map((preset) => {
+                const isSelected = (data.certificateSubtitle ?? 'DE PARTICIPAÇÃO').trim().toUpperCase() === preset;
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => {
+                      const syntheticEvent = {
+                        target: { name: 'certificateSubtitle', value: preset },
+                      } as React.ChangeEvent<HTMLInputElement>;
+                      onChange(syntheticEvent);
+                    }}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${
+                      isSelected
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400 hover:text-blue-600'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <AppInput
             id="courseName"
             name="courseName"

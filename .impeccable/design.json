@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T10:56:00.000Z",
+  "title": "Design System: CertificaMaster",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Corporate Blue",
+        "canonical": "#2563eb",
+        "tonalRamp": ["#1e3a8a", "#1e40af", "#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#dbeafe"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Slate Accent",
+        "canonical": "#f1f5f9",
+        "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f8fafc"]
+      },
+      "accent-gold": {
+        "role": "tertiary",
+        "displayName": "Academic Gold",
+        "canonical": "#d97706",
+        "tonalRamp": ["#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fef3c7"]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Canvas White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#020617", "#0f172a", "#334155", "#64748b", "#cbd5e1", "#e2e8f0", "#f8fafc", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display Title", "purpose": "Título solene de honraria no certificado (Playfair Display)." },
+      "script": { "displayName": "Script Signature", "purpose": "Assinatura protocolar institucional (Alex Brush)." },
+      "headline": { "displayName": "UI Headline", "purpose": "Títulos de áreas funcionais e cabeçalhos de tela (Inter)." },
+      "body": { "displayName": "Body Text", "purpose": "Textos de leitura, campos e tabelas curriculares (Inter)." },
+      "label": { "displayName": "UI Label", "purpose": "Rótulos de campos, badges e metadados de rodapé (Inter)." }
+    },
+    "shadows": [
+      { "name": "card-rest", "value": "0 1px 2px 0 rgba(0, 0, 0, 0.05)", "purpose": "Elevação padrão para cards estruturais." },
+      { "name": "modal-dialog", "value": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)", "purpose": "Elevação de destaque para modais de persistência e exportação." },
+      { "name": "document-sheet", "value": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)", "purpose": "Destaca a folha A4 flutuante contra a bancada de trabalho." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Transição suave padrão para estados de foco, hover e abertura de cards." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Botão de ação prioritária com feedback de foco duplo.",
+      "html": "<button class=\"ds-btn-primary\">Exportar PDF</button>",
+      "css": ".ds-btn-primary { background: #2563eb; color: #ffffff; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; border-radius: 8px; border: none; cursor: pointer; transition: background 0.2s, box-shadow 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); } .ds-btn-primary:hover { background: #1d4ed8; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #2563eb; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Botão de apoio para ações neutras ou cancelamento.",
+      "html": "<button class=\"ds-btn-secondary\">Cancelar</button>",
+      "css": ".ds-btn-secondary { background: #f1f5f9; color: #334155; padding: 8px 16px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: background 0.2s; } .ds-btn-secondary:hover { background: #e2e8f0; }"
+    },
+    {
+      "name": "Card Container",
+      "kind": "card",
+      "refersTo": "card-container",
+      "description": "Container estrutural com cabeçalho retrátil e borda perimetral suave.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">Dados do Curso</h3></div><div class=\"ds-card-body\"><p>Conteúdo do formulário</p></div></div>",
+      "css": ".ds-card { background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); overflow: hidden; font-family: 'Inter', sans-serif; } .ds-card-header { padding: 14px 20px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; } .ds-card-title { margin: 0; font-size: 14px; font-weight: 600; color: #1e293b; } .ds-card-body { padding: 20px; color: #334155; font-size: 14px; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Campo de entrada de texto com rótulo e anel de foco expansivo.",
+      "html": "<div class=\"ds-input-group\"><label class=\"ds-label\">Nome do Aluno</label><input type=\"text\" class=\"ds-input\" placeholder=\"Ex: Carlos Eduardo Silva\" /></div>",
+      "css": ".ds-input-group { display: flex; flex-direction: column; gap: 6px; font-family: 'Inter', sans-serif; } .ds-label { font-size: 12px; font-weight: 600; color: #334155; } .ds-input { padding: 8px 12px; font-size: 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: #ffffff; color: #1e293b; outline: none; transition: border-color 0.2s, box-shadow 0.2s; } .ds-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Solemn Academic Guilloche",
+    "overview": "O CertificaMaster combina a solenidade cerimonial da tradição acadêmica clássica com a precisão minimalista de ferramentas administrativas de alta densidade técnica. A interface operacional equilibra a sobriedade institucional exigida na emissão de documentos oficiais com uma ergonomia de trabalho moderna, dividida em quatro áreas de foco claras.",
+    "keyCharacteristics": [
+      "Duas Camadas Visuais Coerentes: Interface utilitária (Slate & Indigo) vs. Canvas nobre (Playfair Display & Ouro).",
+      "Sobriedade Funcional: Acentos de cor reservados para ações primárias e confirmações.",
+      "Micro-ritmo Consistente: Grade espacial modular de 4px/8px em toda a aplicação.",
+      "Acessibilidade Universal: Contraste WCAG 2.2 AA e foco visível em 100% dos controles."
+    ],
+    "rules": [
+      {
+        "name": "The Rarity of Gold Rule",
+        "body": "O tom dourado (#d97706) é restrito a elementos de chancelaria e selos oficiais no documento emitido.",
+        "section": "colors"
+      },
+      {
+        "name": "The High-Contrast Slate Rule",
+        "body": "Textos sobre superfícies brancas utilizam invariavelmente Slate 800 ou Slate 900 (contraste >= 7:1).",
+        "section": "colors"
+      },
+      {
+        "name": "The Document Sans Prohibition Rule",
+        "body": "Nenhum certificado final pode utilizar fontes Sans-serif nos títulos solenes ou nas assinaturas.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Form Rule",
+        "body": "Campos de input descansam sem sombras; ganham anel de foco destacado apenas quando ativos.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preservar a paridade duplex estrita em todas as telas de pré-visualização e geração de PDF.",
+      "Do validar algorítmicamente todos os CPFs importados via CSV.",
+      "Do manter a tipografia Playfair Display e Alex Brush no certificado e Inter na interface.",
+      "Do garantir anéis de foco visíveis em todos os elementos interativos."
+    ],
+    "donts": [
+      "Don't alterar as proporções ou margens do certificado para formatos diferentes de A4 Paisagem.",
+      "Don't introduzir sombras pesadas ou gradientes agressivos na interface.",
+      "Don't injetar scripts ou atributos inline em SVGs.",
+      "Don't permitir ações destrutivas sem modal de confirmação."
+    ]
+  }
+}
+

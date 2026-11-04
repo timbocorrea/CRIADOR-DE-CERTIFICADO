@@ -20,6 +20,8 @@ interface AppHeaderProps {
   onToggleTheme?: () => void;
   mobileView?: 'split' | 'editor' | 'preview';
   onSelectMobileView?: (view: 'split' | 'editor' | 'preview') => void;
+  operatorName?: string;
+  onLogout?: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -38,6 +40,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onToggleTheme,
   mobileView = 'split',
   onSelectMobileView,
+  operatorName,
+  onLogout,
 }) => {
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const actionMenuRef = useRef<HTMLDivElement>(null);
@@ -89,20 +93,27 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         {/* Persistence Status Badge */}
         <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-slate-800 text-xs shrink-0">
           {autoSaveStatus === 'saved' ? (
-            <div className="flex items-center gap-1.5 text-emerald-400 text-xs" title="Layout não-sensível salvo localmente">
-              <i className="fa-solid fa-circle-check text-xs" aria-hidden="true"></i>
-              <span>Layout Salvo</span>
+            <div className="flex items-center gap-1.5 text-emerald-400 text-xs" title="Todas as alterações salvas automaticamente para o seu usuário">
+              <i className="fa-solid fa-cloud-arrow-up text-xs" aria-hidden="true"></i>
+              <span>Auto-Save Ativo</span>
             </div>
           ) : autoSaveStatus === 'saving' ? (
             <div className="flex items-center gap-1.5 text-blue-400 text-xs">
               <i className="fa-solid fa-circle-notch fa-spin text-xs" aria-hidden="true"></i>
-              <span>Salvando preferências...</span>
+              <span>Salvando edição...</span>
             </div>
           ) : null}
 
+          {operatorName && (
+            <span className="px-2 py-0.5 rounded-md bg-slate-800 border border-slate-700 text-slate-300 font-semibold flex items-center gap-1.5">
+              <i className="fa-solid fa-user-check text-blue-400 text-[10px]" aria-hidden="true"></i>
+              <span>{operatorName}</span>
+            </span>
+          )}
+
           {studentsCount > 0 && (
             <AppBadge variant="info" size="sm" icon="fa-solid fa-shield-halved">
-              {studentsCount} aluno(s) em memória
+              {studentsCount} aluno(s) salvos
             </AppBadge>
           )}
         </div>
@@ -308,6 +319,29 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   </button>
                 </div>
               )}
+
+              {/* Seção 4: Operador Autenticado e Sair */}
+              {onLogout && (
+                <div className="p-1 pt-1.5">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setIsActionMenuOpen(false);
+                      onLogout();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-red-300 hover:bg-red-950/50 flex items-center justify-between transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <i className="fa-solid fa-right-from-bracket text-xs text-red-400" aria-hidden="true"></i>
+                      <span className="truncate">Sair ({operatorName || 'Operador'})</span>
+                    </div>
+                    <span className="text-[10px] text-red-300 bg-red-950/70 px-1.5 py-0.5 rounded border border-red-800/70">
+                      Trocar
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -403,6 +437,19 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <span className="hidden xs:inline">Exportar PDF</span>
           <span className="xs:hidden">PDF</span>
         </AppButton>
+
+        {/* Sair / Trocar Operador */}
+        {onLogout && (
+          <button
+            type="button"
+            onClick={onLogout}
+            title={`Sair da conta (${operatorName || 'Operador'})`}
+            aria-label="Sair ou trocar usuário"
+            className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800 hover:bg-red-950/70 hover:border-red-800 text-slate-300 hover:text-red-300 transition-all text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+          >
+            <i className="fa-solid fa-right-from-bracket text-xs" aria-hidden="true"></i>
+          </button>
+        )}
       </div>
     </header>
   );

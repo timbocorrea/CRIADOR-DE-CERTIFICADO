@@ -11,6 +11,7 @@ interface DesignSectionProps {
   previewPage?: 1 | 2;
   onSelectPage?: (page: 1 | 2) => void;
   onSliderChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCheckboxChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSetTextAlign: (align: 'left' | 'center' | 'right' | 'justify') => void;
   onToggleBoldVariable: (variable: string) => void;
   onSetImageField: (field: 'bgImage' | 'signatureImage' | 'digitalSeal', base64: string | null) => void;
@@ -107,6 +108,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
   previewPage = 1,
   onSelectPage,
   onSliderChange,
+  onCheckboxChange,
   onSetTextAlign,
   onToggleBoldVariable,
   onSetImageField,
@@ -773,11 +775,11 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
             </AppCard>
           )}
 
-          {/* 2. Ajustes de Posição e Deslocamento Vertical */}
+          {/* 2. Ajustes de Posição Vertical e Horizontal (Todos os Campos) */}
           {showOffsets && (
             <AppCard
-              title="Ajustes de Posição (Offsets Verticais)"
-              description="Deslocamentos milimétricos dos blocos de conteúdo"
+              title="Ajustes de Posição (Vertical e Horizontal)"
+              description="Deslocamentos milimétricos para cima/baixo (V) e esquerda/direita (H) em todos os campos"
               icon="fa-solid fa-up-down-left-right"
               isCollapsible={true}
               isExpanded={activeSectionFilter !== 'all' || expandedCards.offsets}
@@ -791,40 +793,269 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   onSelectPage={onSelectPage}
                   title="FRENTE (Página 1)"
                 >
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Título</span>
-                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.titleVerticalOffset}px</span>
+                  <div className="space-y-3">
+                    {/* 1. Título Principal */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-heading text-blue-500 text-[10px]"></i>
+                        <span>Título Principal</span>
                       </div>
-                      <input
-                        type="range"
-                        name="titleVerticalOffset"
-                        min="-200"
-                        max="200"
-                        value={data.titleVerticalOffset}
-                        onPointerDown={() => ensurePreviewPage(1)}
-                        onFocus={() => ensurePreviewPage(1)}
-                        onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
-                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.titleVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="titleVerticalOffset"
+                            min="-250"
+                            max="250"
+                            value={data.titleVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.titleHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="titleHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.titleHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Assinaturas</span>
-                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.signaturesVerticalOffset}px</span>
+
+                    {/* 2. Subtítulo */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-tag text-blue-500 text-[10px]"></i>
+                        <span>Subtítulo</span>
                       </div>
-                      <input
-                        type="range"
-                        name="signaturesVerticalOffset"
-                        min="-200"
-                        max="200"
-                        value={data.signaturesVerticalOffset}
-                        onPointerDown={() => ensurePreviewPage(1)}
-                        onFocus={() => ensurePreviewPage(1)}
-                        onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
-                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.subtitleVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="subtitleVerticalOffset"
+                            min="-200"
+                            max="200"
+                            value={data.subtitleVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.subtitleHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="subtitleHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.subtitleHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Nome de Destaque */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-signature text-blue-500 text-[10px]"></i>
+                        <span>Nome de Destaque</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.highlightNameVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="highlightNameVerticalOffset"
+                            min="-250"
+                            max="250"
+                            value={data.highlightNameVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.highlightNameHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="highlightNameHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.highlightNameHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. Corpo do Texto */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-paragraph text-blue-500 text-[10px]"></i>
+                        <span>Corpo do Texto</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.bodyVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="bodyVerticalOffset"
+                            min="-250"
+                            max="250"
+                            value={data.bodyVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.bodyHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="bodyHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.bodyHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 5. Assinaturas */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-pen-nib text-blue-500 text-[10px]"></i>
+                        <span>Bloco de Assinaturas</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.signaturesVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="signaturesVerticalOffset"
+                            min="-250"
+                            max="250"
+                            value={data.signaturesVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.signaturesHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="signaturesHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.signaturesHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 6. Rodapé Oficial */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-building text-blue-500 text-[10px]"></i>
+                        <span>Rodapé Oficial</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.footerVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="footerVerticalOffset"
+                            min="-200"
+                            max="200"
+                            value={data.footerVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.footerHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="footerHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.footerHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </FaceGroup>
@@ -836,40 +1067,181 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                   onSelectPage={onSelectPage}
                   title="VERSO (Página 2)"
                 >
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Grade</span>
-                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoCurriculumVerticalOffset}px</span>
+                  <div className="space-y-3">
+                    {/* 1. Título do Verso */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-heading text-blue-500 text-[10px]"></i>
+                        <span>Título do Verso</span>
                       </div>
-                      <input
-                        type="range"
-                        name="versoCurriculumVerticalOffset"
-                        min="-200"
-                        max="200"
-                        value={data.versoCurriculumVerticalOffset}
-                        onPointerDown={() => ensurePreviewPage(2)}
-                        onFocus={() => ensurePreviewPage(2)}
-                        onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
-                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoTitleVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoTitleVerticalOffset"
+                            min="-200"
+                            max="200"
+                            value={data.versoTitleVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoTitleHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoTitleHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.versoTitleHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-700 dark:text-slate-200 font-medium">Offset Instituição</span>
-                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoInstitutionVerticalOffset}px</span>
+
+                    {/* 2. Coluna Instituição / Curso */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-building-columns text-blue-500 text-[10px]"></i>
+                        <span>Coluna Instituição / Curso</span>
                       </div>
-                      <input
-                        type="range"
-                        name="versoInstitutionVerticalOffset"
-                        min="-200"
-                        max="200"
-                        value={data.versoInstitutionVerticalOffset}
-                        onPointerDown={() => ensurePreviewPage(2)}
-                        onFocus={() => ensurePreviewPage(2)}
-                        onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
-                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
-                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoInstitutionVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoInstitutionVerticalOffset"
+                            min="-200"
+                            max="200"
+                            value={data.versoInstitutionVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoInstitutionHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoInstitutionHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.versoInstitutionHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Tabela da Grade Curricular */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-table-list text-blue-500 text-[10px]"></i>
+                        <span>Grade Curricular</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoCurriculumVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoCurriculumVerticalOffset"
+                            min="-200"
+                            max="200"
+                            value={data.versoCurriculumVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoCurriculumHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoCurriculumHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.versoCurriculumHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. Rodapé do Verso */}
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/70">
+                      <div className="text-[11px] font-bold text-slate-700 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+                        <i className="fa-solid fa-shoe-prints text-blue-500 text-[10px]"></i>
+                        <span>Rodapé do Verso</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Vertical (Cima/Baixo)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoFooterVerticalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoFooterVerticalOffset"
+                            min="-200"
+                            max="200"
+                            value={data.versoFooterVerticalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-600 dark:text-slate-300 font-medium">Horizontal (Esq/Dir)</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.versoFooterHorizontalOffset || 0}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="versoFooterHorizontalOffset"
+                            min="-300"
+                            max="300"
+                            value={data.versoFooterHorizontalOffset || 0}
+                            onPointerDown={() => ensurePreviewPage(2)}
+                            onFocus={() => ensurePreviewPage(2)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 2)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </FaceGroup>
@@ -932,24 +1304,105 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mt-3">
-                    <div>
-                      <div className="flex justify-between items-center mb-1 text-xs">
-                        <span className="text-slate-700 dark:text-slate-200 font-medium">Nome de Destaque</span>
-                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.highlightNameFontSize}px</span>
+                  {/* Bloco Completo: Nome de Destaque (Exibir/Ocultar, Tamanho da Fonte e Posição Para Cima/Baixo) */}
+                  <div className="mt-3 p-3 rounded-xl bg-white dark:bg-slate-800/90 border border-blue-200 dark:border-blue-800/70 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-100 dark:border-slate-700/70">
+                      <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-signature text-blue-600 dark:text-blue-400 text-xs" aria-hidden="true"></i>
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                          Nome de Destaque (Manuscrito)
+                        </span>
                       </div>
-                      <input
-                        type="range"
-                        name="highlightNameFontSize"
-                        min="20"
-                        max="150"
-                        value={data.highlightNameFontSize}
-                        onPointerDown={() => ensurePreviewPage(1)}
-                        onFocus={() => ensurePreviewPage(1)}
-                        onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
-                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
-                      />
+
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          name="showHighlightName"
+                          checked={data.showHighlightName !== false}
+                          onChange={(e) => {
+                            ensurePreviewPage(1);
+                            onCheckboxChange?.(e);
+                          }}
+                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                        <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-200">
+                          {data.showHighlightName !== false ? 'Exibir no Certificado' : 'Ocultado (Apenas Corpo)'}
+                        </span>
+                      </label>
                     </div>
+
+                    {data.showHighlightName !== false ? (
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between items-center mb-1 text-xs">
+                            <span className="text-slate-700 dark:text-slate-200 font-medium">Tamanho da Fonte</span>
+                            <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.highlightNameFontSize}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            name="highlightNameFontSize"
+                            min="20"
+                            max="150"
+                            value={data.highlightNameFontSize}
+                            onPointerDown={() => ensurePreviewPage(1)}
+                            onFocus={() => ensurePreviewPage(1)}
+                            onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                            className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <div className="flex justify-between items-center mb-1 text-xs">
+                              <span className="text-slate-700 dark:text-slate-200 font-medium">Vertical (Cima / Baixo)</span>
+                              <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">
+                                {data.highlightNameVerticalOffset > 0 ? `+${data.highlightNameVerticalOffset}` : data.highlightNameVerticalOffset}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              name="highlightNameVerticalOffset"
+                              min="-250"
+                              max="250"
+                              value={data.highlightNameVerticalOffset}
+                              onPointerDown={() => ensurePreviewPage(1)}
+                              onFocus={() => ensurePreviewPage(1)}
+                              onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                              className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="flex justify-between items-center mb-1 text-xs">
+                              <span className="text-slate-700 dark:text-slate-200 font-medium">Horizontal (Esq / Dir)</span>
+                              <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">
+                                {(data.highlightNameHorizontalOffset || 0) > 0
+                                  ? `+${data.highlightNameHorizontalOffset}`
+                                  : data.highlightNameHorizontalOffset || 0}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              name="highlightNameHorizontalOffset"
+                              min="-300"
+                              max="300"
+                              value={data.highlightNameHorizontalOffset || 0}
+                              onPointerDown={() => ensurePreviewPage(1)}
+                              onFocus={() => ensurePreviewPage(1)}
+                              onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                              className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-amber-700 dark:text-amber-300 bg-amber-50/80 dark:bg-amber-950/40 px-2.5 py-1.5 rounded-lg border border-amber-200/70 dark:border-amber-800/60">
+                        O Nome de Destaque e a linha divisória estão ocultos. O certificado exibirá apenas o Título e o Corpo do Texto.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mt-3">
                     <div>
                       <div className="flex justify-between items-center mb-1 text-xs">
                         <span className="text-slate-700 dark:text-slate-200 font-medium">Corpo do Texto</span>
@@ -961,6 +1414,23 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                         min="12"
                         max="42"
                         value={data.bodyFontSize || 24}
+                        onPointerDown={() => ensurePreviewPage(1)}
+                        onFocus={() => ensurePreviewPage(1)}
+                        onChange={(e) => handleSliderWithAutoSwitch(e, 1)}
+                        className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 dark:accent-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-1 text-xs">
+                        <span className="text-slate-700 dark:text-slate-200 font-medium">Posição Corpo (Cima/Baixo)</span>
+                        <span className="font-mono text-blue-600 dark:text-blue-400 font-bold">{data.bodyVerticalOffset}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        name="bodyVerticalOffset"
+                        min="-200"
+                        max="200"
+                        value={data.bodyVerticalOffset}
                         onPointerDown={() => ensurePreviewPage(1)}
                         onFocus={() => ensurePreviewPage(1)}
                         onChange={(e) => handleSliderWithAutoSwitch(e, 1)}

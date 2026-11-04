@@ -18,6 +18,12 @@ import { DesignSection } from './components/sections/DesignSection';
 // Espaço de Trabalho e Pré-visualização
 import { PreviewToolbar } from './components/preview/PreviewToolbar';
 import { CertificateWorkspace } from './components/preview/CertificateWorkspace';
+import { LoginScreen } from './components/auth/LoginScreen';
+import {
+  getCurrentOperatorSession,
+  logoutOperator,
+  OperatorSession,
+} from './services/authService';
 
 // Modais com Carregamento Tardio (Code Splitting / G07-B)
 const FinalPreviewModal = lazy(() =>
@@ -40,6 +46,11 @@ const CertificateValidationModal = lazy(() =>
 );
 
 const AppContent: React.FC = () => {
+  // 0. Sessão Autenticada do Operador (Acesso personalizado para isolar Auto-Save)
+  const [operatorSession, setOperatorSession] = useState<OperatorSession | null>(() =>
+    getCurrentOperatorSession()
+  );
+
   // 1. Gerenciamento Centralizado de Estado (Gate 04 / Gate 05)
   const {
     data,
@@ -67,14 +78,18 @@ const AppContent: React.FC = () => {
     loadFullProject,
   } = useCertificateData();
 
-  // 2. Persistência Segura e Controle de Versão
+  // 2. Persistência Segura e Auto-Save Completo por Operador Logado
   const {
     autoSaveStatus,
     lastSavedTime,
     exportFullProject,
     importFullProject,
     resetSavedDraft,
-  } = useProjectPersistence(data, updateFields);
+  } = useProjectPersistence(
+    data,
+    updateFields,
+    operatorSession?.username || 'default'
+  );
 
   // 3. Orquestração do Motor de PDF Protegido
   const {
@@ -178,6 +193,45 @@ const AppContent: React.FC = () => {
     handleToggleZoomMode('auto');
   }, [handleToggleZoomMode]);
 
+  const handleLogout = useCallback(() => {
+    logoutOperator();
+    setOperatorSession(null);
+    toast.info('Sessão Encerrada', 'Seu rascunho permanece salvo automaticamente no seu usuário.');
+  }, [toast]);
+
+  // Se o operador ainda não autenticou seu login/senha, exibe a Tela de Acesso Personalizado
+  if (!operatorSession) {
+    return (
+      <>
+        <LoginScreen
+          onAuthenticated={(session) => {
+            setOperatorSession(session);
+            toast.success(
+              `Bem-vindo, ${session.displayName || session.username}!`,
+              'Auto-Save completo ativado para sua sessão.'
+            );
+          }}
+          onOpenValidation={() => {
+            setValidationInitialCode('');
+            setIsValidationModalOpen(true);
+          }}
+        />
+        <Suspense fallback={null}>
+          {isValidationModalOpen && (
+            <CertificateValidationModal
+              isOpen={isValidationModalOpen}
+              onClose={() => {
+                setIsValidationModalOpen(false);
+                setValidationInitialCode('');
+              }}
+              initialCode={validationInitialCode}
+            />
+          )}
+        </Suspense>
+      </>
+    );
+  }
+
   return (
     <div className="h-[100dvh] max-h-[100dvh] flex flex-col bg-slate-900 font-sans text-slate-800 antialiased overflow-hidden">
       {/* 1. Barra Superior Corporativa com Menus Responsivos */}
@@ -205,6 +259,8 @@ const AppContent: React.FC = () => {
             handleResetZoom();
           }
         }}
+        operatorName={operatorSession.displayName || operatorSession.username}
+        onLogout={handleLogout}
       />
 
       {/* 2. Área Principal: Barra Lateral Funcional + Área de Pré-visualização */}
@@ -304,6 +360,7 @@ const AppContent: React.FC = () => {
                 previewPage={previewPage}
                 onSelectPage={setPreviewPage}
                 onSliderChange={handleSliderChange}
+                onCheckboxChange={handleCheckboxChange}
                 onSetTextAlign={setTextAlign}
                 onToggleBoldVariable={toggleBoldVariable}
                 onSetImageField={setImageField}

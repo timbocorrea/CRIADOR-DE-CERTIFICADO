@@ -75,48 +75,67 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             boxSizing: 'border-box'
           }}
         >
-          {/* ZONA 1: TÍTULO */}
+          {/* ZONA 1: TÍTULO E SUBTÍTULO EDITÁVEIS (COM AJUSTE VERTICAL E HORIZONTAL) */}
           <div 
             className="w-full text-center flex flex-col items-center"
-            style={{ transform: `translateY(${data.titleVerticalOffset}px)` }}
+            style={{ transform: `translate(${data.titleHorizontalOffset || 0}px, ${data.titleVerticalOffset || 0}px)` }}
           >
-            <h1 
-              style={{ fontSize: `${data.titleFontSize}px` }}
-              className="font-bold text-blue-900 uppercase tracking-widest leading-[1]"
-            >
-              Certificado
-            </h1>
-            <p 
-              style={{ fontSize: `${data.subtitleFontSize}px`, marginTop: `${data.titleSpacing}px` }}
-              className="font-medium text-gray-500 tracking-[0.4em] uppercase"
-            >
-              DE PARTICIPAÇÃO
-            </p>
+            {(data.certificateTitle ?? 'CERTIFICADO').trim() !== '' && (
+              <h1 
+                style={{ fontSize: `${data.titleFontSize}px` }}
+                className="font-bold text-blue-900 uppercase tracking-widest leading-[1]"
+              >
+                {data.certificateTitle ?? 'CERTIFICADO'}
+              </h1>
+            )}
+            {(data.certificateSubtitle ?? 'DE PARTICIPAÇÃO').trim() !== '' && (
+              <p 
+                style={{
+                  fontSize: `${data.subtitleFontSize}px`,
+                  marginTop: `${data.titleSpacing}px`,
+                  transform: `translate(${data.subtitleHorizontalOffset || 0}px, ${data.subtitleVerticalOffset || 0}px)`
+                }}
+                className="font-medium text-gray-500 tracking-[0.4em] uppercase"
+              >
+                {data.certificateSubtitle ?? 'DE PARTICIPAÇÃO'}
+              </p>
+            )}
           </div>
           
-          {/* ZONA 2: NOME MANUSCRITO */}
-          <div 
-            className="w-full flex items-center justify-center"
-            style={{ height: '140px', marginTop: '20px', transform: `translateY(${data.highlightNameVerticalOffset}px)` }}
-          >
-            <div 
-              className="script-font text-blue-900 text-center w-full leading-none"
-              style={{ fontSize: `${data.highlightNameFontSize}px` }}
-            >
-              {displayHighlightName}
-            </div>
-          </div>
+          {/* ZONA 2: NOME MANUSCRITO (Pode ser ocultado para deixar apenas o corpo do texto) */}
+          {data.showHighlightName !== false && (
+            <>
+              <div 
+                className="w-full flex items-center justify-center"
+                style={{
+                  height: '140px',
+                  marginTop: '20px',
+                  transform: `translate(${data.highlightNameHorizontalOffset || 0}px, ${data.highlightNameVerticalOffset || 0}px)`
+                }}
+              >
+                <div 
+                  className="script-font text-blue-900 text-center w-full leading-none"
+                  style={{ fontSize: `${data.highlightNameFontSize}px` }}
+                >
+                  {displayHighlightName}
+                </div>
+              </div>
 
-          <div 
-            className="w-full border-b border-gray-300"
-            style={{ marginBottom: '30px', transform: `translateY(${data.highlightNameVerticalOffset}px)` }}
-          ></div>
+              <div 
+                className="w-full border-b border-gray-300"
+                style={{
+                  marginBottom: '30px',
+                  transform: `translate(${data.highlightNameHorizontalOffset || 0}px, ${data.highlightNameVerticalOffset || 0}px)`
+                }}
+              ></div>
+            </>
+          )}
           
           <div 
             className="leading-relaxed text-gray-800 whitespace-pre-wrap w-full px-6 flex-grow flex items-center"
             style={{ 
               fontSize: `${data.bodyFontSize || 24}px`,
-              transform: `translateY(${data.bodyVerticalOffset}px)`,
+              transform: `translate(${data.bodyHorizontalOffset || 0}px, ${data.bodyVerticalOffset || 0}px)`,
               textAlign: data.frontTextAlign,
               maxHeight: '280px'
             }}
@@ -127,7 +146,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           <div 
             className={`w-full flex items-start ${data.showTechResponsible ? 'justify-between' : 'justify-around'}`}
             style={{ 
-              transform: `translateY(${data.signaturesVerticalOffset}px)`,
+              transform: `translate(${data.signaturesHorizontalOffset || 0}px, ${data.signaturesVerticalOffset || 0}px)`,
               paddingLeft: `${data.signaturesHorizontalPadding}px`,
               paddingRight: `${data.signaturesHorizontalPadding}px`,
               minHeight: '160px'
@@ -216,7 +235,12 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           
           <div 
             className="absolute w-full px-10 text-gray-400 uppercase tracking-tighter text-center" 
-            style={{ left: 0, fontSize: `${data.footerFontSize}px`, bottom: `${data.frontFooterPadding}px` }}
+            style={{
+              left: 0,
+              fontSize: `${data.footerFontSize}px`,
+              bottom: `${data.frontFooterPadding}px`,
+              transform: `translate(${data.footerHorizontalOffset || 0}px, ${data.footerVerticalOffset || 0}px)`
+            }}
           >
              {data.companyName} - {data.companyCnpj} {data.address && `| ${data.address.replace(/\n/g, ' ')}`}
           </div>
@@ -324,7 +348,8 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         style={{ 
           fontSize: `${data.versoTitleFontSize || 30}px`,
           marginBottom: '24px', 
-          paddingBottom: '12px' 
+          paddingBottom: '12px',
+          transform: `translate(${data.versoTitleHorizontalOffset || 0}px, ${data.versoTitleVerticalOffset || 0}px)`
         }}
       >
         {headerTitle}
@@ -334,7 +359,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         className="grid gap-8 flex-grow overflow-hidden"
         style={{ gridTemplateColumns: `${data.versoSplitRatio}% 1fr` }}
       >
-        <div className="space-y-8" style={{ transform: `translateY(${data.versoInstitutionVerticalOffset}px)` }}>
+        <div
+          className="space-y-8"
+          style={{ transform: `translate(${data.versoInstitutionHorizontalOffset || 0}px, ${data.versoInstitutionVerticalOffset || 0}px)` }}
+        >
           {data.providerName && (
             <div>
               <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Empresa Fornecedora / Realização</p>
@@ -352,7 +380,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         
         <div 
           className="flex flex-col h-full border rounded-lg overflow-hidden bg-white"
-          style={{ transform: `translateY(${data.versoCurriculumVerticalOffset}px)` }}
+          style={{ transform: `translate(${data.versoCurriculumHorizontalOffset || 0}px, ${data.versoCurriculumVerticalOffset || 0}px)` }}
         >
           <table className="w-full text-left border-collapse">
             <thead>
@@ -399,7 +427,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         </div>
       </div>
 
-      <div className="mt-8 pt-4 border-t flex justify-between items-end opacity-60">
+      <div
+        className="mt-8 pt-4 border-t flex justify-between items-end opacity-60"
+        style={{ transform: `translate(${data.versoFooterHorizontalOffset || 0}px, ${data.versoFooterVerticalOffset || 0}px)` }}
+      >
         <div className="text-gray-400 max-w-md uppercase tracking-tighter" style={{ fontSize: `${data.versoFooterFontSize || data.footerFontSize}px` }}>
           Registro oficial da instituição para fins de comprovação acadêmica.
         </div>

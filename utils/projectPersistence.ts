@@ -23,6 +23,8 @@ export interface NonSensitiveConfig {
   schemaVersion: number;
   savedAt: string;
   courseName: string;
+  certificateTitle?: string;
+  certificateSubtitle?: string;
   courseDate: string;
   totalHours: string;
   workloadMode?: 'auto' | 'manual';
@@ -43,19 +45,34 @@ export interface NonSensitiveConfig {
   versoHeaderFontSize: number;
   footerFontSize: number;
   versoInstitutionVerticalOffset: number;
+  versoInstitutionHorizontalOffset?: number;
   versoCurriculumVerticalOffset: number;
+  versoCurriculumHorizontalOffset?: number;
+  versoTitleVerticalOffset?: number;
+  versoTitleHorizontalOffset?: number;
+  versoFooterVerticalOffset?: number;
+  versoFooterHorizontalOffset?: number;
   mainTextVerticalOffset: number;
   titleVerticalOffset: number;
+  titleHorizontalOffset?: number;
+  subtitleVerticalOffset?: number;
+  subtitleHorizontalOffset?: number;
   titleFontSize: number;
   subtitleFontSize: number;
   titleSpacing: number;
   bodyVerticalOffset: number;
+  bodyHorizontalOffset?: number;
   highlightNameVerticalOffset: number;
+  highlightNameHorizontalOffset?: number;
   highlightNameFontSize: number;
+  showHighlightName?: boolean;
   frontSidePadding: number;
   signaturesVerticalOffset: number;
+  signaturesHorizontalOffset?: number;
   signaturesHorizontalPadding: number;
   signatureFontSize: number;
+  footerVerticalOffset?: number;
+  footerHorizontalOffset?: number;
   frontTextAlign: 'left' | 'center' | 'right' | 'justify';
   boldVariables: string[];
   frontHeaderPadding: number;
@@ -78,6 +95,8 @@ export function saveNonSensitiveConfig(data: CertificateData): boolean {
       schemaVersion: CURRENT_SCHEMA_VERSION,
       savedAt: new Date().toISOString(),
       courseName: data.courseName || '',
+      certificateTitle: data.certificateTitle ?? 'CERTIFICADO',
+      certificateSubtitle: data.certificateSubtitle ?? 'DE PARTICIPAÇÃO',
       courseDate: data.courseDate || '',
       totalHours: data.totalHours || '0',
       workloadMode: data.workloadMode || 'auto',
@@ -98,19 +117,34 @@ export function saveNonSensitiveConfig(data: CertificateData): boolean {
       versoHeaderFontSize: data.versoHeaderFontSize,
       footerFontSize: data.footerFontSize,
       versoInstitutionVerticalOffset: data.versoInstitutionVerticalOffset,
+      versoInstitutionHorizontalOffset: data.versoInstitutionHorizontalOffset || 0,
       versoCurriculumVerticalOffset: data.versoCurriculumVerticalOffset,
+      versoCurriculumHorizontalOffset: data.versoCurriculumHorizontalOffset || 0,
+      versoTitleVerticalOffset: data.versoTitleVerticalOffset || 0,
+      versoTitleHorizontalOffset: data.versoTitleHorizontalOffset || 0,
+      versoFooterVerticalOffset: data.versoFooterVerticalOffset || 0,
+      versoFooterHorizontalOffset: data.versoFooterHorizontalOffset || 0,
       mainTextVerticalOffset: data.mainTextVerticalOffset,
       titleVerticalOffset: data.titleVerticalOffset,
+      titleHorizontalOffset: data.titleHorizontalOffset || 0,
+      subtitleVerticalOffset: data.subtitleVerticalOffset || 0,
+      subtitleHorizontalOffset: data.subtitleHorizontalOffset || 0,
       titleFontSize: data.titleFontSize,
       subtitleFontSize: data.subtitleFontSize,
       titleSpacing: data.titleSpacing,
       bodyVerticalOffset: data.bodyVerticalOffset,
+      bodyHorizontalOffset: data.bodyHorizontalOffset || 0,
       highlightNameVerticalOffset: data.highlightNameVerticalOffset,
+      highlightNameHorizontalOffset: data.highlightNameHorizontalOffset || 0,
       highlightNameFontSize: data.highlightNameFontSize,
+      showHighlightName: data.showHighlightName !== false,
       frontSidePadding: data.frontSidePadding,
       signaturesVerticalOffset: data.signaturesVerticalOffset,
+      signaturesHorizontalOffset: data.signaturesHorizontalOffset || 0,
       signaturesHorizontalPadding: data.signaturesHorizontalPadding,
       signatureFontSize: data.signatureFontSize,
+      footerVerticalOffset: data.footerVerticalOffset || 0,
+      footerHorizontalOffset: data.footerHorizontalOffset || 0,
       frontTextAlign: data.frontTextAlign,
       boldVariables: data.boldVariables || [],
       frontHeaderPadding: data.frontHeaderPadding,
@@ -160,6 +194,100 @@ export function clearSavedConfig(): void {
     const storage = getStorage();
     if (storage) {
       storage.removeItem(CONFIG_STORAGE_KEY);
+    }
+  } catch {}
+}
+
+/* ========================================================================= */
+/* AUTO-SAVE COMPLETO POR USUÁRIO LOGADO (PERSISTÊNCIA DE SESSÃO INTEGRAL)   */
+/* ========================================================================= */
+
+export const USER_WORKSPACE_STORAGE_PREFIX = 'certificamaster_user_workspace_v1_';
+
+export interface UserWorkspaceSnapshot {
+  schemaVersion: number;
+  savedAt: string;
+  userId: string;
+  data: CertificateData;
+}
+
+export function getUserWorkspaceKey(userId: string): string {
+  const normalized = (userId || 'default').trim().toLowerCase().replace(/[^a-z0-9._@-]/g, '_');
+  return `${USER_WORKSPACE_STORAGE_PREFIX}${normalized || 'default'}`;
+}
+
+/**
+ * Salva imediatamente TODO o estado do projeto (incluindo alunos, instrutores,
+ * grade curricular, textos, layout e imagens) vinculado exclusivamente ao usuário logado.
+ * Possui fallback automático caso imagens pesadas excedam a cota do navegador.
+ */
+export function saveFullUserWorkspace(userId: string, data: CertificateData): boolean {
+  try {
+    const storage = getStorage();
+    if (!storage) return false;
+
+    const key = getUserWorkspaceKey(userId);
+    const snapshot: UserWorkspaceSnapshot = {
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      savedAt: new Date().toISOString(),
+      userId: (userId || 'default').trim().toLowerCase(),
+      data
+    };
+
+    try {
+      storage.setItem(key, JSON.stringify(snapshot));
+      return true;
+    } catch {
+      // Fallback de segurança caso imagens base64 excedam os ~5MB do localStorage:
+      // preserva 100% dos alunos, grade, instrutores, textos e configurações
+      const lightSnapshot: UserWorkspaceSnapshot = {
+        ...snapshot,
+        data: {
+          ...data,
+          bgImage: null
+        }
+      };
+      storage.setItem(key, JSON.stringify(lightSnapshot));
+      return true;
+    }
+  } catch (err) {
+    console.warn('Falha ao salvar workspace completo do usuário:', err);
+    return false;
+  }
+}
+
+/**
+ * Carrega o estado completo salvo automaticamente para o usuário logado.
+ */
+export function loadFullUserWorkspace(userId: string): CertificateData | null {
+  try {
+    const storage = getStorage();
+    if (!storage) return null;
+
+    const key = getUserWorkspaceKey(userId);
+    const raw = storage.getItem(key);
+    if (!raw) return null;
+
+    const parsed: UserWorkspaceSnapshot = JSON.parse(raw);
+    if (!parsed || parsed.schemaVersion !== CURRENT_SCHEMA_VERSION || !parsed.data) {
+      return null;
+    }
+
+    return parsed.data;
+  } catch (err) {
+    console.warn('Falha ao carregar workspace completo do usuário:', err);
+    return null;
+  }
+}
+
+/**
+ * Limpa o rascunho completo salvo para o usuário logado.
+ */
+export function clearFullUserWorkspace(userId: string): void {
+  try {
+    const storage = getStorage();
+    if (storage) {
+      storage.removeItem(getUserWorkspaceKey(userId));
     }
   } catch {}
 }
