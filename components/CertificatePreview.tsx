@@ -141,7 +141,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 </div>
                 <div className="w-full border-t border-gray-400 mb-1"></div>
                 <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
-                  {data.instructors[0]?.name || 'Instrutor Responsável'}
+                  {data.instructors[0]?.name || '[NOME DO INSTRUTOR]'}
+                </p>
+                <p style={{ fontSize: `${Math.max(8, data.signatureFontSize * 0.7)}px` }} className="font-bold text-gray-400 uppercase mt-1">
+                  Instrutor Responsável
                 </p>
                 {data.instructors[0]?.competencies && (
                   <p style={{ fontSize: `${data.signatureFontSize * 0.7}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[200px] leading-tight">
@@ -164,6 +167,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                       <div className="w-full border-t border-gray-400 mb-1"></div>
                       <p style={{ fontSize: `${effectiveFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
                         {inst.name}
+                      </p>
+                      <p style={{ fontSize: `${Math.max(8, effectiveFontSize * 0.75)}px` }} className="font-bold text-gray-400 uppercase mt-1">
+                        Instrutor Responsável
                       </p>
                       {inst.competencies && (
                         <p style={{ fontSize: `${effectiveFontSize * 0.75}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[160px] leading-tight">
@@ -194,7 +200,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 </div>
                 <div className="w-full border-t border-gray-400 mb-1"></div>
                 <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
-                  {data.techResponsibleName || 'Responsável Técnico'}
+                  {data.techResponsibleName || '[RESPONSÁVEL TÉCNICO]'}
                 </p>
                 <p style={{ fontSize: `${Math.max(8, data.signatureFontSize * 0.7)}px` }} className="font-bold text-gray-400 uppercase mt-1">
                   Responsável Técnico
