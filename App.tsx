@@ -362,6 +362,7 @@ const AppContent: React.FC = () => {
                 onUpdateCurriculumItem={updateCurriculumItem}
                 onSetTotalHoursManual={setTotalHoursManual}
                 onToggleWorkloadMode={setWorkloadMode}
+                onOpenAISettings={() => setIsAISettingsModalOpen(true)}
                 onNotify={handleNotify}
               />
             )}
@@ -426,6 +427,7 @@ const AppContent: React.FC = () => {
                 onUpdateCurriculumItem={updateCurriculumItem}
                 onSetTotalHoursManual={setTotalHoursManual}
                 onToggleWorkloadMode={setWorkloadMode}
+                onOpenAISettings={() => setIsAISettingsModalOpen(true)}
                 onNotify={handleNotify}
               />
             </div>

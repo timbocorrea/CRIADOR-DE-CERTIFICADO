@@ -8,7 +8,14 @@
  * Armazenamento 100% seguro no localStorage do operador.
  */
 
-import { AISettings, AIProviderId, AIExtractionResult, ExtractedStudentCandidate } from '../types';
+import {
+  AISettings,
+  AIProviderId,
+  AIExtractionResult,
+  ExtractedStudentCandidate,
+  AICurriculumExtractionResult,
+  ExtractedCurriculumCandidate,
+} from '../types';
 import { formatCPF, cleanCPF, validateCPF } from '../utils/security';
 
 const STORAGE_KEY = 'certificamaster_ai_settings';
@@ -947,5 +954,544 @@ export async function enhanceCertificateText(
     success: false,
     error: 'ALL_PROVIDERS_FAILED',
     message: `Falha ao aprimorar texto com IA: ${errors.join(' | ')}`,
+  };
+}
+
+/**
+ * Prompt de sistema para OCR e extração estruturada de Conteúdo Programático / Grade Curricular
+ */
+export const CURRICULUM_VISION_SYSTEM_PROMPT = `Você é um assistente especialista em OCR e estruturação de grades curriculares e conteúdos programáticos de cursos técnicos, treinamentos corporativos (NRs, SST, informática, gestão) e acadêmicos.
+Você analisará a imagem fornecida (que pode ser um print de proposta comercial, PDF, ementa, apostila, planilha ou mensagem de WhatsApp) e extrairá os módulos/disciplinas do curso e suas respectivas cargas horárias (em horas).
+
+Instruções obrigatórias:
+1. Ignore cabeçalhos institucionais genéricos ("Conteúdo Programático", "Grade Curricular", "Total de Horas") e rodapés.
+2. Para cada disciplina, módulo ou tópico principal identificado, extraia o nome limpo em "subject" e a quantidade de horas em "hours" (número inteiro; se não houver carga horária informada para o item, retorne 0).
+3. Retorne estritamente um objeto JSON com a propriedade "items" contendo um array de disciplinas.
+Formato exato esperado:
+{
+  "items": [
+    { "subject": "Introdução e Conceitos Fundamentais", "hours": 4 },
+    { "subject": "Prática Operacional e Segurança", "hours": 8 }
+  ]
+}
+Não inclua nenhuma explicação antes ou depois do JSON.`;
+
+export const CURRICULUM_TEXT_SYSTEM_PROMPT = `Você é um especialista em estruturação de grades curriculares e conteúdos programáticos de cursos.
+Analise o texto bruto fornecido pelo usuário (que pode conter numeração desorganizada, tópicos de ementa, traços, parênteses com horas ou texto corrido) e extraia a lista de disciplinas/módulos com suas respectivas cargas horárias em horas.
+
+Instruções obrigatórias:
+1. Limpe marcadores desnecessários no início se atrapalharem a leitura, mantendo o título claro de cada disciplina/módulo.
+2. Converta indicações de carga horária (ex: "10h", "10 horas", "(8 h)", "- 4h/a") para um número inteiro na propriedade "hours". Caso uma disciplina não tenha horas informadas, use 0.
+3. Ignore linhas que sejam apenas o somatório final (ex: "Carga Horária Total: 40h").
+4. Retorne estritamente um objeto JSON com a propriedade "items":
+{
+  "items": [
+    { "subject": "Nome da Disciplina ou Módulo", "hours": 10 }
+  ]
+}
+Não inclua nenhuma explicação antes ou depois do JSON.`;
+
+/**
+ * Extrai e normaliza o array de disciplinas a partir de resposta JSON da IA
+ */
+export function parseCurriculumFromJson(text: string): ExtractedCurriculumCandidate[] {
+  if (!text) return [];
+
+  let cleaned = text.trim();
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```[a-z]*\n?/i, '').replace(/\n?```$/i, '').trim();
+  }
+
+  let candidates: any[] = [];
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    if (Array.isArray(parsed)) {
+      candidates = parsed;
+    } else if (parsed && Array.isArray(parsed.items)) {
+      candidates = parsed.items;
+    } else if (parsed && Array.isArray(parsed.curriculum)) {
+      candidates = parsed.curriculum;
+    } else if (parsed && Array.isArray(parsed.disciplinas)) {
+      candidates = parsed.disciplinas;
+    } else if (parsed && Array.isArray(parsed.modules)) {
+      candidates = parsed.modules;
+    }
+  } catch {
+    const arrayMatch = cleaned.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    if (arrayMatch) {
+      try {
+        candidates = JSON.parse(arrayMatch[0]);
+      } catch {
+        candidates = [];
+      }
+    }
+  }
+
+  return candidates
+    .map((c) => {
+      const rawSubject = String(c?.subject || c?.disciplina || c?.modulo || c?.name || c?.titulo || '').trim();
+      const rawHours = c?.hours ?? c?.horas ?? c?.cargaHoraria ?? c?.workload ?? 0;
+      const parsedHours =
+        typeof rawHours === 'number'
+          ? Math.max(0, Math.round(rawHours))
+          : parseInt(String(rawHours).replace(/\D/g, ''), 10) || 0;
+      return {
+        subject: rawSubject,
+        hours: parsedHours,
+      };
+    })
+    .filter((c) => c.subject.length > 0 && !/^(carga\s+hor[aá]ria\s+total|total\s+de\s+horas|total\s+geral)$/i.test(c.subject));
+}
+
+/**
+ * Parser inteligente local para linhas de disciplinas coladas ou arquivos (.csv, .tsv, .txt)
+ * Reconhece formatos:
+ * - "Introdução ao Design, 10" / "Introdução ao Design; 10h" / "Introdução ao Design | 10"
+ * - "Módulo 1: NR-35 Trabalho em Altura - 8 horas"
+ * - "1. Primeiros Socorros (4h)"
+ */
+export function parseCurriculumBulkTextLocal(rawText: string): ExtractedCurriculumCandidate[] {
+  if (!rawText || !rawText.trim()) return [];
+
+  const lines = rawText
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  const results: ExtractedCurriculumCandidate[] = [];
+
+  for (const line of lines) {
+    // Ignora cabeçalhos de tabelas CSV comuns ou linha de total
+    if (/^(disciplina|m[oó]dulo|conte[uú]do)\s*[,;|\t]\s*(horas|carga|ch)\b/i.test(line)) {
+      continue;
+    }
+    if (/^(carga\s+hor[aá]ria\s+total|total\s+de\s+horas|total\s+final)\b/i.test(line)) {
+      continue;
+    }
+
+    const cleanedLine = line.replace(/^[\u2022\u25CF\u25AA\-\*]+\s*/, '').trim();
+    if (!cleanedLine) continue;
+
+    // 1. Padrão no final entre parênteses ou após traço/dois-pontos: "Disciplina (10h)" ou "Disciplina - 10 horas"
+    const trailingHoursMatch = cleanedLine.match(
+      /^(.+?)(?:\s*[-–—:;|\t,]\s*|\s+\()(\d{1,4})\s*(?:h(?:oras?)?|hr?s?|h\/a)?\)?$/i
+    );
+    if (trailingHoursMatch) {
+      const sub = trailingHoursMatch[1].trim().replace(/[,;|:\-–—]+$/, '').trim();
+      const hr = parseInt(trailingHoursMatch[2], 10) || 0;
+      if (sub) {
+        results.push({ subject: sub, hours: hr });
+        continue;
+      }
+    }
+
+    // 2. Padrão delimitado explícito (; | , \t)
+    const parts = cleanedLine.split(/[;|\t,]/);
+    if (parts.length >= 2) {
+      const lastPart = parts[parts.length - 1].trim();
+      const firstParts = parts.slice(0, parts.length - 1).join(', ').trim();
+      const digits = lastPart.replace(/\D/g, '');
+      if (firstParts && digits.length > 0 && digits.length <= 4) {
+        results.push({
+          subject: firstParts,
+          hours: parseInt(digits, 10) || 0,
+        });
+        continue;
+      }
+    }
+
+    // 3. Linha apenas com o nome da disciplina (sem horas)
+    results.push({
+      subject: cleanedLine,
+      hours: 0,
+    });
+  }
+
+  return results;
+}
+
+async function callGeminiCurriculumVision(
+  apiKey: string,
+  base64Data: string,
+  mimeType: string = 'image/png'
+): Promise<AICurriculumExtractionResult> {
+  const cleanKey = apiKey.trim();
+  const payload = {
+    contents: [
+      {
+        parts: [
+          { text: CURRICULUM_VISION_SYSTEM_PROMPT },
+          {
+            inlineData: {
+              mimeType,
+              data: base64Data,
+            },
+          },
+        ],
+      },
+    ],
+    generationConfig: {
+      temperature: 0.1,
+      responseMimeType: 'application/json',
+    },
+  };
+
+  let lastError: Error | null = null;
+  for (const model of GEMINI_CANDIDATE_MODELS) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`;
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': cleanKey,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 404 || response.status === 503 || response.status === 502 || response.status === 500) {
+        lastError = new Error(`Modelo ${model} retornou ${response.status}.`);
+        continue;
+      }
+      if (response.status === 429) {
+        throw new Error('Limite de requisições do Gemini atingido (429 Rate Limit).');
+      }
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Falha no Google Gemini (${response.status}): ${errorText.substring(0, 100)}`);
+      }
+
+      const data = await response.json();
+      const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const items = parseCurriculumFromJson(textContent);
+
+      return {
+        success: true,
+        items,
+        providerUsed: 'gemini',
+        modelUsed: model,
+      };
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('429 Rate Limit')) throw err;
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+
+  throw lastError || new Error('Nenhum modelo Gemini compatível pôde ser acessado.');
+}
+
+async function callGroqCurriculumVision(
+  apiKey: string,
+  base64Data: string,
+  mimeType: string = 'image/png'
+): Promise<AICurriculumExtractionResult> {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey.trim()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.2-11b-vision-preview',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: CURRICULUM_VISION_SYSTEM_PROMPT },
+            {
+              type: 'image_url',
+              image_url: { url: `data:${mimeType};base64,${base64Data}` },
+            },
+          ],
+        },
+      ],
+      temperature: 0.1,
+      response_format: { type: 'json_object' },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`Falha no Groq (${response.status}): ${errorText.substring(0, 100)}`);
+  }
+
+  const data = await response.json();
+  const textContent = data.choices?.[0]?.message?.content || '';
+  const items = parseCurriculumFromJson(textContent);
+
+  return {
+    success: true,
+    items,
+    providerUsed: 'groq',
+    modelUsed: 'llama-3.2-11b-vision-preview',
+  };
+}
+
+async function callOpenRouterCurriculumVision(
+  apiKey: string,
+  base64Data: string,
+  mimeType: string = 'image/png'
+): Promise<AICurriculumExtractionResult> {
+  const endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+  let lastError: Error | null = null;
+
+  for (const model of OPENROUTER_CANDIDATE_MODELS) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey.trim()}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://certificamaster.local',
+          'X-Title': 'CertificaMaster',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: CURRICULUM_VISION_SYSTEM_PROMPT },
+                {
+                  type: 'image_url',
+                  image_url: { url: `data:${mimeType};base64,${base64Data}` },
+                },
+              ],
+            },
+          ],
+          temperature: 0.1,
+        }),
+      });
+
+      if (response.status === 404 || response.status === 429 || response.status === 503) {
+        lastError = new Error(`OpenRouter (${model}): ${response.status}`);
+        continue;
+      }
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => '');
+        throw new Error(`Falha no OpenRouter (${response.status}): ${errorText.substring(0, 100)}`);
+      }
+
+      const data = await response.json();
+      const textContent = data.choices?.[0]?.message?.content || '';
+      const items = parseCurriculumFromJson(textContent);
+
+      return {
+        success: true,
+        items,
+        providerUsed: 'openrouter',
+        modelUsed: model,
+      };
+    } catch (err: unknown) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+
+  throw lastError || new Error('Nenhum modelo OpenRouter compatível pôde processar a imagem.');
+}
+
+/**
+ * Orquestrador Unificado para Extração Visual (OCR) de Grade Curricular / Disciplinas por Imagem
+ */
+export async function extractCurriculumFromImage(
+  base64Data: string,
+  mimeType: string = 'image/png',
+  customSettings?: AISettings
+): Promise<AICurriculumExtractionResult> {
+  const settings = customSettings || loadAISettings();
+
+  const queue: AIProviderId[] = [];
+  if (settings.preferredProvider === 'gemini') {
+    queue.push('gemini', 'groq', 'openrouter');
+  } else if (settings.preferredProvider === 'groq') {
+    queue.push('groq', 'gemini', 'openrouter');
+  } else if (settings.preferredProvider === 'openrouter') {
+    queue.push('openrouter', 'gemini', 'groq');
+  } else {
+    queue.push('gemini', 'groq', 'openrouter');
+  }
+
+  const attempts = buildExecutionAttempts(queue, settings);
+
+  if (attempts.length === 0) {
+    return {
+      success: false,
+      items: [],
+      error: 'NO_KEY_CONFIGURED',
+      message:
+        'Nenhuma chave de IA configurada. Clique em Configurar IAs para adicionar uma chave gratuita do Google Gemini, Groq ou OpenRouter.',
+    };
+  }
+
+  const errors: string[] = [];
+
+  for (const attempt of attempts) {
+    const { provider, key, isCustom } = attempt;
+    const tierLabel = isCustom ? 'Prioridade 1 (Pessoal)' : 'Sistema (Fallback)';
+    try {
+      if (provider === 'gemini') {
+        const res = await callGeminiCurriculumVision(key, base64Data, mimeType);
+        if (res.success && res.items.length > 0) return { ...res, providerUsed: provider };
+        errors.push(`Gemini [${tierLabel}] não identificou disciplinas na imagem.`);
+      } else if (provider === 'groq') {
+        const res = await callGroqCurriculumVision(key, base64Data, mimeType);
+        if (res.success && res.items.length > 0) return { ...res, providerUsed: provider };
+        errors.push(`Groq [${tierLabel}] não identificou disciplinas na imagem.`);
+      } else if (provider === 'openrouter') {
+        const res = await callOpenRouterCurriculumVision(key, base64Data, mimeType);
+        if (res.success && res.items.length > 0) return { ...res, providerUsed: provider };
+        errors.push(`OpenRouter [${tierLabel}] não identificou disciplinas na imagem.`);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`${provider} [${tierLabel}]: ${msg}`);
+    }
+  }
+
+  return {
+    success: false,
+    items: [],
+    error: 'ALL_PROVIDERS_FAILED',
+    message: `Não foi possível extrair a grade curricular da imagem. Detalhes: ${errors.join(' | ')}`,
+  };
+}
+
+/**
+ * Extrai e organiza disciplinas e cargas horárias a partir de um texto livre / ementa colada usando IA
+ */
+export async function extractCurriculumFromTextWithAI(
+  rawText: string,
+  customSettings?: AISettings
+): Promise<AICurriculumExtractionResult> {
+  if (!rawText || !rawText.trim()) {
+    return {
+      success: false,
+      items: [],
+      error: 'EMPTY_TEXT',
+      message: 'Cole ou digite o conteúdo programático antes de organizar com IA.',
+    };
+  }
+
+  const settings = customSettings || loadAISettings();
+  const queue: AIProviderId[] = [];
+  if (settings.preferredProvider === 'gemini') {
+    queue.push('gemini', 'groq', 'openrouter');
+  } else if (settings.preferredProvider === 'groq') {
+    queue.push('groq', 'gemini', 'openrouter');
+  } else if (settings.preferredProvider === 'openrouter') {
+    queue.push('openrouter', 'gemini', 'groq');
+  } else {
+    queue.push('gemini', 'groq', 'openrouter');
+  }
+
+  const attempts = buildExecutionAttempts(queue, settings);
+
+  for (const attempt of attempts) {
+    const { provider, key } = attempt;
+    try {
+      if (provider === 'gemini') {
+        for (const model of GEMINI_CANDIDATE_MODELS) {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key.trim()}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': key.trim(),
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: `${CURRICULUM_TEXT_SYSTEM_PROMPT}\n\nTexto da ementa/conteúdo:\n${rawText}` },
+                  ],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.1,
+                responseMimeType: 'application/json',
+              },
+            }),
+          });
+          if (!response.ok) continue;
+          const data = await response.json();
+          const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const items = parseCurriculumFromJson(content);
+          if (items.length > 0) {
+            return { success: true, items, providerUsed: 'gemini', modelUsed: model };
+          }
+        }
+      } else if (provider === 'groq') {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${key.trim()}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            messages: [
+              { role: 'system', content: CURRICULUM_TEXT_SYSTEM_PROMPT },
+              { role: 'user', content: rawText },
+            ],
+            temperature: 0.1,
+            response_format: { type: 'json_object' },
+          }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const content = data.choices?.[0]?.message?.content || '';
+          const items = parseCurriculumFromJson(content);
+          if (items.length > 0) {
+            return { success: true, items, providerUsed: 'groq', modelUsed: 'llama-3.3-70b-versatile' };
+          }
+        }
+      } else if (provider === 'openrouter') {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${key.trim()}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://certificamaster.local',
+            'X-Title': 'CertificaMaster',
+          },
+          body: JSON.stringify({
+            model: 'meta-llama/llama-3.3-70b-instruct:free',
+            messages: [
+              { role: 'system', content: CURRICULUM_TEXT_SYSTEM_PROMPT },
+              { role: 'user', content: rawText },
+            ],
+            temperature: 0.1,
+          }),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const content = data.choices?.[0]?.message?.content || '';
+          const items = parseCurriculumFromJson(content);
+          if (items.length > 0) {
+            return { success: true, items, providerUsed: 'openrouter' };
+          }
+        }
+      }
+    } catch {
+      // Fallback para próximo provedor ou parser local
+    }
+  }
+
+  // Fallback Local Inteligente se todos os provedores falharem
+  const localItems = parseCurriculumBulkTextLocal(rawText);
+  if (localItems.length > 0) {
+    return {
+      success: true,
+      items: localItems,
+      providerUsed: 'local',
+    };
+  }
+
+  return {
+    success: false,
+    items: [],
+    error: 'PARSE_FAILED',
+    message: 'Não foi possível identificar disciplinas no texto informado.',
   };
 }

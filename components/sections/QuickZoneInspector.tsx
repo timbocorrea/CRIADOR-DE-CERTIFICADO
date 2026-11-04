@@ -35,6 +35,7 @@ interface QuickZoneInspectorProps {
   onUpdateCurriculumItem: (id: string, updatedItem: Partial<CurriculumItem>) => void;
   onSetTotalHoursManual: (hours: string) => void;
   onToggleWorkloadMode: (mode: 'auto' | 'manual') => void;
+  onOpenAISettings?: () => void;
   onNotify?: (type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) => void;
 }
 
@@ -122,6 +123,7 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
   onUpdateCurriculumItem,
   onSetTotalHoursManual,
   onToggleWorkloadMode,
+  onOpenAISettings,
   onNotify,
 }) => {
   const meta = ZONE_METADATA[zone];
@@ -1119,6 +1121,8 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
               onRemove={onRemoveCurriculumItem}
               onUpdate={onUpdateCurriculumItem}
               onUpdateTotal={onSetTotalHoursManual}
+              onOpenAISettings={onOpenAISettings}
+              onNotify={onNotify}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">

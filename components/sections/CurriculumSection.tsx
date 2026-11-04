@@ -17,6 +17,7 @@ interface CurriculumSectionProps {
   onUpdateCurriculumItem: (id: string, updatedItem: Partial<CurriculumItem>) => void;
   onSetTotalHoursManual: (hours: string) => void;
   onToggleWorkloadMode: (mode: 'auto' | 'manual') => void;
+  onOpenAISettings?: () => void;
   onNotify?: (type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) => void;
 }
 
@@ -30,6 +31,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
   onUpdateCurriculumItem,
   onSetTotalHoursManual,
   onToggleWorkloadMode,
+  onOpenAISettings,
   onNotify,
 }) => {
   const declaredHoursNum = parseFloat(data.totalHours || '0') || 0;
@@ -307,6 +309,8 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
           onRemove={onRemoveCurriculumItem}
           onUpdate={onUpdateCurriculumItem}
           onUpdateTotal={onSetTotalHoursManual}
+          onOpenAISettings={onOpenAISettings}
+          onNotify={onNotify}
         />
       </AppCard>
       </div>

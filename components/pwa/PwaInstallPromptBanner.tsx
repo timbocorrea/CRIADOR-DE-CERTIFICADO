@@ -102,34 +102,35 @@ export const PwaInstallPromptBanner: React.FC = () => {
         <div
           role="region"
           aria-label="Instalação do Aplicativo CertificaMaster"
-          className="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-[410px] z-50 bg-slate-900/98 text-white border-2 border-indigo-500/80 rounded-2xl shadow-2xl p-4 animate-fadeIn backdrop-blur-md no-print"
+          style={{ backgroundColor: '#0f172a' }}
+          className="fixed bottom-4 right-4 left-4 sm:left-auto sm:w-[410px] z-50 bg-slate-900 text-white border-2 border-indigo-500 rounded-2xl shadow-2xl p-4 animate-fadeIn no-print"
         >
           <div className="flex items-start gap-3">
             <img
               src="/pwa-192x192.png"
               alt="Ícone CertificaMaster"
-              className="w-11 h-11 rounded-xl shrink-0 border border-indigo-400/50 shadow-md"
+              className="w-11 h-11 rounded-xl shrink-0 border border-indigo-400 shadow-md"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-600/40 border border-indigo-400/50 text-[10px] font-extrabold uppercase tracking-wider text-indigo-200">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-700 border border-indigo-400 text-[10px] font-extrabold uppercase tracking-wider text-white">
                   <i className="fa-solid fa-mobile-screen-button"></i>
                   <span>Aplicativo PWA Disponível</span>
                 </span>
                 <button
                   type="button"
                   onClick={handleDismissBanner}
-                  className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors"
+                  className="text-slate-300 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
                   title="Fechar aviso"
                 >
                   <i className="fa-solid fa-xmark text-xs"></i>
                 </button>
               </div>
 
-              <h3 className="text-xs sm:text-sm font-bold text-white mt-1">
+              <h3 className="text-xs sm:text-sm font-bold text-white mt-1.5">
                 Instalar o CertificaMaster no seu Dispositivo
               </h3>
-              <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+              <p className="text-[11px] text-slate-200 mt-0.5 leading-relaxed">
                 Acesse direto pela Área de Trabalho ou Tela Inicial como um aplicativo nativo em tela cheia.
               </p>
 
@@ -137,14 +138,14 @@ export const PwaInstallPromptBanner: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleDismissBanner}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors"
                 >
                   Agora não
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleTriggerInstall()}
-                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white border border-indigo-400/70 shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white border border-indigo-400 shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
                 >
                   <i className="fa-solid fa-download"></i>
                   <span>Instalar Aplicativo Agora</span>
@@ -206,3 +207,4 @@ export const PwaInstallPromptBanner: React.FC = () => {
     </>
   );
 };
+

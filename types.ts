@@ -134,6 +134,20 @@ export interface AIExtractionResult {
   message?: string;
 }
 
+export interface ExtractedCurriculumCandidate {
+  subject: string;
+  hours: number;
+}
+
+export interface AICurriculumExtractionResult {
+  success: boolean;
+  items: ExtractedCurriculumCandidate[];
+  providerUsed?: AIProviderId | 'local';
+  modelUsed?: string;
+  error?: string;
+  message?: string;
+}
+
 // Zonas interativas do certificado no Preview (Clique direto no elemento -> abre controles daquele elemento)
 export type CertificateElementZone =
   | 'front_header'         // Título e Subtítulo da Frente ("CERTIFICADO", "DE PARTICIPAÇÃO")
