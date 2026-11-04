@@ -503,7 +503,7 @@ export const CourseIssuerSection: React.FC<CourseIssuerSectionProps> = ({
                   <AppInput
                     id="techResponsibleCompetencies"
                     name="techResponsibleCompetencies"
-                    placeholder="Ex: CREA 12345/D"
+                    placeholder="Ex: 12345/D (prefixo CREA- automático)"
                     value={data.techResponsibleCompetencies}
                     onChange={onChange}
                   />

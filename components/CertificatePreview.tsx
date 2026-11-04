@@ -194,14 +194,14 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 <p style={{ fontSize: `${data.signatureFontSize}px` }} className="font-bold uppercase text-gray-800 leading-tight">
                   {data.techResponsibleName || 'Responsável Técnico'}
                 </p>
-                {data.techResponsibleCompetencies && (
-                  <p style={{ fontSize: `${data.signatureFontSize * 0.7}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[220px] leading-tight">
-                    {data.techResponsibleCompetencies}
-                  </p>
-                )}
                 <p style={{ fontSize: `${Math.max(8, data.signatureFontSize * 0.7)}px` }} className="font-bold text-gray-400 uppercase mt-1">
                   Responsável Técnico
                 </p>
+                {data.techResponsibleCompetencies && data.techResponsibleCompetencies.trim() && (
+                  <p style={{ fontSize: `${data.signatureFontSize * 0.7}px` }} className="text-gray-500 uppercase mt-0.5 max-w-[220px] leading-tight">
+                    {`CREA-${data.techResponsibleCompetencies.trim().replace(/^crea[\s\-:\/º°nN.]*/i, '')}`}
+                  </p>
+                )}
               </div>
             )}
           </div>
