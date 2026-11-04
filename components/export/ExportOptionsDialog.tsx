@@ -92,10 +92,10 @@ export const ExportOptionsDialog: React.FC<ExportOptionsDialogProps> = ({
               onClick={() => !opt.disabled && onSelectMode(opt.mode)}
               className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
                 opt.disabled
-                  ? 'opacity-40 cursor-not-allowed border-slate-200 bg-slate-50'
+                  ? 'opacity-40 cursor-not-allowed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50'
                   : isSelected
-                  ? 'border-blue-600 bg-blue-50/60 shadow-sm'
-                  : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  ? 'border-blue-600 dark:border-blue-500 bg-blue-50/60 dark:bg-blue-950/40 shadow-sm'
+                  : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/60'
               }`}
             >
               <div className="pt-0.5">
@@ -111,7 +111,7 @@ export const ExportOptionsDialog: React.FC<ExportOptionsDialogProps> = ({
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-bold text-xs text-slate-800">
+                  <span className="font-bold text-xs text-slate-800 dark:text-slate-100">
                     {opt.title}
                   </span>
                   {opt.badge && (
@@ -123,7 +123,7 @@ export const ExportOptionsDialog: React.FC<ExportOptionsDialogProps> = ({
                     </AppBadge>
                   )}
                 </div>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-300 mt-1 leading-relaxed">
                   {opt.description}
                 </p>
               </div>

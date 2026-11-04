@@ -144,25 +144,25 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
     >
       <div className="space-y-4">
         {errorMessage && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-800 flex items-start gap-2 animate-fadeIn">
-            <i className="fa-solid fa-circle-exclamation text-red-600 mt-0.5"></i>
+          <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/70 rounded-xl text-xs text-red-800 dark:text-red-200 flex items-start gap-2 animate-fadeIn">
+            <i className="fa-solid fa-circle-exclamation text-red-600 dark:text-red-400 mt-0.5"></i>
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-start gap-2 animate-fadeIn">
-            <i className="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/70 rounded-xl text-xs text-emerald-800 dark:text-emerald-200 flex items-start gap-2 animate-fadeIn">
+            <i className="fa-solid fa-circle-check text-emerald-600 dark:text-emerald-400 mt-0.5"></i>
             <span>{successMessage}</span>
           </div>
         )}
 
-        {/* 1. Status da Persistência Local */}
-        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-800">
-                Preferências Visuais Salvas Localmente
+        {/* 1. Status da Persistência Local (Auto-Save Completo por Operador) */}
+        <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                Auto-Save da Sessão no Navegador
               </span>
               <AppBadge
                 variant={autoSaveStatus === 'saved' ? 'success' : 'neutral'}
@@ -174,34 +174,31 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
             <button
               type="button"
               onClick={handleClearDraft}
-              className="text-xs text-red-600 hover:text-red-700 font-semibold"
+              className="px-2.5 py-1 rounded-lg bg-red-50 dark:bg-red-950/60 hover:bg-red-100 dark:hover:bg-red-900/60 border border-red-200/80 dark:border-red-800/70 text-xs text-red-600 dark:text-red-300 font-semibold shrink-0 transition-colors"
             >
               Limpar Rascunho
             </button>
           </div>
-          <p className="text-[11px] text-slate-500 leading-relaxed">
-            Margens, alinhamentos e dados da instituição são salvos automaticamente no navegador.
-            <strong className="text-slate-700 ml-1">
-              Dados pessoais de alunos (CPFs e nomes) e assinaturas NÃO são gravados no navegador por privacidade (LGPD).
-            </strong>
+          <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+            Todas as alterações (textos, posições, imagens, alunos e grade) ficam salvas automaticamente na sua conta de operador neste navegador para evitar perdas acidentais.
           </p>
         </div>
 
         {/* 2. Exportar Projeto Completo (.certproj) */}
-        <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-100 space-y-3">
+        <div className="p-4 bg-blue-50/70 dark:bg-slate-800/90 rounded-xl border border-blue-200/80 dark:border-blue-800/70 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                <i className="fa-solid fa-download text-blue-600"></i>
+              <p className="text-xs font-bold text-blue-900 dark:text-blue-200 flex items-center gap-1.5">
+                <i className="fa-solid fa-download text-blue-600 dark:text-blue-400"></i>
                 Exportar Projeto Completo (.certproj)
               </p>
-              <p className="text-[11px] text-blue-700 mt-0.5">
+              <p className="text-[11px] text-blue-800/90 dark:text-slate-300 mt-0.5">
                 Gera um arquivo contendo todos os dados, turma de alunos, grade e imagens.
               </p>
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <AppInput
               id="exportPassword"
               type="password"
@@ -214,7 +211,6 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
                   ? 'O arquivo será cifrado com AES-GCM (PBKDF2 com 100.000 iterações).'
                   : 'Sem senha, o arquivo conterá JSON legível por qualquer pessoa que tenha acesso.'
               }
-              className="bg-white"
             />
 
             <div className="flex justify-end pt-1">
@@ -233,13 +229,13 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
         </div>
 
         {/* 3. Importar Projeto (.certproj) */}
-        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+        <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-3">
           <div>
-            <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <i className="fa-solid fa-upload text-slate-600"></i>
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+              <i className="fa-solid fa-upload text-blue-600 dark:text-blue-400"></i>
               Importar / Restaurar Projeto (.certproj)
             </p>
-            <p className="text-[11px] text-slate-500 mt-0.5">
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
               Selecione um arquivo previamente exportado para restaurar o estado completo.
             </p>
           </div>
@@ -250,14 +246,14 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
               type="file"
               accept=".certproj,.json"
               onChange={handleFileSelect}
-              className="block w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+              className="block w-full text-xs text-slate-600 dark:text-slate-200 file:mr-4 file:py-2 file:px-3.5 file:rounded-lg file:border file:border-blue-200 dark:file:border-blue-700 file:text-xs file:font-bold file:bg-blue-50 dark:file:bg-blue-600 file:text-blue-700 dark:file:text-white hover:file:bg-blue-100 dark:hover:file:bg-blue-500 cursor-pointer"
             />
           </label>
 
           {importRequiresPassword && (
-            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 space-y-2 animate-fadeIn">
-              <p className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
-                <i className="fa-solid fa-lock text-amber-600"></i>
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/50 rounded-lg border border-amber-200 dark:border-amber-800/70 space-y-2 animate-fadeIn">
+              <p className="text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                <i className="fa-solid fa-lock text-amber-600 dark:text-amber-400"></i>
                 Arquivo Criptografado — Informe a Senha
               </p>
               <div className="flex gap-2">
@@ -266,7 +262,7 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
                   placeholder="Senha definida na exportação"
                   value={importPassword}
                   onChange={(e) => setImportPassword(e.target.value)}
-                  className="bg-white text-xs"
+                  className="text-xs"
                 />
                 <AppButton
                   type="button"
@@ -283,14 +279,14 @@ export const ProjectPersistenceModal: React.FC<ProjectPersistenceModalProps> = (
         </div>
 
         {/* 4. Histórico de Turmas Salvas & Recuperação Instantânea */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-800 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
+        <div className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
                 <i className="fa-solid fa-clock-rotate-left text-blue-600 dark:text-blue-400"></i>
                 Turmas Salvas & Recuperação Instantânea
               </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
                 Restaure turmas emitidas anteriormente para reemitir certificados ou alterar dados.
               </p>
             </div>

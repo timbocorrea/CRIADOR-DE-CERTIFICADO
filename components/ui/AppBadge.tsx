@@ -30,7 +30,7 @@ export const AppBadge: React.FC<AppBadgeProps> = ({
   };
 
   return (
-    <span className={`inline-flex items-center font-medium rounded-full ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}>
+    <span className={`inline-flex items-center font-medium rounded-full shrink-0 whitespace-nowrap ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}>
       {icon && <i className={icon}></i>}
       {children}
     </span>
