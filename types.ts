@@ -18,6 +18,14 @@ export interface CurriculumItem {
   hours: number;
 }
 
+export interface CustomFontItem {
+  id: string;
+  name: string;
+  fontFamily: string;
+  dataUrl: string;
+  format: 'truetype' | 'opentype' | 'woff' | 'woff2';
+}
+
 export interface CertificateData {
   students: Student[];
   companyName: string;
@@ -40,6 +48,10 @@ export interface CertificateData {
   bgImage: string | null;
   signatureImage: string | null;
   digitalSeal: string | null;
+  titleFontFamily?: string;
+  highlightNameFontFamily?: string;
+  bodyFontFamily?: string;
+  customFonts?: CustomFontItem[];
   showHoursColumn: boolean;
   versoSplitRatio: number;
   hoursColumnWidth: number;

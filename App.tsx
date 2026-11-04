@@ -16,6 +16,7 @@ import { CurriculumSection } from './components/sections/CurriculumSection';
 import { DesignSection } from './components/sections/DesignSection';
 import { QuickZoneInspector } from './components/sections/QuickZoneInspector';
 import { CertificateElementZone } from './types';
+import { syncCustomFontsStylesheet } from './utils/fontManager';
 
 // Espaço de Trabalho e Pré-visualização
 import { PreviewToolbar } from './components/preview/PreviewToolbar';
@@ -86,6 +87,8 @@ const AppContent: React.FC = () => {
     setTextAlign,
     toggleBoldVariable,
     setImageField,
+    addCustomFont,
+    removeCustomFont,
     loadFullProject,
   } = useCertificateData();
 
@@ -156,6 +159,11 @@ const AppContent: React.FC = () => {
       }
     }
   }, []);
+
+  // Sincroniza fontes personalizadas enviadas pelo usuário (.ttf, .otf, .woff, .woff2) no DOM
+  useEffect(() => {
+    syncCustomFontsStylesheet(data.customFonts || []);
+  }, [data.customFonts]);
 
   // Handlers genéricos de formulário
   const handleGenericChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -334,6 +342,9 @@ const AppContent: React.FC = () => {
                 onSetTextAlign={setTextAlign}
                 onToggleBoldVariable={toggleBoldVariable}
                 onSetImageField={setImageField}
+                onUpdateFontFamily={(field, fontFamily) => updateField(field, fontFamily)}
+                onAddCustomFont={addCustomFont}
+                onRemoveCustomFont={removeCustomFont}
                 onUpdateBaseText={(txt) => updateField('baseText', txt)}
                 onUpdateStudentDisplayName={updateStudentDisplayName}
                 onAddInstructor={addInstructor}
@@ -427,6 +438,9 @@ const AppContent: React.FC = () => {
                 onSetTextAlign={setTextAlign}
                 onToggleBoldVariable={toggleBoldVariable}
                 onSetImageField={setImageField}
+                onUpdateFontFamily={(field, fontFamily) => updateField(field, fontFamily)}
+                onAddCustomFont={addCustomFont}
+                onRemoveCustomFont={removeCustomFont}
                 onNotify={handleNotify}
               />
             </div>

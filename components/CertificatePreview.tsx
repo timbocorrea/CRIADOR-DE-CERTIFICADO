@@ -30,6 +30,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   onSelectZone,
 }) => {
   const isInteractive = Boolean(onSelectZone) && idSuffix === "";
+  const effectiveBodyFont = data.bodyFontFamily || "'Playfair Display', serif";
+  const effectiveTitleFont = data.titleFontFamily || effectiveBodyFont;
+  const effectiveHighlightFont = data.highlightNameFontFamily || "'Alex Brush', cursive";
 
   const getInteractiveClass = (zone: CertificateElementZone) => {
     if (!isInteractive) return '';
@@ -55,7 +58,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
       <div
         id={`certificate-page-1${idSuffix}`}
         className="relative w-[1123px] h-[794px] bg-white mx-auto certificate-font box-border overflow-hidden select-none"
-        style={{ width: '1123px', height: '794px' }}
+        style={{ width: '1123px', height: '794px', fontFamily: effectiveBodyFont }}
       >
         {/* Renderização do Fundo */}
         {data.bgImage ? (
@@ -101,11 +104,14 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             onClick={(e) => handleZoneClick(e, 'front_header')}
             title={isInteractive ? 'Clique para editar o Cabeçalho (Título e Subtítulo)' : undefined}
             className={`w-full text-center flex flex-col items-center ${getInteractiveClass('front_header')}`}
-            style={{ transform: `translate(${data.titleHorizontalOffset || 0}px, ${data.titleVerticalOffset || 0}px)` }}
+            style={{
+              transform: `translate(${data.titleHorizontalOffset || 0}px, ${data.titleVerticalOffset || 0}px)`,
+              fontFamily: effectiveTitleFont
+            }}
           >
             {(data.certificateTitle ?? 'CERTIFICADO').trim() !== '' && (
               <h1 
-                style={{ fontSize: `${data.titleFontSize}px` }}
+                style={{ fontSize: `${data.titleFontSize}px`, fontFamily: effectiveTitleFont }}
                 className="font-bold text-blue-900 uppercase tracking-widest leading-[1]"
               >
                 {data.certificateTitle ?? 'CERTIFICADO'}
@@ -116,7 +122,8 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 style={{
                   fontSize: `${data.subtitleFontSize}px`,
                   marginTop: `${data.titleSpacing}px`,
-                  transform: `translate(${data.subtitleHorizontalOffset || 0}px, ${data.subtitleVerticalOffset || 0}px)`
+                  transform: `translate(${data.subtitleHorizontalOffset || 0}px, ${data.subtitleVerticalOffset || 0}px)`,
+                  fontFamily: effectiveTitleFont
                 }}
                 className="font-medium text-gray-500 tracking-[0.4em] uppercase"
               >
@@ -140,7 +147,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
               >
                 <div 
                   className="script-font text-blue-900 text-center w-full leading-none"
-                  style={{ fontSize: `${data.highlightNameFontSize}px` }}
+                  style={{ fontSize: `${data.highlightNameFontSize}px`, fontFamily: effectiveHighlightFont }}
                 >
                   {displayHighlightName}
                 </div>
@@ -163,6 +170,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             className={`leading-relaxed text-gray-800 whitespace-pre-wrap w-full px-6 flex-grow flex items-center ${getInteractiveClass('front_body')}`}
             style={{ 
               fontSize: `${data.bodyFontSize || 24}px`,
+              fontFamily: effectiveBodyFont,
               transform: `translate(${data.bodyHorizontalOffset || 0}px, ${data.bodyVerticalOffset || 0}px)`,
               textAlign: data.frontTextAlign,
               maxHeight: '280px'
@@ -291,6 +299,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           border: `${data.versoBorderWidth !== undefined ? data.versoBorderWidth : 4}px solid #f3f4f6`, 
           width: '1123px', 
           height: '794px',
+          fontFamily: effectiveBodyFont,
           paddingTop: `${data.versoHeaderPadding}px`,
           paddingBottom: `${data.versoFooterPadding}px`,
           paddingLeft: `${data.versoSidePadding !== undefined ? data.versoSidePadding : 64}px`,
@@ -369,6 +378,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         border: `${data.versoBorderWidth !== undefined ? data.versoBorderWidth : 4}px solid #f3f4f6`, 
         width: '1123px', 
         height: '794px',
+        fontFamily: effectiveBodyFont,
         paddingTop: `${data.versoHeaderPadding}px`,
         paddingBottom: `${data.versoFooterPadding}px`,
         paddingLeft: `${data.versoSidePadding !== undefined ? data.versoSidePadding : 64}px`,
@@ -381,6 +391,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         className={`font-bold text-blue-900 border-b-4 border-blue-900 uppercase tracking-wide leading-tight ${getInteractiveClass('verso_header')}`}
         style={{ 
           fontSize: `${data.versoTitleFontSize || 30}px`,
+          fontFamily: effectiveTitleFont,
           marginBottom: '24px', 
           paddingBottom: '12px',
           transform: `translate(${data.versoTitleHorizontalOffset || 0}px, ${data.versoTitleVerticalOffset || 0}px)`

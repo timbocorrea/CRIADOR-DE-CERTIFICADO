@@ -80,6 +80,9 @@ export interface NonSensitiveConfig {
   versoHeaderPadding: number;
   versoFooterPadding: number;
   frontBorderWidth: number;
+  titleFontFamily?: string;
+  highlightNameFontFamily?: string;
+  bodyFontFamily?: string;
 }
 
 /**
@@ -151,7 +154,10 @@ export function saveNonSensitiveConfig(data: CertificateData): boolean {
       frontFooterPadding: data.frontFooterPadding,
       versoHeaderPadding: data.versoHeaderPadding,
       versoFooterPadding: data.versoFooterPadding,
-      frontBorderWidth: data.frontBorderWidth
+      frontBorderWidth: data.frontBorderWidth,
+      titleFontFamily: data.titleFontFamily || "'Playfair Display', serif",
+      highlightNameFontFamily: data.highlightNameFontFamily || "'Alex Brush', cursive",
+      bodyFontFamily: data.bodyFontFamily || "'Playfair Display', serif"
     };
 
     storage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(payload));

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { CertificateData, DEFAULT_BASE_TEXT, Student, Instructor, CurriculumItem } from '../types';
+import { CertificateData, DEFAULT_BASE_TEXT, Student, Instructor, CurriculumItem, CustomFontItem } from '../types';
 import { generateId, formatHighlightName } from '../utils/helpers';
 import { formatCPF } from '../utils/security';
 import { calculateCurriculumHours, checkWorkloadDivergence, WorkloadDivergenceInfo } from '../utils/workloadCalculator';
@@ -26,6 +26,10 @@ export const INITIAL_CERTIFICATE_DATA: CertificateData = {
   bgImage: null,
   signatureImage: null,
   digitalSeal: null,
+  titleFontFamily: "'Playfair Display', serif",
+  highlightNameFontFamily: "'Alex Brush', cursive",
+  bodyFontFamily: "'Playfair Display', serif",
+  customFonts: [],
   showHoursColumn: true,
   versoSplitRatio: 40,
   hoursColumnWidth: 80,
@@ -307,6 +311,30 @@ export function useCertificateData(initialData?: Partial<CertificateData>) {
     setData(prev => ({ ...prev, [field]: base64 }));
   }, []);
 
+  const addCustomFont = useCallback((font: CustomFontItem) => {
+    setData(prev => ({
+      ...prev,
+      customFonts: [...(prev.customFonts || []), font],
+    }));
+  }, []);
+
+  const removeCustomFont = useCallback((fontId: string) => {
+    setData(prev => {
+      const target = (prev.customFonts || []).find(f => f.id === fontId);
+      const remaining = (prev.customFonts || []).filter(f => f.id !== fontId);
+      const resetTitle = target && prev.titleFontFamily === target.fontFamily ? "'Playfair Display', serif" : prev.titleFontFamily;
+      const resetHighlight = target && prev.highlightNameFontFamily === target.fontFamily ? "'Alex Brush', cursive" : prev.highlightNameFontFamily;
+      const resetBody = target && prev.bodyFontFamily === target.fontFamily ? "'Playfair Display', serif" : prev.bodyFontFamily;
+      return {
+        ...prev,
+        customFonts: remaining,
+        titleFontFamily: resetTitle,
+        highlightNameFontFamily: resetHighlight,
+        bodyFontFamily: resetBody,
+      };
+    });
+  }, []);
+
   // Carga de Projeto Completo
   const loadFullProject = useCallback((newData: CertificateData) => {
     setData(newData);
@@ -343,6 +371,8 @@ export function useCertificateData(initialData?: Partial<CertificateData>) {
     setTextAlign,
     toggleBoldVariable,
     setImageField,
+    addCustomFont,
+    removeCustomFont,
     loadFullProject,
     resetToDefaults,
   };

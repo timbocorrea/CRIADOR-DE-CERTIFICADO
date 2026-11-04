@@ -1,6 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CertificateData } from '../../types';
+import { CertificateData, CustomFontItem } from '../../types';
 import { readImageAsBase64 } from '../../utils/imageManager';
+import {
+  CERTIFICATE_STANDARD_FONTS,
+  CERTIFICATE_SCRIPT_FONTS,
+  parseFontFileToCustomFont,
+} from '../../utils/fontManager';
 import {
   AppCard,
   AppBadge,
@@ -15,6 +20,9 @@ interface DesignSectionProps {
   onSetTextAlign: (align: 'left' | 'center' | 'right' | 'justify') => void;
   onToggleBoldVariable: (variable: string) => void;
   onSetImageField: (field: 'bgImage' | 'signatureImage' | 'digitalSeal', base64: string | null) => void;
+  onUpdateFontFamily?: (field: 'titleFontFamily' | 'highlightNameFontFamily' | 'bodyFontFamily', fontFamily: string) => void;
+  onAddCustomFont?: (font: CustomFontItem) => void;
+  onRemoveCustomFont?: (fontId: string) => void;
   onNotify?: (type: 'success' | 'error' | 'warning' | 'info', title: string, message?: string) => void;
 }
 
@@ -112,18 +120,27 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
   onSetTextAlign,
   onToggleBoldVariable,
   onSetImageField,
+  onUpdateFontFamily,
+  onAddCustomFont,
+  onRemoveCustomFont,
   onNotify,
 }) => {
   // Alternância entre Modo Padrão e Modo Avançado
   const [designMode, setDesignMode] = useState<'standard' | 'advanced'>('standard');
 
   // Submenu suspenso para Modo Padrão (< lg): exibe apenas 1 opção por vez em telas mobile
-  type StandardSubSection = 'alignment' | 'bold' | 'assets';
-  const [mobileStandardSection, setMobileStandardSection] = useState<StandardSubSection>('alignment');
+  type StandardSubSection = 'fonts' | 'alignment' | 'bold' | 'assets';
+  const [mobileStandardSection, setMobileStandardSection] = useState<StandardSubSection>('fonts');
   const [isMobileStandardMenuOpen, setIsMobileStandardMenuOpen] = useState<boolean>(false);
   const mobileStandardMenuRef = useRef<HTMLDivElement>(null);
 
   const standardSubSections: { id: StandardSubSection; label: string; description: string; icon: string }[] = [
+    {
+      id: 'fonts',
+      label: 'Fontes do Certificado & Upload (.TTF/.OTF)',
+      description: 'Fontes clássicas de certificados ou envie sua própria fonte',
+      icon: 'fa-solid fa-font',
+    },
     {
       id: 'alignment',
       label: 'Alinhamento do Texto Principal',
@@ -148,6 +165,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
     standardSubSections.find((s) => s.id === mobileStandardSection) || standardSubSections[0];
 
   const [standardDesktopExpanded, setStandardDesktopExpanded] = useState<Record<StandardSubSection, boolean>>({
+    fonts: true,
     alignment: true,
     bold: true,
     assets: true,
@@ -289,6 +307,262 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
     if (onNotify) onNotify('info', 'Imagem Removida', `${fieldName} foi removido.`);
   };
 
+  const handleUploadCustomFont = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    applyToField?: 'titleFontFamily' | 'highlightNameFontFamily' | 'bodyFontFamily'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      ensurePreviewPage(1);
+      const customFont = await parseFontFileToCustomFont(file);
+      onAddCustomFont?.(customFont);
+      if (applyToField) {
+        onUpdateFontFamily?.(applyToField, customFont.fontFamily);
+      } else {
+        onUpdateFontFamily?.('titleFontFamily', customFont.fontFamily);
+        onUpdateFontFamily?.('bodyFontFamily', customFont.fontFamily);
+      }
+      onNotify?.(
+        'success',
+        'Fonte Carregada com Sucesso',
+        `A fonte "${customFont.name}" foi instalada e aplicada ao certificado.`
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      onNotify?.('error', 'Falha no Upload da Fonte', msg);
+    } finally {
+      e.target.value = '';
+    }
+  };
+
+  const customFontsList = data.customFonts || [];
+
+  const renderFontFamilyControls = () => (
+    <div className="space-y-3.5">
+      {/* 1. Fonte do Título e Subtítulo */}
+      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+            <i className="fa-solid fa-heading text-blue-600 dark:text-blue-400"></i>
+            <span>Fonte do Título e Subtítulo</span>
+          </label>
+          <span
+            className="text-xs font-bold text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-800/70 truncate max-w-[160px]"
+            style={{ fontFamily: data.titleFontFamily || "'Playfair Display', serif" }}
+          >
+            CERTIFICADO
+          </span>
+        </div>
+        <select
+          value={data.titleFontFamily || "'Playfair Display', serif"}
+          onChange={(e) => {
+            ensurePreviewPage(1);
+            onUpdateFontFamily?.('titleFontFamily', e.target.value);
+          }}
+          className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          <optgroup label="Fontes Clássicas & Corporativas de Certificados">
+            {CERTIFICATE_STANDARD_FONTS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Fontes Caligráficas / Manuscritas">
+            {CERTIFICATE_SCRIPT_FONTS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </optgroup>
+          {customFontsList.length > 0 && (
+            <optgroup label="Minhas Fontes Enviadas (Upload)">
+              {customFontsList.map((cf) => (
+                <option key={cf.id} value={cf.fontFamily}>
+                  ★ {cf.name} (Fonte Enviada)
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+      </div>
+
+      {/* 2. Fonte Caligráfica do Nome de Destaque */}
+      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+            <i className="fa-solid fa-signature text-blue-600 dark:text-blue-400"></i>
+            <span>Fonte do Nome de Destaque (Caligrafia)</span>
+          </label>
+          <span
+            className="text-base text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-800/70 truncate max-w-[160px] leading-none"
+            style={{ fontFamily: data.highlightNameFontFamily || "'Alex Brush', cursive" }}
+          >
+            Nome de Destaque
+          </span>
+        </div>
+        <select
+          value={data.highlightNameFontFamily || "'Alex Brush', cursive"}
+          onChange={(e) => {
+            ensurePreviewPage(1);
+            onUpdateFontFamily?.('highlightNameFontFamily', e.target.value);
+          }}
+          className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          <optgroup label="Fontes Caligráficas / Manuscritas de Certificados">
+            {CERTIFICATE_SCRIPT_FONTS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Fontes Clássicas & Corporativas">
+            {CERTIFICATE_STANDARD_FONTS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </optgroup>
+          {customFontsList.length > 0 && (
+            <optgroup label="Minhas Fontes Enviadas (Upload)">
+              {customFontsList.map((cf) => (
+                <option key={cf.id} value={cf.fontFamily}>
+                  ★ {cf.name} (Fonte Enviada)
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+      </div>
+
+      {/* 3. Fonte do Corpo do Texto, Assinaturas e Verso */}
+      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+            <i className="fa-solid fa-paragraph text-blue-600 dark:text-blue-400"></i>
+            <span>Fonte do Corpo do Texto, Assinaturas e Verso</span>
+          </label>
+          <span
+            className="text-xs text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/60 border border-blue-200/70 dark:border-blue-800/70 truncate max-w-[160px]"
+            style={{ fontFamily: data.bodyFontFamily || "'Playfair Display', serif" }}
+          >
+            Certificamos que...
+          </span>
+        </div>
+        <select
+          value={data.bodyFontFamily || "'Playfair Display', serif"}
+          onChange={(e) => {
+            ensurePreviewPage(1);
+            onUpdateFontFamily?.('bodyFontFamily', e.target.value);
+          }}
+          className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          <optgroup label="Fontes Clássicas & Corporativas de Certificados">
+            {CERTIFICATE_STANDARD_FONTS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </optgroup>
+          {customFontsList.length > 0 && (
+            <optgroup label="Minhas Fontes Enviadas (Upload)">
+              {customFontsList.map((cf) => (
+                <option key={cf.id} value={cf.fontFamily}>
+                  ★ {cf.name} (Fonte Enviada)
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+      </div>
+
+      {/* 4. Upload de Fonte Personalizada pelo Usuário (.TTF, .OTF, .WOFF, .WOFF2) */}
+      <div className="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/80 space-y-2.5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+              <i className="fa-solid fa-file-arrow-up text-blue-600 dark:text-blue-400"></i>
+              <span>Importar Fonte do Seu Computador / Celular</span>
+            </p>
+            <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
+              Aceita arquivos <strong>.TTF, .OTF, .WOFF ou .WOFF2</strong>. A fonte fica salva no seu certificado e no PDF exportado.
+            </p>
+          </div>
+          <label className="cursor-pointer shrink-0 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-colors">
+            <i className="fa-solid fa-upload"></i>
+            <span>Enviar Fonte</span>
+            <input
+              type="file"
+              accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2"
+              onChange={(e) => handleUploadCustomFont(e)}
+              className="hidden"
+            />
+          </label>
+        </div>
+
+        {customFontsList.length > 0 && (
+          <div className="pt-2 border-t border-blue-200/60 dark:border-blue-800/60 space-y-1.5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300">
+              Fontes Enviadas por Você ({customFontsList.length})
+            </p>
+            <div className="space-y-1.5">
+              {customFontsList.map((cf) => (
+                <div
+                  key={cf.id}
+                  className="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2 text-xs"
+                >
+                  <div className="min-w-0 flex items-center gap-2">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 truncate">{cf.name}</span>
+                    <span
+                      className="text-xs text-blue-600 dark:text-blue-400 truncate hidden sm:inline"
+                      style={{ fontFamily: cf.fontFamily }}
+                    >
+                      (Aa Bb Cc)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        ensurePreviewPage(1);
+                        onUpdateFontFamily?.('titleFontFamily', cf.fontFamily);
+                        onUpdateFontFamily?.('bodyFontFamily', cf.fontFamily);
+                      }}
+                      className="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 text-[10px] font-bold"
+                      title="Usar no Título e Corpo"
+                    >
+                      Usar no Texto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        ensurePreviewPage(1);
+                        onUpdateFontFamily?.('highlightNameFontFamily', cf.fontFamily);
+                      }}
+                      className="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 text-[10px] font-bold"
+                      title="Usar no Nome de Destaque"
+                    >
+                      Usar no Nome
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onRemoveCustomFont?.(cf.id)}
+                      className="p-1 text-red-500 hover:text-red-700 dark:text-red-400"
+                      title="Remover fonte enviada"
+                    >
+                      <i className="fa-solid fa-trash-can text-[11px]"></i>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   // Seletor de visibilidade de cards conforme menu suspenso
   const showDimensions = activeSectionFilter === 'all' || activeSectionFilter === 'dimensions';
   const showOffsets = activeSectionFilter === 'all' || activeSectionFilter === 'offsets';
@@ -401,6 +675,22 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
                 })}
               </div>
             )}
+          </div>
+
+          {/* 0. Tipografia & Fontes do Certificado (Catálogo Clássico + Upload de Fonte Própria) */}
+          <div className={mobileStandardSection === 'fonts' ? 'block' : 'hidden lg:block'}>
+            <AppCard
+              title="Fontes do Certificado & Upload (.TTF / .OTF)"
+              description="Escolha fontes clássicas de certificados ou envie sua própria fonte"
+              icon="fa-solid fa-font"
+              headerClassName="max-lg:hidden"
+              contentClassName="p-3.5 sm:p-5"
+              isCollapsible={true}
+              isExpanded={isMobileViewport ? true : standardDesktopExpanded.fonts}
+              onToggleExpand={(exp) => setStandardDesktopExpanded((prev) => ({ ...prev, fonts: exp }))}
+            >
+              {renderFontFamilyControls()}
+            </AppCard>
           </div>
 
           {/* 1. Alinhamento do Texto */}
@@ -1538,6 +1828,9 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
               onToggleExpand={() => toggleCard('typography')}
             >
               <div className="space-y-4">
+                {/* Seletor de Famílias de Fontes + Upload também disponível dentro de Tamanhos de Fontes no Modo Avançado */}
+                {renderFontFamilyControls()}
+
                 {/* Grupo FRENTE */}
                 <FaceGroup
                   page={1}

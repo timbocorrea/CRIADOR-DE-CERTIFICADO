@@ -1,9 +1,14 @@
 import React from 'react';
-import { CertificateData, CertificateElementZone, Student, CurriculumItem } from '../../types';
+import { CertificateData, CertificateElementZone, Student, CurriculumItem, CustomFontItem } from '../../types';
 import { AppCard, AppInput, AppButton, AppBadge } from '../ui';
 import CurriculumTable from '../CurriculumTable';
 import { AVAILABLE_VARIABLES } from './DesignSection';
 import { readImageAsBase64 } from '../../utils/imageManager';
+import {
+  CERTIFICATE_STANDARD_FONTS,
+  CERTIFICATE_SCRIPT_FONTS,
+  parseFontFileToCustomFont,
+} from '../../utils/fontManager';
 import { MAX_INSTRUCTORS } from '../../hooks/useCertificateData';
 
 interface QuickZoneInspectorProps {
@@ -18,6 +23,9 @@ interface QuickZoneInspectorProps {
   onSetTextAlign: (align: 'left' | 'center' | 'right' | 'justify') => void;
   onToggleBoldVariable: (variable: string) => void;
   onSetImageField: (field: 'bgImage' | 'signatureImage' | 'digitalSeal', base64: string | null) => void;
+  onUpdateFontFamily?: (field: 'titleFontFamily' | 'highlightNameFontFamily' | 'bodyFontFamily', fontFamily: string) => void;
+  onAddCustomFont?: (font: CustomFontItem) => void;
+  onRemoveCustomFont?: (fontId: string) => void;
   onUpdateBaseText: (text: string) => void;
   onUpdateStudentDisplayName: (id: string, name: string) => void;
   onAddInstructor: (name: string, competencies: string) => { success: boolean; error?: string };
@@ -102,6 +110,9 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
   onSetTextAlign,
   onToggleBoldVariable,
   onSetImageField,
+  onUpdateFontFamily,
+  onAddCustomFont,
+  onRemoveCustomFont,
   onUpdateBaseText,
   onUpdateStudentDisplayName,
   onAddInstructor,
@@ -131,6 +142,129 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
     } catch (err: unknown) {
       onNotify?.('error', 'Falha no Upload', err instanceof Error ? err.message : String(err));
     }
+  };
+
+  const handleUploadFont = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    targetField: 'titleFontFamily' | 'highlightNameFontFamily' | 'bodyFontFamily'
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const customFont = await parseFontFileToCustomFont(file);
+      onAddCustomFont?.(customFont);
+      onUpdateFontFamily?.(targetField, customFont.fontFamily);
+      onNotify?.(
+        'success',
+        'Fonte Carregada',
+        `A fonte "${customFont.name}" foi instalada e aplicada a este campo.`
+      );
+    } catch (err: unknown) {
+      onNotify?.('error', 'Falha no Upload da Fonte', err instanceof Error ? err.message : String(err));
+    } finally {
+      e.target.value = '';
+    }
+  };
+
+  const renderFontSelectorBox = (
+    label: string,
+    targetField: 'titleFontFamily' | 'highlightNameFontFamily' | 'bodyFontFamily',
+    defaultFont: string,
+    prioritizeScript = false
+  ) => {
+    const currentVal = data[targetField] || defaultFont;
+    const customFontsList = data.customFonts || [];
+    return (
+      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <i className="fa-solid fa-font text-blue-600 dark:text-blue-400"></i>
+            <span>{label}</span>
+          </label>
+          <label className="cursor-pointer px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] flex items-center gap-1 shadow-xs transition-colors">
+            <i className="fa-solid fa-upload"></i>
+            <span>Enviar Fonte (.TTF/.OTF)</span>
+            <input
+              type="file"
+              accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2"
+              onChange={(e) => handleUploadFont(e, targetField)}
+              className="hidden"
+            />
+          </label>
+        </div>
+        <select
+          value={currentVal}
+          onChange={(e) => onUpdateFontFamily?.(targetField, e.target.value)}
+          className="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        >
+          {prioritizeScript ? (
+            <>
+              <optgroup label="Fontes Caligráficas / Manuscritas de Certificados">
+                {CERTIFICATE_SCRIPT_FONTS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Fontes Clássicas & Corporativas">
+                {CERTIFICATE_STANDARD_FONTS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </optgroup>
+            </>
+          ) : (
+            <>
+              <optgroup label="Fontes Clássicas & Corporativas de Certificados">
+                {CERTIFICATE_STANDARD_FONTS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Fontes Caligráficas / Manuscritas">
+                {CERTIFICATE_SCRIPT_FONTS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
+                ))}
+              </optgroup>
+            </>
+          )}
+          {customFontsList.length > 0 && (
+            <optgroup label="Minhas Fontes Enviadas (Upload)">
+              {customFontsList.map((cf) => (
+                <option key={cf.id} value={cf.fontFamily}>
+                  ★ {cf.name} (Fonte Enviada)
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+        {customFontsList.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {customFontsList.map((cf) => (
+              <span
+                key={cf.id}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[10px] font-semibold text-slate-700 dark:text-slate-200"
+              >
+                <i className="fa-solid fa-font text-blue-500"></i>
+                <span>{cf.name}</span>
+                <button
+                  type="button"
+                  onClick={() => onRemoveCustomFont?.(cf.id)}
+                  className="text-red-500 hover:text-red-700 ml-1"
+                  title="Remover fonte enviada"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderOffsetPair = (
@@ -254,6 +388,13 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
               />
             </div>
 
+            {renderFontSelectorBox(
+              'Fonte do Título e Subtítulo',
+              'titleFontFamily',
+              "'Playfair Display', serif",
+              false
+            )}
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <div>
                 <div className="flex justify-between items-center mb-1 text-xs">
@@ -354,6 +495,13 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
               />
             )}
 
+            {renderFontSelectorBox(
+              'Fonte Caligráfica do Nome de Destaque',
+              'highlightNameFontFamily',
+              "'Alex Brush', cursive",
+              true
+            )}
+
             <div>
               <div className="flex justify-between items-center mb-1 text-xs">
                 <span className="text-slate-700 dark:text-slate-200 font-medium">Tamanho da Fonte Caligrafada</span>
@@ -392,6 +540,13 @@ export const QuickZoneInspector: React.FC<QuickZoneInspectorProps> = ({
                 className="w-full rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-xs bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-600"
               />
             </div>
+
+            {renderFontSelectorBox(
+              'Fonte do Corpo do Texto',
+              'bodyFontFamily',
+              "'Playfair Display', serif",
+              false
+            )}
 
             {/* Alinhamento e Tamanho da Fonte */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
