@@ -14,6 +14,8 @@ import { CourseIssuerSection } from './components/sections/CourseIssuerSection';
 import { ParticipantsSection } from './components/sections/ParticipantsSection';
 import { CurriculumSection } from './components/sections/CurriculumSection';
 import { DesignSection } from './components/sections/DesignSection';
+import { QuickZoneInspector } from './components/sections/QuickZoneInspector';
+import { CertificateElementZone } from './types';
 
 // Espaço de Trabalho e Pré-visualização
 import { PreviewToolbar } from './components/preview/PreviewToolbar';
@@ -129,6 +131,7 @@ const AppContent: React.FC = () => {
 
   // 5. Estados de Interface e Navegação das 4 Áreas Funcionais (Gate 05 / Gate 06)
   const [activeArea, setActiveArea] = useState<FunctionalArea>('course_issuer');
+  const [selectedZone, setSelectedZone] = useState<CertificateElementZone | null>(null);
   const [mobileView, setMobileView] = useState<'split' | 'editor' | 'preview'>('split');
   const [previewPage, setPreviewPage] = useState<1 | 2>(1);
   const [zoomMode, setZoomMode] = useState<'auto' | 'manual'>('auto');
@@ -296,16 +299,46 @@ const AppContent: React.FC = () => {
         >
           <AppSidebar
             activeArea={activeArea}
-            onSelectArea={setActiveArea}
+            onSelectArea={(area) => {
+              setSelectedZone(null);
+              setActiveArea(area);
+            }}
             studentsCount={data.students.length}
             curriculumCount={data.curriculum.length}
           >
+            {/* Inspetor Contextual Direto (Quando o usuário clica em um elemento no Preview) */}
+            {selectedZone && (
+              <QuickZoneInspector
+                zone={selectedZone}
+                data={data}
+                currentStudent={currentStudent}
+                calculatedHours={calculatedHours}
+                onClose={() => setSelectedZone(null)}
+                onChange={handleGenericChange}
+                onCheckboxChange={handleCheckboxChange}
+                onSliderChange={handleSliderChange}
+                onSetTextAlign={setTextAlign}
+                onToggleBoldVariable={toggleBoldVariable}
+                onSetImageField={setImageField}
+                onUpdateBaseText={(txt) => updateField('baseText', txt)}
+                onUpdateStudentDisplayName={updateStudentDisplayName}
+                onAddInstructor={addInstructor}
+                onRemoveInstructor={removeInstructor}
+                onAddCurriculumItem={addCurriculumItem}
+                onRemoveCurriculumItem={removeCurriculumItem}
+                onUpdateCurriculumItem={updateCurriculumItem}
+                onSetTotalHoursManual={setTotalHoursManual}
+                onToggleWorkloadMode={setWorkloadMode}
+                onNotify={handleNotify}
+              />
+            )}
+
             {/* Área 1: Curso & Emissor */}
             <div
               id="panel-course_issuer"
               role="tabpanel"
               aria-labelledby="tab-course_issuer"
-              className={activeArea === 'course_issuer' ? 'block' : 'hidden'}
+              className={!selectedZone && activeArea === 'course_issuer' ? 'block' : 'hidden'}
             >
               <CourseIssuerSection
                 data={data}
@@ -327,7 +360,7 @@ const AppContent: React.FC = () => {
               id="panel-participants"
               role="tabpanel"
               aria-labelledby="tab-participants"
-              className={activeArea === 'participants' ? 'block' : 'hidden'}
+              className={!selectedZone && activeArea === 'participants' ? 'block' : 'hidden'}
             >
               <ParticipantsSection
                 students={data.students}
@@ -348,7 +381,7 @@ const AppContent: React.FC = () => {
               id="panel-curriculum"
               role="tabpanel"
               aria-labelledby="tab-curriculum"
-              className={activeArea === 'curriculum' ? 'block' : 'hidden'}
+              className={!selectedZone && activeArea === 'curriculum' ? 'block' : 'hidden'}
             >
               <CurriculumSection
                 data={data}
@@ -369,7 +402,7 @@ const AppContent: React.FC = () => {
               id="panel-design"
               role="tabpanel"
               aria-labelledby="tab-design"
-              className={activeArea === 'design' ? 'block' : 'hidden'}
+              className={!selectedZone && activeArea === 'design' ? 'block' : 'hidden'}
             >
               <DesignSection
                 data={data}
@@ -428,6 +461,13 @@ const AppContent: React.FC = () => {
             zoomMode={zoomMode}
             onAutoZoomCalculated={handleAutoZoomCalculated}
             activeRenderTask={activeRenderTask}
+            selectedZone={selectedZone}
+            onSelectZone={(zone) => {
+              setSelectedZone(zone);
+              if (mobileView === 'preview') {
+                setMobileView('split');
+              }
+            }}
           />
         </main>
       </div>

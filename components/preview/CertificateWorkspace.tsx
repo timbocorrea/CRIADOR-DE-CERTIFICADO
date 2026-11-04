@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import CertificatePreview from '../CertificatePreview';
-import { CertificateData, Student } from '../../types';
+import { CertificateData, Student, CertificateElementZone } from '../../types';
 import { PageRenderTask } from '../../services/pdf';
 
 interface CertificateWorkspaceProps {
@@ -11,6 +11,8 @@ interface CertificateWorkspaceProps {
   zoomMode?: 'auto' | 'manual';
   onAutoZoomCalculated?: (fitScale: number) => void;
   activeRenderTask: PageRenderTask | null;
+  selectedZone?: CertificateElementZone | null;
+  onSelectZone?: (zone: CertificateElementZone) => void;
 }
 
 export const CertificateWorkspace: React.FC<CertificateWorkspaceProps> = React.memo(({
@@ -21,6 +23,8 @@ export const CertificateWorkspace: React.FC<CertificateWorkspaceProps> = React.m
   zoomMode = 'auto',
   onAutoZoomCalculated,
   activeRenderTask,
+  selectedZone = null,
+  onSelectZone,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +99,8 @@ export const CertificateWorkspace: React.FC<CertificateWorkspaceProps> = React.m
             data={data}
             student={previewPage === 1 ? currentStudent : null}
             page={previewPage}
+            selectedZone={selectedZone}
+            onSelectZone={onSelectZone}
           />
         </div>
       </div>

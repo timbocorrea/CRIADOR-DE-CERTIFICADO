@@ -118,3 +118,16 @@ export interface AIExtractionResult {
   message?: string;
 }
 
+// Zonas interativas do certificado no Preview (Clique direto no elemento -> abre controles daquele elemento)
+export type CertificateElementZone =
+  | 'front_header'         // Título e Subtítulo da Frente ("CERTIFICADO", "DE PARTICIPAÇÃO")
+  | 'front_highlight_name' // Nome de Destaque Manuscrito
+  | 'front_body'           // Corpo do Texto de Certificação
+  | 'front_signatures'     // Bloco de Assinaturas, Instrutores, Aluno e Selo/Resp. Técnico
+  | 'front_footer'         // Rodapé Institucional da Frente
+  | 'verso_header'         // Título do Verso ("CONTEÚDO PROGRAMÁTICO")
+  | 'verso_institution'    // Coluna Esquerda do Verso (Empresa Fornecedora / Curso Ministrado)
+  | 'verso_curriculum'     // Tabela da Grade Curricular no Verso
+  | 'verso_footer';        // Rodapé do Verso
+
+

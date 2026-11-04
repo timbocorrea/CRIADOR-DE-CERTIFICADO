@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CertificateData, Student, CurriculumItem } from '../types';
+import { CertificateData, Student, CurriculumItem, CertificateElementZone } from '../types';
 import { renderSafeCertificateText, formatHighlightName } from '../utils/helpers';
 import { formatRegistryForDisplay } from '../utils/professionalRegistry';
 
@@ -13,6 +13,8 @@ interface CertificatePreviewProps {
   versoTotalPages?: number;
   curriculumSlice?: CurriculumItem[];
   isFillerPage?: boolean;
+  selectedZone?: CertificateElementZone | null;
+  onSelectZone?: (zone: CertificateElementZone) => void;
 }
 
 const CertificatePreview: React.FC<CertificatePreviewProps> = ({
@@ -24,7 +26,26 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   versoTotalPages,
   curriculumSlice,
   isFillerPage = false,
+  selectedZone = null,
+  onSelectZone,
 }) => {
+  const isInteractive = Boolean(onSelectZone) && idSuffix === "";
+
+  const getInteractiveClass = (zone: CertificateElementZone) => {
+    if (!isInteractive) return '';
+    const isSelected = selectedZone === zone;
+    return `cursor-pointer transition-all rounded-lg ${
+      isSelected
+        ? 'ring-2 ring-blue-600 bg-blue-500/5 shadow-sm'
+        : 'hover:ring-2 hover:ring-blue-400/70 hover:bg-blue-500/[0.03]'
+    }`;
+  };
+
+  const handleZoneClick = (e: React.MouseEvent, zone: CertificateElementZone) => {
+    if (!isInteractive || !onSelectZone) return;
+    e.stopPropagation();
+    onSelectZone(zone);
+  };
   // Versão 1: Frente
   if (page === 1) {
     const rawHighlightName = student?.displayName || student?.name || '[Nome de Destaque]';
@@ -77,7 +98,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         >
           {/* ZONA 1: TÍTULO E SUBTÍTULO EDITÁVEIS (COM AJUSTE VERTICAL E HORIZONTAL) */}
           <div 
-            className="w-full text-center flex flex-col items-center"
+            onClick={(e) => handleZoneClick(e, 'front_header')}
+            title={isInteractive ? 'Clique para editar o Cabeçalho (Título e Subtítulo)' : undefined}
+            className={`w-full text-center flex flex-col items-center ${getInteractiveClass('front_header')}`}
             style={{ transform: `translate(${data.titleHorizontalOffset || 0}px, ${data.titleVerticalOffset || 0}px)` }}
           >
             {(data.certificateTitle ?? 'CERTIFICADO').trim() !== '' && (
@@ -106,7 +129,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           {data.showHighlightName !== false && (
             <>
               <div 
-                className="w-full flex items-center justify-center"
+                onClick={(e) => handleZoneClick(e, 'front_highlight_name')}
+                title={isInteractive ? 'Clique para editar o Nome de Destaque' : undefined}
+                className={`w-full flex items-center justify-center ${getInteractiveClass('front_highlight_name')}`}
                 style={{
                   height: '140px',
                   marginTop: '20px',
@@ -122,6 +147,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
               </div>
 
               <div 
+                onClick={(e) => handleZoneClick(e, 'front_highlight_name')}
                 className="w-full border-b border-gray-300"
                 style={{
                   marginBottom: '30px',
@@ -132,7 +158,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           )}
           
           <div 
-            className="leading-relaxed text-gray-800 whitespace-pre-wrap w-full px-6 flex-grow flex items-center"
+            onClick={(e) => handleZoneClick(e, 'front_body')}
+            title={isInteractive ? 'Clique para editar o Corpo do Texto do Certificado' : undefined}
+            className={`leading-relaxed text-gray-800 whitespace-pre-wrap w-full px-6 flex-grow flex items-center ${getInteractiveClass('front_body')}`}
             style={{ 
               fontSize: `${data.bodyFontSize || 24}px`,
               transform: `translate(${data.bodyHorizontalOffset || 0}px, ${data.bodyVerticalOffset || 0}px)`,
@@ -144,7 +172,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           </div>
 
           <div 
-            className={`w-full flex items-start ${data.showTechResponsible ? 'justify-between' : 'justify-around'}`}
+            onClick={(e) => handleZoneClick(e, 'front_signatures')}
+            title={isInteractive ? 'Clique para editar Assinaturas, Instrutores e Selo' : undefined}
+            className={`w-full flex items-start ${data.showTechResponsible ? 'justify-between' : 'justify-around'} ${getInteractiveClass('front_signatures')}`}
             style={{ 
               transform: `translate(${data.signaturesHorizontalOffset || 0}px, ${data.signaturesVerticalOffset || 0}px)`,
               paddingLeft: `${data.signaturesHorizontalPadding}px`,
@@ -234,7 +264,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           </div>
           
           <div 
-            className="absolute w-full px-10 text-gray-400 uppercase tracking-tighter text-center" 
+            onClick={(e) => handleZoneClick(e, 'front_footer')}
+            title={isInteractive ? 'Clique para editar o Rodapé Institucional' : undefined}
+            className={`absolute w-full px-10 text-gray-400 uppercase tracking-tighter text-center ${getInteractiveClass('front_footer')}`}
             style={{
               left: 0,
               fontSize: `${data.footerFontSize}px`,
@@ -344,7 +376,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
       }}
     >
       <h2 
-        className="font-bold text-blue-900 border-b-4 border-blue-900 uppercase tracking-wide leading-tight"
+        onClick={(e) => handleZoneClick(e, 'verso_header')}
+        title={isInteractive ? 'Clique para editar o Cabeçalho do Verso' : undefined}
+        className={`font-bold text-blue-900 border-b-4 border-blue-900 uppercase tracking-wide leading-tight ${getInteractiveClass('verso_header')}`}
         style={{ 
           fontSize: `${data.versoTitleFontSize || 30}px`,
           marginBottom: '24px', 
@@ -360,7 +394,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         style={{ gridTemplateColumns: `${data.versoSplitRatio}% 1fr` }}
       >
         <div
-          className="space-y-8"
+          onClick={(e) => handleZoneClick(e, 'verso_institution')}
+          title={isInteractive ? 'Clique para editar Dados da Instituição e Curso no Verso' : undefined}
+          className={`space-y-8 ${getInteractiveClass('verso_institution')}`}
           style={{ transform: `translate(${data.versoInstitutionHorizontalOffset || 0}px, ${data.versoInstitutionVerticalOffset || 0}px)` }}
         >
           {data.providerName && (
@@ -379,7 +415,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         </div>
         
         <div 
-          className="flex flex-col h-full border rounded-lg overflow-hidden bg-white"
+          onClick={(e) => handleZoneClick(e, 'verso_curriculum')}
+          title={isInteractive ? 'Clique para editar a Tabela da Grade Curricular' : undefined}
+          className={`flex flex-col h-full border rounded-lg overflow-hidden bg-white ${getInteractiveClass('verso_curriculum')}`}
           style={{ transform: `translate(${data.versoCurriculumHorizontalOffset || 0}px, ${data.versoCurriculumVerticalOffset || 0}px)` }}
         >
           <table className="w-full text-left border-collapse">
@@ -428,7 +466,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
       </div>
 
       <div
-        className="mt-8 pt-4 border-t flex justify-between items-end opacity-60"
+        onClick={(e) => handleZoneClick(e, 'verso_footer')}
+        title={isInteractive ? 'Clique para editar o Rodapé do Verso' : undefined}
+        className={`mt-8 pt-4 border-t flex justify-between items-end opacity-60 ${getInteractiveClass('verso_footer')}`}
         style={{ transform: `translate(${data.versoFooterHorizontalOffset || 0}px, ${data.versoFooterVerticalOffset || 0}px)` }}
       >
         <div className="text-gray-400 max-w-md uppercase tracking-tighter" style={{ fontSize: `${data.versoFooterFontSize || data.footerFontSize}px` }}>
